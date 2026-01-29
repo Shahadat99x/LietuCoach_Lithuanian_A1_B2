@@ -1,8 +1,5 @@
 # Audio Sync Script (PowerShell)
 # Mirrors audio files from content/ to assets/ for Flutter dev playback
-#
-# Usage:
-#   .\tool\sync_audio_to_assets.ps1
 
 $ErrorActionPreference = "Stop"
 
@@ -46,7 +43,7 @@ foreach ($unitDir in $unitDirs) {
     foreach ($file in $audioFiles) {
         $destPath = Join-Path $destDir $file.Name
         
-        # Check if file needs updating (newer or different size)
+        # Check if file needs updating
         $needsCopy = $true
         if (Test-Path $destPath) {
             $sourceFile = Get-Item $file.FullName

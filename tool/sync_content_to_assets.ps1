@@ -1,8 +1,5 @@
 # Content Sync Script (PowerShell)
 # Mirrors unit.json files from content/ to assets/ for Flutter dev loading
-#
-# Usage:
-#   .\tool\sync_content_to_assets.ps1
 
 $ErrorActionPreference = "Stop"
 
