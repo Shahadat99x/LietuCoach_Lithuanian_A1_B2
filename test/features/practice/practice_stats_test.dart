@@ -91,5 +91,15 @@ void main() {
       stats = await service.stats;
       expect(stats.totalXp, 10); // Now it committed
     });
+
+    test('UserStats serialization includes dailyGoalMinutes', () {
+      final stats = UserStats(dailyGoalMinutes: 45);
+      final map = stats.toMap();
+
+      expect(map['dailyGoalMinutes'], 45);
+
+      final fromMap = UserStats.fromMap(map);
+      expect(fromMap.dailyGoalMinutes, 45);
+    });
   });
 }
