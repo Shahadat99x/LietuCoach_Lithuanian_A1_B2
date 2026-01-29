@@ -1,6 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:lietucoach/content/content.dart';
-import 'package:lietucoach/packs/packs.dart';
 import 'package:lietucoach/debug/debug_state.dart';
 import 'mocks/mock_pad_service.dart';
 
