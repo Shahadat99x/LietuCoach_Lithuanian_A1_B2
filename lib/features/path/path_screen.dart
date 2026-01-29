@@ -32,6 +32,54 @@ const List<CourseUnitConfig> courseUnits = [
     lessonCount: 2,
     hasContent: true,
   ),
+  CourseUnitConfig(
+    unitId: 'unit_03',
+    title: 'Introductions 2',
+    lessonCount: 2,
+    hasContent: true,
+  ),
+  CourseUnitConfig(
+    unitId: 'unit_04',
+    title: 'Personal Info',
+    lessonCount: 2,
+    hasContent: true,
+  ),
+  CourseUnitConfig(
+    unitId: 'unit_05',
+    title: 'Family & People',
+    lessonCount: 2,
+    hasContent: true,
+  ),
+  CourseUnitConfig(
+    unitId: 'unit_06',
+    title: 'Days & Time',
+    lessonCount: 2,
+    hasContent: true,
+  ),
+  CourseUnitConfig(
+    unitId: 'unit_07',
+    title: 'Food Basics',
+    lessonCount: 2,
+    hasContent: true,
+  ),
+  CourseUnitConfig(
+    unitId: 'unit_08',
+    title: 'Directions',
+    lessonCount: 2,
+    hasContent: true,
+  ),
+  CourseUnitConfig(
+    unitId: 'unit_09',
+    title: 'Shopping',
+    lessonCount: 2,
+    hasContent: true,
+  ),
+  CourseUnitConfig(
+    unitId: 'unit_10',
+    title: 'Weather',
+    lessonCount: 2,
+    hasContent: true,
+  ),
 ];
 
 class CourseUnitConfig {
@@ -245,9 +293,10 @@ class _PathScreenState extends State<PathScreen> {
 
     // Resolve current user details
     final user = authService.currentUser;
-    final String resolvedName = user?.userMetadata?['full_name'] as String? ?? 
-                       user?.email?.split('@')[0] ?? 
-                       'Guest User';
+    final String resolvedName =
+        user?.userMetadata?['full_name'] as String? ??
+        user?.email?.split('@')[0] ??
+        'Guest User';
     final String resolvedId = user?.id ?? 'guest_user';
 
     // Check if exists
@@ -255,7 +304,8 @@ class _PathScreenState extends State<PathScreen> {
     var cert = certs.isEmpty ? null : certs.first; // Simplified for MVP
 
     // Check if we need to regenerate (missing or name mismatch)
-    final bool needsRegeneration = cert == null || cert.learnerName != resolvedName;
+    final bool needsRegeneration =
+        cert == null || cert.learnerName != resolvedName;
 
     if (needsRegeneration) {
       // Generate one
@@ -324,7 +374,7 @@ class _PathScreenState extends State<PathScreen> {
                 if (_repository.isPadEnabled) {
                   _startDownload(config.unitId);
                 } else {
-                  // If PAD disabled and not available, still try to open 
+                  // If PAD disabled and not available, still try to open
                   // to show "Coming soon" or error inside the target screen.
                   _openUnitLessons(config.unitId);
                 }
