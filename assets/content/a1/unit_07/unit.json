@@ -1,0 +1,188 @@
+{
+    "id": "unit_07",
+    "title": "Food Basics",
+    "titleLt": "Maistas",
+    "lessons": [
+        {
+            "id": "lesson_01_drinks",
+            "title": "Drinks",
+            "titleLt": "Gėrimai",
+            "steps": [
+                {
+                    "type": "teach_phrase",
+                    "phraseId": "vanduo",
+                    "showTranslation": true
+                },
+                {
+                    "type": "teach_phrase",
+                    "phraseId": "kava",
+                    "showTranslation": true
+                },
+                {
+                    "type": "teach_phrase",
+                    "phraseId": "arbata",
+                    "showTranslation": true
+                },
+                {
+                    "type": "teach_phrase",
+                    "phraseId": "pienas",
+                    "showTranslation": true
+                },
+                {
+                    "type": "match",
+                    "pairs": [
+                        {
+                            "left": "Vanduo",
+                            "right": "Water"
+                        },
+                        {
+                            "left": "Kava",
+                            "right": "Coffee"
+                        },
+                        {
+                            "left": "Arbata",
+                            "right": "Tea"
+                        }
+                    ]
+                },
+                {
+                    "type": "teach_phrase",
+                    "phraseId": "noriu",
+                    "showTranslation": true
+                },
+                {
+                    "type": "fill_blank",
+                    "sentence": "Aš ___ vandens.",
+                    "blank": "___",
+                    "answer": "noriu"
+                },
+                {
+                    "type": "lesson_complete",
+                    "itemsLearned": 5,
+                    "xpEarned": 10
+                }
+            ]
+        },
+        {
+            "id": "lesson_02_food",
+            "title": "Food",
+            "titleLt": "Maistas",
+            "steps": [
+                {
+                    "type": "teach_phrase",
+                    "phraseId": "maistas",
+                    "showTranslation": true
+                },
+                {
+                    "type": "teach_phrase",
+                    "phraseId": "duona",
+                    "showTranslation": true
+                },
+                {
+                    "type": "teach_phrase",
+                    "phraseId": "suris",
+                    "showTranslation": true
+                },
+                {
+                    "type": "teach_phrase",
+                    "phraseId": "obuolys",
+                    "showTranslation": true
+                },
+                {
+                    "type": "teach_phrase",
+                    "phraseId": "skanus",
+                    "showTranslation": true
+                },
+                {
+                    "type": "mcq",
+                    "prompt": "Translate 'Delicious'",
+                    "options": [
+                        "Duona",
+                        "Skanus",
+                        "Vanduo",
+                        "Noriu"
+                    ],
+                    "correctIndex": 1
+                },
+                {
+                    "type": "teach_phrase",
+                    "phraseId": "prasom",
+                    "showTranslation": true
+                },
+                {
+                    "type": "listening_choice",
+                    "audioId": "a1_u07_prasom",
+                    "options": [
+                        "Prašom",
+                        "Ačiū",
+                        "Skanus",
+                        "Maistas"
+                    ],
+                    "correctIndex": 0
+                },
+                {
+                    "type": "lesson_complete",
+                    "itemsLearned": 6,
+                    "xpEarned": 10
+                }
+            ]
+        }
+    ],
+    "items": {
+        "vanduo": {
+            "lt": "Vanduo",
+            "en": "Water",
+            "audioId": "a1_u07_vanduo"
+        },
+        "kava": {
+            "lt": "Kava",
+            "en": "Coffee",
+            "audioId": "a1_u07_kava"
+        },
+        "arbata": {
+            "lt": "Arbata",
+            "en": "Tea",
+            "audioId": "a1_u07_arbata"
+        },
+        "pienas": {
+            "lt": "Pienas",
+            "en": "Milk",
+            "audioId": "a1_u07_pienas"
+        },
+        "noriu": {
+            "lt": "Noriu",
+            "en": "I want",
+            "audioId": "a1_u07_noriu"
+        },
+        "maistas": {
+            "lt": "Maistas",
+            "en": "Food",
+            "audioId": "a1_u07_maistas"
+        },
+        "duona": {
+            "lt": "Duona",
+            "en": "Bread",
+            "audioId": "a1_u07_duona"
+        },
+        "suris": {
+            "lt": "Sūris",
+            "en": "Cheese",
+            "audioId": "a1_u07_suris"
+        },
+        "obuolys": {
+            "lt": "Obuolys",
+            "en": "Apple",
+            "audioId": "a1_u07_obuolys"
+        },
+        "skanus": {
+            "lt": "Skanus",
+            "en": "Delicious",
+            "audioId": "a1_u07_skanus"
+        },
+        "prasom": {
+            "lt": "Prašom",
+            "en": "Please / Here you go",
+            "audioId": "a1_u07_prasom"
+        }
+    }
+}

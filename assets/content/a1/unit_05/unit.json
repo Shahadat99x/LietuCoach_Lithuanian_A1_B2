@@ -1,0 +1,209 @@
+{
+    "id": "unit_05",
+    "title": "Family & People",
+    "titleLt": "Šeima ir žmonės",
+    "lessons": [
+        {
+            "id": "lesson_01_family",
+            "title": "Family Members",
+            "titleLt": "Šeimos nariai",
+            "steps": [
+                {
+                    "type": "teach_phrase",
+                    "phraseId": "seima",
+                    "showTranslation": true
+                },
+                {
+                    "type": "teach_phrase",
+                    "phraseId": "mama",
+                    "showTranslation": true
+                },
+                {
+                    "type": "teach_phrase",
+                    "phraseId": "tetis",
+                    "showTranslation": true
+                },
+                {
+                    "type": "teach_phrase",
+                    "phraseId": "brolis",
+                    "showTranslation": true
+                },
+                {
+                    "type": "teach_phrase",
+                    "phraseId": "sese",
+                    "showTranslation": true
+                },
+                {
+                    "type": "match",
+                    "pairs": [
+                        {
+                            "left": "Mama",
+                            "right": "Mother/Mom"
+                        },
+                        {
+                            "left": "Tėtis",
+                            "right": "Father/Dad"
+                        },
+                        {
+                            "left": "Brolis",
+                            "right": "Brother"
+                        },
+                        {
+                            "left": "Sesė",
+                            "right": "Sister"
+                        }
+                    ]
+                },
+                {
+                    "type": "teach_phrase",
+                    "phraseId": "tai_yra",
+                    "showTranslation": true
+                },
+                {
+                    "type": "fill_blank",
+                    "sentence": "Tai yra mano ___.",
+                    "blank": "___",
+                    "answer": "mama"
+                },
+                {
+                    "type": "lesson_complete",
+                    "itemsLearned": 6,
+                    "xpEarned": 10
+                }
+            ]
+        },
+        {
+            "id": "lesson_02_people",
+            "title": "People",
+            "titleLt": "Žmonės",
+            "steps": [
+                {
+                    "type": "teach_phrase",
+                    "phraseId": "vyras",
+                    "showTranslation": true
+                },
+                {
+                    "type": "teach_phrase",
+                    "phraseId": "moteris",
+                    "showTranslation": true
+                },
+                {
+                    "type": "teach_phrase",
+                    "phraseId": "berniukas",
+                    "showTranslation": true
+                },
+                {
+                    "type": "teach_phrase",
+                    "phraseId": "mergaite",
+                    "showTranslation": true
+                },
+                {
+                    "type": "match",
+                    "pairs": [
+                        {
+                            "left": "Vyras",
+                            "right": "Man"
+                        },
+                        {
+                            "left": "Moteris",
+                            "right": "Woman"
+                        },
+                        {
+                            "left": "Berniukas",
+                            "right": "Boy"
+                        }
+                    ]
+                },
+                {
+                    "type": "teach_phrase",
+                    "phraseId": "draugas",
+                    "showTranslation": true
+                },
+                {
+                    "type": "mcq",
+                    "prompt": "What is 'Friend'?",
+                    "options": [
+                        "Vyras",
+                        "Draugas",
+                        "Moteris",
+                        "Sesė"
+                    ],
+                    "correctIndex": 1
+                },
+                {
+                    "type": "listening_choice",
+                    "audioId": "a1_u05_moteris",
+                    "options": [
+                        "Moteris",
+                        "Vyras",
+                        "Mama",
+                        "Tėtis"
+                    ],
+                    "correctIndex": 0
+                },
+                {
+                    "type": "lesson_complete",
+                    "itemsLearned": 5,
+                    "xpEarned": 10
+                }
+            ]
+        }
+    ],
+    "items": {
+        "seima": {
+            "lt": "Šeima",
+            "en": "Family",
+            "audioId": "a1_u05_seima"
+        },
+        "mama": {
+            "lt": "Mama",
+            "en": "Mother/Mom",
+            "audioId": "a1_u05_mama"
+        },
+        "tetis": {
+            "lt": "Tėtis",
+            "en": "Father/Dad",
+            "audioId": "a1_u05_tetis"
+        },
+        "brolis": {
+            "lt": "Brolis",
+            "en": "Brother",
+            "audioId": "a1_u05_brolis"
+        },
+        "sese": {
+            "lt": "Sesė",
+            "en": "Sister",
+            "audioId": "a1_u05_sese"
+        },
+        "tai_yra": {
+            "lt": "Tai yra",
+            "en": "This is",
+            "audioId": "a1_u05_tai_yra"
+        },
+        "vyras": {
+            "lt": "Vyras",
+            "en": "Man",
+            "audioId": "a1_u05_vyras"
+        },
+        "moteris": {
+            "lt": "Moteris",
+            "en": "Woman",
+            "audioId": "a1_u05_moteris"
+        },
+        "berniukas": {
+            "lt": "Berniukas",
+            "en": "Boy",
+            "audioId": "a1_u05_berniukas"
+        },
+        "mergaite": {
+            "lt": "Mergaitė",
+            "en": "Girl",
+            "audioId": "a1_u05_mergaite"
+        },
+        "draugas": {
+            "lt": "Draugas",
+            "en": "Friend (m)",
+            "audioId": "a1_u05_draugas"
+        }
+    }
+}
