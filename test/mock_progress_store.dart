@@ -59,6 +59,9 @@ class MockProgressStore implements ProgressStore {
     _userStats.lastActivityDate = stats.lastActivityDate;
     _userStats.lessonsCompleted = stats.lessonsCompleted;
     _userStats.examsCompleted = stats.examsCompleted;
+    _userStats.dailyGoalMinutes = stats.dailyGoalMinutes;
+    _userStats.minutesToday = stats.minutesToday;
+    _userStats.lastSessionDate = stats.lastSessionDate;
   }
 
   @override
