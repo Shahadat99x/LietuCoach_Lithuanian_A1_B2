@@ -4,6 +4,7 @@ import 'package:lietucoach/packs/packs.dart';
 import 'mocks/mock_pad_service.dart';
 
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
   group('ContentRepository PAD Integration', () {
     late ContentRepository repository;
     late MockPadPackService mockService;

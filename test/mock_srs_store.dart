@@ -24,6 +24,25 @@ class MockSrsStore implements SrsStore {
   }
 
   @override
+  Future<List<SrsCard>> getRecentlyLearned({int limit = 10}) async {
+    final now = DateTime.now();
+    final learned = _cards.values
+        .where((card) => card.dueAt.isAfter(now))
+        .toList();
+    learned.sort(
+      (a, b) => b.dueAt.compareTo(a.dueAt),
+    ); // Most future first? Or recently reviewed?
+    // Recently learned usually means "lastReviewedAt" is recent.
+    // Let's sort by updated/lastReviewed desc.
+    learned.sort((a, b) {
+      final aTime = a.lastReviewedAt ?? a.updatedAt;
+      final bTime = b.lastReviewedAt ?? b.updatedAt;
+      return bTime.compareTo(aTime);
+    });
+    return learned.take(limit).toList();
+  }
+
+  @override
   Future<SrsCard?> getCard(String cardId) async {
     return _cards[cardId];
   }
