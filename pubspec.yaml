@@ -82,10 +82,26 @@ flutter:
 
   # Audio assets (dev-only mirroring from content/)
   assets:
-    - assets/audio/a1/unit_01/
-    - assets/audio/a1/unit_02/
     - assets/content/a1/unit_01/
     - assets/content/a1/unit_02/
+    - assets/content/a1/unit_03/
+    - assets/content/a1/unit_04/
+    - assets/content/a1/unit_05/
+    - assets/content/a1/unit_06/
+    - assets/content/a1/unit_07/
+    - assets/content/a1/unit_08/
+    - assets/content/a1/unit_09/
+    - assets/content/a1/unit_10/
+    - assets/audio/a1/unit_01/
+    - assets/audio/a1/unit_02/
+    - assets/audio/a1/unit_03/
+    - assets/audio/a1/unit_04/
+    - assets/audio/a1/unit_05/
+    - assets/audio/a1/unit_06/
+    - assets/audio/a1/unit_07/
+    - assets/audio/a1/unit_08/
+    - assets/audio/a1/unit_09/
+    - assets/audio/a1/unit_10/
     - .env
 
   # An image asset can refer to one or more resolution-specific "variants", see

@@ -1,0 +1,182 @@
+{
+    "id": "unit_08",
+    "title": "Directions",
+    "titleLt": "Kryptys",
+    "lessons": [
+        {
+            "id": "lesson_01_where_is",
+            "title": "Where is it?",
+            "titleLt": "Kur tai yra?",
+            "steps": [
+                {
+                    "type": "teach_phrase",
+                    "phraseId": "kur_yra",
+                    "showTranslation": true
+                },
+                {
+                    "type": "teach_phrase",
+                    "phraseId": "gatve",
+                    "showTranslation": true
+                },
+                {
+                    "type": "teach_phrase",
+                    "phraseId": "namas",
+                    "showTranslation": true
+                },
+                {
+                    "type": "teach_phrase",
+                    "phraseId": "parduotuve",
+                    "showTranslation": true
+                },
+                {
+                    "type": "teach_phrase",
+                    "phraseId": "miestas",
+                    "showTranslation": true
+                },
+                {
+                    "type": "match",
+                    "pairs": [
+                        {
+                            "left": "Gatvė",
+                            "right": "Street"
+                        },
+                        {
+                            "left": "Namas",
+                            "right": "House"
+                        },
+                        {
+                            "left": "Miestas",
+                            "right": "City"
+                        }
+                    ]
+                },
+                {
+                    "type": "lesson_complete",
+                    "itemsLearned": 5,
+                    "xpEarned": 10
+                }
+            ]
+        },
+        {
+            "id": "lesson_02_directions",
+            "title": "Ways",
+            "titleLt": "Keliai",
+            "steps": [
+                {
+                    "type": "teach_phrase",
+                    "phraseId": "kaire",
+                    "showTranslation": true
+                },
+                {
+                    "type": "teach_phrase",
+                    "phraseId": "desine",
+                    "showTranslation": true
+                },
+                {
+                    "type": "teach_phrase",
+                    "phraseId": "tiesiai",
+                    "showTranslation": true
+                },
+                {
+                    "type": "teach_phrase",
+                    "phraseId": "kur",
+                    "showTranslation": true
+                },
+                {
+                    "type": "teach_phrase",
+                    "phraseId": "arti",
+                    "showTranslation": true
+                },
+                {
+                    "type": "teach_phrase",
+                    "phraseId": "toli",
+                    "showTranslation": true
+                },
+                {
+                    "type": "mcq",
+                    "prompt": "Translate 'Left'",
+                    "options": [
+                        "Dešinė",
+                        "Kairė",
+                        "Tiesiai",
+                        "Toli"
+                    ],
+                    "correctIndex": 1
+                },
+                {
+                    "type": "listening_choice",
+                    "audioId": "a1_u08_tiesiai",
+                    "options": [
+                        "Tiesiai",
+                        "Kairė",
+                        "Dešinė",
+                        "Kur"
+                    ],
+                    "correctIndex": 0
+                },
+                {
+                    "type": "lesson_complete",
+                    "itemsLearned": 6,
+                    "xpEarned": 10
+                }
+            ]
+        }
+    ],
+    "items": {
+        "kur_yra": {
+            "lt": "Kur yra...?",
+            "en": "Where is...?",
+            "audioId": "a1_u08_kur_yra"
+        },
+        "gatve": {
+            "lt": "Gatvė",
+            "en": "Street",
+            "audioId": "a1_u08_gatve"
+        },
+        "namas": {
+            "lt": "Namas",
+            "en": "House",
+            "audioId": "a1_u08_namas"
+        },
+        "parduotuve": {
+            "lt": "Parduotuvė",
+            "en": "Shop/Store",
+            "audioId": "a1_u08_parduotuve"
+        },
+        "miestas": {
+            "lt": "Miestas",
+            "en": "City",
+            "audioId": "a1_u08_miestas"
+        },
+        "kaire": {
+            "lt": "Kairė",
+            "en": "Left",
+            "audioId": "a1_u08_kaire"
+        },
+        "desine": {
+            "lt": "Dešinė",
+            "en": "Right",
+            "audioId": "a1_u08_desine"
+        },
+        "tiesiai": {
+            "lt": "Tiesiai",
+            "en": "Straight",
+            "audioId": "a1_u08_tiesiai"
+        },
+        "kur": {
+            "lt": "Kur?",
+            "en": "Where?",
+            "audioId": "a1_u08_kur"
+        },
+        "arti": {
+            "lt": "Arti",
+            "en": "Close/Near",
+            "audioId": "a1_u08_arti"
+        },
+        "toli": {
+            "lt": "Toli",
+            "en": "Far",
+            "audioId": "a1_u08_toli"
+        }
+    }
+}

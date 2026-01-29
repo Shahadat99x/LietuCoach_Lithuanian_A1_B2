@@ -1,0 +1,240 @@
+{
+    "id": "unit_03",
+    "title": "Introductions 2",
+    "titleLt": "Prisistatymas 2",
+    "lessons": [
+        {
+            "id": "lesson_01_countries",
+            "title": "Where are you from?",
+            "titleLt": "Iš kur tu?",
+            "steps": [
+                {
+                    "type": "teach_phrase",
+                    "phraseId": "lietuva",
+                    "showTranslation": true
+                },
+                {
+                    "type": "teach_phrase",
+                    "phraseId": "anglija",
+                    "showTranslation": true
+                },
+                {
+                    "type": "teach_phrase",
+                    "phraseId": "amerika",
+                    "showTranslation": true
+                },
+                {
+                    "type": "teach_phrase",
+                    "phraseId": "is_kur",
+                    "showTranslation": true
+                },
+                {
+                    "type": "mcq",
+                    "prompt": "How do you say 'Lithuania'?",
+                    "options": [
+                        "Anglija",
+                        "Lietuva",
+                        "Amerika",
+                        "Iš kur"
+                    ],
+                    "correctIndex": 1
+                },
+                {
+                    "type": "teach_phrase",
+                    "phraseId": "is_lietuvos",
+                    "showTranslation": true
+                },
+                {
+                    "type": "match",
+                    "pairs": [
+                        {
+                            "left": "Lietuva",
+                            "right": "Lithuania"
+                        },
+                        {
+                            "left": "Anglija",
+                            "right": "England"
+                        },
+                        {
+                            "left": "Amerika",
+                            "right": "America"
+                        }
+                    ]
+                },
+                {
+                    "type": "teach_phrase",
+                    "phraseId": "is_anglijos",
+                    "showTranslation": true
+                },
+                {
+                    "type": "fill_blank",
+                    "sentence": "Aš esu iš ___.",
+                    "blank": "___",
+                    "answer": "Lietuvos"
+                },
+                {
+                    "type": "listening_choice",
+                    "audioId": "a1_u03_is_kur",
+                    "options": [
+                        "Iš kur?",
+                        "Lietuva",
+                        "Anglija",
+                        "Amerika"
+                    ],
+                    "correctIndex": 0
+                },
+                {
+                    "type": "lesson_complete",
+                    "itemsLearned": 6,
+                    "xpEarned": 10
+                }
+            ]
+        },
+        {
+            "id": "lesson_02_nationalities",
+            "title": "Nationalities",
+            "titleLt": "Tautybės",
+            "steps": [
+                {
+                    "type": "teach_phrase",
+                    "phraseId": "lietuvis",
+                    "showTranslation": true
+                },
+                {
+                    "type": "teach_phrase",
+                    "phraseId": "lietuve",
+                    "showTranslation": true
+                },
+                {
+                    "type": "teach_phrase",
+                    "phraseId": "anglas",
+                    "showTranslation": true
+                },
+                {
+                    "type": "teach_phrase",
+                    "phraseId": "amerikietis",
+                    "showTranslation": true
+                },
+                {
+                    "type": "match",
+                    "pairs": [
+                        {
+                            "left": "Lietuvis",
+                            "right": "Lithuanian (m)"
+                        },
+                        {
+                            "left": "Lietuvė",
+                            "right": "Lithuanian (f)"
+                        },
+                        {
+                            "left": "Anglas",
+                            "right": "Englishman"
+                        }
+                    ]
+                },
+                {
+                    "type": "teach_phrase",
+                    "phraseId": "as_esu_lietuvis",
+                    "showTranslation": true
+                },
+                {
+                    "type": "mcq",
+                    "prompt": "Translate: 'I am Lithuanian (female)'",
+                    "options": [
+                        "Aš esu lietuvis",
+                        "Aš esu lietuvė",
+                        "Aš esu anglas",
+                        "Aš esu amerikietis"
+                    ],
+                    "correctIndex": 1
+                },
+                {
+                    "type": "reorder",
+                    "words": [
+                        "Aš",
+                        "esu",
+                        "lietuvis"
+                    ],
+                    "correctOrder": [
+                        0,
+                        1,
+                        2
+                    ]
+                },
+                {
+                    "type": "listening_choice",
+                    "audioId": "a1_u03_as_esu_lietuvis",
+                    "options": [
+                        "Aš esu lietuvis",
+                        "Aš esu iš Lietuvos",
+                        "Lietuva",
+                        "Anglija"
+                    ],
+                    "correctIndex": 0
+                },
+                {
+                    "type": "lesson_complete",
+                    "itemsLearned": 5,
+                    "xpEarned": 10
+                }
+            ]
+        }
+    ],
+    "items": {
+        "lietuva": {
+            "lt": "Lietuva",
+            "en": "Lithuania",
+            "audioId": "a1_u03_lietuva"
+        },
+        "anglija": {
+            "lt": "Anglija",
+            "en": "England",
+            "audioId": "a1_u03_anglija"
+        },
+        "amerika": {
+            "lt": "Amerika",
+            "en": "America",
+            "audioId": "a1_u03_amerika"
+        },
+        "is_kur": {
+            "lt": "Iš kur?",
+            "en": "Where from?",
+            "audioId": "a1_u03_is_kur"
+        },
+        "is_lietuvos": {
+            "lt": "Iš Lietuvos",
+            "en": "From Lithuania",
+            "audioId": "a1_u03_is_lietuvos"
+        },
+        "is_anglijos": {
+            "lt": "Iš Anglijos",
+            "en": "From England",
+            "audioId": "a1_u03_is_anglijos"
+        },
+        "lietuvis": {
+            "lt": "Lietuvis",
+            "en": "Lithuanian (male)",
+            "audioId": "a1_u03_lietuvis"
+        },
+        "lietuve": {
+            "lt": "Lietuvė",
+            "en": "Lithuanian (female)",
+            "audioId": "a1_u03_lietuve"
+        },
+        "anglas": {
+            "lt": "Anglas",
+            "en": "Englishman",
+            "audioId": "a1_u03_anglas"
+        },
+        "amerikietis": {
+            "lt": "Amerikietis",
+            "en": "American (male)",
+            "audioId": "a1_u03_amerikietis"
+        },
+        "as_esu_lietuvis": {
+            "lt": "Aš esu lietuvis",
+            "en": "I am Lithuanian (male)",
+            "audioId": "a1_u03_as_esu_lietuvis"
+        }
+    }
+}
