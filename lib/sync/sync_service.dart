@@ -463,6 +463,9 @@ class SyncService extends ChangeNotifier {
 
     // Get local
     final local = await progressStore.getUserStats();
+    debugPrint(
+      'Sync: PracticeStats [LOCAL] - streak: ${local.currentStreak}, totalXp: ${local.totalXp}, updated: ${local.updatedAt}',
+    );
 
     // Get remote
     final remoteResponse = await client
@@ -472,11 +475,31 @@ class SyncService extends ChangeNotifier {
         .maybeSingle();
 
     if (remoteResponse != null) {
+      debugPrint(
+        'Sync: PracticeStats [REMOTE] - streak: ${remoteResponse['streak_count']}, totalXp: ${remoteResponse['total_xp']}, updated: ${remoteResponse['updated_at']}',
+      );
+
       // Merge
       final remoteUpdated = DateTime.parse(remoteResponse['updated_at']);
 
-      // If remote is newer OR local is default/empty but remote exists
-      if (local.updatedAt.isBefore(remoteUpdated)) {
+      // Check if local is effectively "empty" or "default" (no activity)
+      // If local is empty but remote has data, valid remote should win regardless of timestamp
+      // (because a fresh install creates a default UserStats with DateTime.now())
+      final localIsDefault =
+          local.currentStreak == 0 &&
+          local.totalXp == 0 &&
+          local.lessonsCompleted == 0;
+      final remoteHasData =
+          (remoteResponse['streak_count'] ?? 0) > 0 ||
+          (remoteResponse['total_xp'] ?? 0) > 0;
+
+      // If remote is newer OR (local is default AND remote has data)
+      if (local.updatedAt.isBefore(remoteUpdated) ||
+          (localIsDefault && remoteHasData)) {
+        debugPrint(
+          'Sync: PracticeStats [DECISION] -> PULL (Remote newer or local default)',
+        );
+
         // Pull
         final merged = UserStats(
           totalXp: remoteResponse['total_xp'],
@@ -490,15 +513,29 @@ class SyncService extends ChangeNotifier {
           updatedAt: remoteUpdated,
         );
         await progressStore.saveUserStats(merged);
+
+        // Log resulting local state
+        debugPrint(
+          'Sync: PracticeStats [APPLIED] -> streak: ${merged.currentStreak}',
+        );
         pulled++;
       } else if (local.updatedAt.isAfter(remoteUpdated)) {
+        debugPrint('Sync: PracticeStats [DECISION] -> PUSH (Local newer)');
         // Push
         await _upsertPracticeStats(client, userId, local);
         pushed++;
+      } else {
+        debugPrint(
+          'Sync: PracticeStats [DECISION] -> NO-OP (Timestamps match)',
+        );
       }
     } else {
+      debugPrint('Sync: PracticeStats [REMOTE] -> None (Empty)');
       // Remote empty, push local if it has data
       if (local.totalXp > 0 || local.currentStreak > 0) {
+        debugPrint(
+          'Sync: PracticeStats [DECISION] -> PUSH (Remote empty, local has data)',
+        );
         await _upsertPracticeStats(client, userId, local);
         pushed++;
       }
@@ -512,16 +549,25 @@ class SyncService extends ChangeNotifier {
     String userId,
     UserStats stats,
   ) async {
-    await client.from('practice_stats').upsert({
-      'user_id': userId,
-      'streak_count': stats.currentStreak,
-      'last_activity_date': stats.lastActivityDate?.toIso8601String(),
-      'total_xp': stats.totalXp,
-      'daily_goal': stats.dailyGoalMinutes,
-      'lessons_completed': stats.lessonsCompleted,
-      'exams_completed': stats.examsCompleted,
-      'updated_at': stats.updatedAt.toIso8601String(),
-    }, onConflict: 'user_id');
+    debugPrint(
+      'Sync: PracticeStats [PUSHING] -> streak: ${stats.currentStreak}, goal: ${stats.dailyGoalMinutes}, updated: ${stats.updatedAt}',
+    );
+    try {
+      await client.from('practice_stats').upsert({
+        'user_id': userId,
+        'streak_count': stats.currentStreak,
+        'last_activity_date': stats.lastActivityDate?.toIso8601String(),
+        'total_xp': stats.totalXp,
+        'daily_goal': stats.dailyGoalMinutes,
+        'lessons_completed': stats.lessonsCompleted,
+        'exams_completed': stats.examsCompleted,
+        'updated_at': stats.updatedAt.toIso8601String(),
+      }, onConflict: 'user_id');
+      debugPrint('Sync: PracticeStats [PUSH] -> Success');
+    } catch (e) {
+      debugPrint('Sync: PracticeStats [PUSH] -> FAILED: $e');
+      rethrow;
+    }
   }
 
   /// Sync Certificates
@@ -553,9 +599,7 @@ class SyncService extends ChangeNotifier {
       final remote = entry.value;
       final local = localMap[entry.key];
 
-      // Certificates are immutable-ish, check existence or if remote is "newer" (re-issued?)
-      final remoteUpdated = DateTime.parse(remote['updated_at']);
-
+      // Certificates are immutable-ish, check existence.
       // If local missing, insert.
       // NOTE: We do NOT push the file path. We mark it as 'cloud_synced' in path?
       // Or just empty path and let UI regenerate?
