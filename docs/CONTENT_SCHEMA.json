@@ -1,0 +1,460 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://lietucoach.app/schemas/content/v0.1.0",
+  "title": "LietuCoach Content Schema",
+  "description": "JSON Schema for LietuCoach content packs (v0.1.0)",
+  "$ref": "#/$defs/unit",
+  "$defs": {
+    "phraseId": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_]*$",
+      "description": "Identifier for a phrase/item"
+    },
+    "audioId": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_]*$",
+      "description": "Identifier for audio file reference"
+    },
+    "stepTeachPhrase": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "teach_phrase"
+        },
+        "phraseId": {
+          "$ref": "#/$defs/phraseId"
+        },
+        "showTranslation": {
+          "type": "boolean",
+          "default": true
+        }
+      },
+      "required": [
+        "type",
+        "phraseId"
+      ],
+      "additionalProperties": false
+    },
+    "stepMcq": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "mcq"
+        },
+        "prompt": {
+          "type": "string",
+          "minLength": 1
+        },
+        "options": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 2,
+          "maxItems": 4
+        },
+        "correctIndex": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 3
+        }
+      },
+      "required": [
+        "type",
+        "prompt",
+        "options",
+        "correctIndex"
+      ],
+      "additionalProperties": false
+    },
+    "stepMatch": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "match"
+        },
+        "pairs": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "left": {
+                "type": "string"
+              },
+              "right": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "left",
+              "right"
+            ],
+            "additionalProperties": false
+          },
+          "minItems": 2,
+          "maxItems": 6
+        }
+      },
+      "required": [
+        "type",
+        "pairs"
+      ],
+      "additionalProperties": false
+    },
+    "stepReorder": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "reorder"
+        },
+        "words": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 2
+        },
+        "correctOrder": {
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "minimum": 0
+          }
+        }
+      },
+      "required": [
+        "type",
+        "words",
+        "correctOrder"
+      ],
+      "additionalProperties": false
+    },
+    "stepFillBlank": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "fill_blank"
+        },
+        "sentence": {
+          "type": "string",
+          "minLength": 1
+        },
+        "blank": {
+          "type": "string",
+          "minLength": 1
+        },
+        "answer": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "type",
+        "sentence",
+        "blank",
+        "answer"
+      ],
+      "additionalProperties": false
+    },
+    "stepListeningChoice": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "listening_choice"
+        },
+        "audioId": {
+          "$ref": "#/$defs/audioId"
+        },
+        "options": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 2,
+          "maxItems": 4
+        },
+        "correctIndex": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 3
+        }
+      },
+      "required": [
+        "type",
+        "audioId",
+        "options",
+        "correctIndex"
+      ],
+      "additionalProperties": false
+    },
+    "stepDialogueChoice": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "dialogue_choice"
+        },
+        "context": {
+          "type": "string",
+          "minLength": 1
+        },
+        "options": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 2,
+          "maxItems": 4
+        },
+        "correctIndex": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 3
+        }
+      },
+      "required": [
+        "type",
+        "context",
+        "options",
+        "correctIndex"
+      ],
+      "additionalProperties": false
+    },
+    "stepLessonComplete": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "lesson_complete"
+        },
+        "itemsLearned": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "xpEarned": {
+          "type": "integer",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "type"
+      ],
+      "additionalProperties": false
+    },
+    "step": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/stepTeachPhrase"
+        },
+        {
+          "$ref": "#/$defs/stepMcq"
+        },
+        {
+          "$ref": "#/$defs/stepMatch"
+        },
+        {
+          "$ref": "#/$defs/stepReorder"
+        },
+        {
+          "$ref": "#/$defs/stepFillBlank"
+        },
+        {
+          "$ref": "#/$defs/stepListeningChoice"
+        },
+        {
+          "$ref": "#/$defs/stepDialogueChoice"
+        },
+        {
+          "$ref": "#/$defs/stepLessonComplete"
+        }
+      ]
+    },
+    "item": {
+      "type": "object",
+      "properties": {
+        "lt": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Lithuanian text"
+        },
+        "en": {
+          "type": "string",
+          "minLength": 1,
+          "description": "English translation"
+        },
+        "audioId": {
+          "$ref": "#/$defs/audioId"
+        },
+        "notes": {
+          "type": "string",
+          "description": "Optional grammar/usage notes"
+        }
+      },
+      "required": [
+        "lt",
+        "en",
+        "audioId"
+      ],
+      "additionalProperties": false
+    },
+    "lesson": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^lesson_[a-z0-9_]+$"
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1
+        },
+        "titleLt": {
+          "type": "string"
+        },
+        "steps": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/step"
+          },
+          "minItems": 1
+        }
+      },
+      "required": [
+        "id",
+        "title",
+        "steps"
+      ],
+      "additionalProperties": false
+    },
+    "unit": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^unit_[a-z0-9_]+$"
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1
+        },
+        "titleLt": {
+          "type": "string"
+        },
+        "lessons": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/lesson"
+          },
+          "minItems": 1
+        },
+        "items": {
+          "type": "object",
+          "propertyNames": {
+            "$ref": "#/$defs/phraseId"
+          },
+          "additionalProperties": {
+            "$ref": "#/$defs/item"
+          }
+        },
+        "exam": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string"
+            },
+            "passScore": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 100
+            }
+          },
+          "required": [
+            "id",
+            "passScore"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "id",
+        "title",
+        "lessons",
+        "items"
+      ],
+      "additionalProperties": false
+    },
+    "levelManifest": {
+      "type": "object",
+      "properties": {
+        "level": {
+          "type": "string",
+          "enum": [
+            "a1",
+            "a2",
+            "b1",
+            "b2"
+          ]
+        },
+        "units": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1
+        },
+        "exam": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string"
+            },
+            "passScore": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 100
+            }
+          },
+          "required": [
+            "id",
+            "passScore"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "level",
+        "units"
+      ],
+      "additionalProperties": false
+    },
+    "versionManifest": {
+      "type": "object",
+      "properties": {
+        "a1": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "a2": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "b1": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "b2": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "schema": {
+          "type": "string",
+          "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+        }
+      },
+      "required": [
+        "a1",
+        "a2",
+        "schema"
+      ],
+      "additionalProperties": false
+    }
+  }
+}
