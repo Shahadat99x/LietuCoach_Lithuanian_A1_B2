@@ -41,7 +41,11 @@ dart run tool/validate_content.dart
 
 ### 5. Audio Generation
 After validation passes, generate TTS audio for new phrases.
-*Requires .secrets/openai_api_key.txt*
+
+**Prerequisites:**
+- Credentials in `.secrets/gcp_service_account.json` (auto-detected)
+- Install dependencies: `pip install google-cloud-texttospeech python-dotenv`
+
 ```bash
 python tool/generate_tts_audio.py
 ```

@@ -36,13 +36,28 @@ from pathlib import Path
 # Check for required environment variable before importing google libs
 def check_credentials():
     creds = os.environ.get('GOOGLE_APPLICATION_CREDENTIALS')
+    
+    # Auto-detect if not set
+    if not creds:
+        # Look for .secrets/gcp_service_account.json in repo root
+        # Script is in tool/, so repo root is parent
+        repo_root = Path(__file__).resolve().parent.parent
+        default_creds = repo_root / '.secrets' / 'gcp_service_account.json'
+        
+        if default_creds.exists():
+            print(f"✓ Auto-detected credentials: {default_creds}")
+            os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = str(default_creds)
+            return str(default_creds)
+    
     if not creds:
         print("ERROR: GOOGLE_APPLICATION_CREDENTIALS not set")
         print("Set it to the path of your service account JSON file")
         sys.exit(2)
+        
     if not Path(creds).exists():
         print(f"ERROR: Credentials file not found: {creds}")
         sys.exit(2)
+        
     return creds
 
 # Configuration defaults
