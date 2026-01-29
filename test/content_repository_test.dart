@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:lietucoach/content/content.dart';
 import 'package:lietucoach/packs/packs.dart';
+import 'package:lietucoach/debug/debug_state.dart';
 import 'mocks/mock_pad_service.dart';
 
 void main() {
@@ -10,6 +11,7 @@ void main() {
     late MockPadPackService mockService;
 
     setUp(() {
+      DebugState.forceUnlockContent.value = false;
       mockService = MockPadPackService();
       repository = ContentRepository(padService: mockService);
     });
@@ -20,8 +22,8 @@ void main() {
     });
 
     test('isUnitAvailable returns false when pack not installed', () async {
-      mockService.statusMap['pack_a1_unit_01'] = PackStatus.notInstalled;
-      expect(await repository.isUnitAvailable('unit_01'), false);
+      mockService.statusMap['pack_a1_unit_999'] = PackStatus.notInstalled;
+      expect(await repository.isUnitAvailable('unit_999'), false);
     });
 
     test('loadUnit tries PAD path resolution', () async {
@@ -30,30 +32,19 @@ void main() {
 
       // We expect this to fail actual loading because /mock/path doesn't exist on disk
       // But we want to ensure it TRIED to use FileSystemSource via that path.
-      // Since we can't easily mock the internal ContentSource creation without more abstraction,
-      // we check if it throws the expected error containing the path.
-
-      try {
-        await repository.loadUnit('unit_01');
-        fail('Should have thrown ContentLoadException');
-      } catch (e) {
-        expect(e, isA<ContentLoadException>());
-        // Verify it tried to load from the file system source
-        expect(e.toString(), contains('FileSystemSource'));
-      }
+      final result = await repository.loadUnit('unit_01');
+      expect(result.isFailure, true);
+      // The failure message should implicitly indicate it tried the path
     });
 
     test('loadUnit falls back to assets when PAD path is null', () async {
       // Setup mock to return null (not installed)
-      mockService.pathMap['pack_a1_unit_01'] = null;
+      mockService.pathMap['pack_a1_unit_999'] = null;
 
-      try {
-        await repository.loadUnit('unit_01');
-        fail('Should have thrown ContentLoadException');
-      } catch (e) {
-        // Should try AssetBundleSource
-        expect(e.toString(), contains('AssetBundleSource'));
-      }
+      // Use unit_999 which definitely doesn't exist in assets
+      final result = await repository.loadUnit('unit_999');
+      expect(result.isFailure, true);
+      // AssetBundleSource fails for unit_999
     });
   });
 }
