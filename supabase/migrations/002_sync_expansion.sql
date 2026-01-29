@@ -43,6 +43,7 @@ create table if not exists practice_stats (
   streak_count int not null default 0,
   last_activity_date date, -- Changed to DATE for safer streak calculations
   total_xp int not null default 0,
+  daily_goal int not null default 10,
   lessons_completed int not null default 0,
   exams_completed int not null default 0,
   updated_at timestamptz default now()

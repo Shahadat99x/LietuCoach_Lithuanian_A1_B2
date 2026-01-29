@@ -64,7 +64,7 @@ class SyncService extends ChangeNotifier {
 
     // Listen to Auth changes for auto-sync
     authService.addListener(_onAuthChanged);
-    
+
     // Initial startup check
     if (authService.isAuthenticated) {
       autoSync(reason: 'startup');
@@ -95,7 +95,7 @@ class SyncService extends ChangeNotifier {
   /// Trigger automatic sync with debounce
   Future<void> autoSync({required String reason}) async {
     if (_isSyncing) return;
-    
+
     final now = DateTime.now();
     if (_lastAutoSyncAttempt != null) {
       final difference = now.difference(_lastAutoSyncAttempt!);
@@ -131,10 +131,10 @@ class SyncService extends ChangeNotifier {
     // Check connectivity
     final connectivityResult = await Connectivity().checkConnectivity();
     if (connectivityResult.contains(ConnectivityResult.none)) {
-       _statusMessage = 'Offline (Pending)';
-       notifyListeners();
-       debugPrint('Sync: Offline, skipping');
-       return SyncResult.failure('Offline - Sync pending');
+      _statusMessage = 'Offline (Pending)';
+      notifyListeners();
+      debugPrint('Sync: Offline, skipping');
+      return SyncResult.failure('Offline - Sync pending');
     }
 
     _isSyncing = true;
@@ -179,7 +179,7 @@ class SyncService extends ChangeNotifier {
 
       debugPrint('Sync: Complete - pushed $pushed, pulled $pulled');
       _statusMessage = 'Synced';
-      
+
       return SyncResult.success(pushed: pushed, pulled: pulled);
     } catch (e) {
       debugPrint('Sync: Error - $e');
@@ -463,7 +463,7 @@ class SyncService extends ChangeNotifier {
 
     // Get local
     final local = await progressStore.getUserStats();
-    
+
     // Get remote
     final remoteResponse = await client
         .from('practice_stats')
@@ -474,7 +474,7 @@ class SyncService extends ChangeNotifier {
     if (remoteResponse != null) {
       // Merge
       final remoteUpdated = DateTime.parse(remoteResponse['updated_at']);
-      
+
       // If remote is newer OR local is default/empty but remote exists
       if (local.updatedAt.isBefore(remoteUpdated)) {
         // Pull
@@ -486,6 +486,7 @@ class SyncService extends ChangeNotifier {
               : null,
           lessonsCompleted: remoteResponse['lessons_completed'],
           examsCompleted: remoteResponse['exams_completed'],
+          dailyGoalMinutes: remoteResponse['daily_goal'] ?? 10,
           updatedAt: remoteUpdated,
         );
         await progressStore.saveUserStats(merged);
@@ -516,6 +517,7 @@ class SyncService extends ChangeNotifier {
       'streak_count': stats.currentStreak,
       'last_activity_date': stats.lastActivityDate?.toIso8601String(),
       'total_xp': stats.totalXp,
+      'daily_goal': stats.dailyGoalMinutes,
       'lessons_completed': stats.lessonsCompleted,
       'exams_completed': stats.examsCompleted,
       'updated_at': stats.updatedAt.toIso8601String(),
@@ -529,8 +531,8 @@ class SyncService extends ChangeNotifier {
   ) async {
     int pushed = 0;
     int pulled = 0;
-    
-    // We need access to CertificateRepository. 
+
+    // We need access to CertificateRepository.
     // Ideally injected, but for now we instantiate or access singleton if available.
     // Assuming CertificateRepository has basic Hive access.
     final certRepo = CertificateRepository();
@@ -543,17 +545,17 @@ class SyncService extends ChangeNotifier {
         .from('certificates')
         .select()
         .eq('user_id', userId);
-    
+
     final remoteMap = {for (var r in remoteData) r['id'] as String: r};
 
     // Pull
     for (final entry in remoteMap.entries) {
       final remote = entry.value;
       final local = localMap[entry.key];
-      
+
       // Certificates are immutable-ish, check existence or if remote is "newer" (re-issued?)
       final remoteUpdated = DateTime.parse(remote['updated_at']);
-      
+
       // If local missing, insert.
       // NOTE: We do NOT push the file path. We mark it as 'cloud_synced' in path?
       // Or just empty path and let UI regenerate?
@@ -579,7 +581,8 @@ class SyncService extends ChangeNotifier {
           'level': local.level,
           'issued_at': local.issuedAt.toIso8601String(),
           'learner_name': local.learnerName,
-          'updated_at': local.issuedAt.toIso8601String(), // Use issuedAt as updated
+          'updated_at': local.issuedAt
+              .toIso8601String(), // Use issuedAt as updated
         });
         pushed++;
       }
