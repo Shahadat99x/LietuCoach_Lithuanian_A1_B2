@@ -1,0 +1,196 @@
+{
+    "id": "unit_01",
+    "title": "Greetings & Basics",
+    "titleLt": "Pasisveikinimai ir pagrindai",
+    "lessons": [
+        {
+            "id": "lesson_01_greetings",
+            "title": "Hello & Goodbye",
+            "titleLt": "Labas ir viso gero",
+            "steps": [
+                {
+                    "type": "teach_phrase",
+                    "phraseId": "labas",
+                    "showTranslation": true
+                },
+                {
+                    "type": "teach_phrase",
+                    "phraseId": "sveikas",
+                    "showTranslation": true
+                },
+                {
+                    "type": "teach_phrase",
+                    "phraseId": "viso_gero",
+                    "showTranslation": true
+                },
+                {
+                    "type": "teach_phrase",
+                    "phraseId": "iki",
+                    "showTranslation": true
+                },
+                {
+                    "type": "mcq",
+                    "prompt": "What does 'Labas' mean?",
+                    "options": [
+                        "Goodbye",
+                        "Hello",
+                        "Thank you",
+                        "Please"
+                    ],
+                    "correctIndex": 1
+                },
+                {
+                    "type": "mcq",
+                    "prompt": "How do you say 'Goodbye' in Lithuanian?",
+                    "options": [
+                        "Labas",
+                        "Sveikas",
+                        "Viso gero",
+                        "Iki"
+                    ],
+                    "correctIndex": 2
+                },
+                {
+                    "type": "reorder",
+                    "words": [
+                        "Labas",
+                        "rytas"
+                    ],
+                    "correctOrder": [
+                        0,
+                        1
+                    ]
+                },
+                {
+                    "type": "listening_choice",
+                    "audioId": "a1_u01_labas",
+                    "options": [
+                        "Labas",
+                        "Sveikas",
+                        "Viso gero",
+                        "Iki"
+                    ],
+                    "correctIndex": 0
+                },
+                {
+                    "type": "lesson_complete",
+                    "itemsLearned": 4,
+                    "xpEarned": 10
+                }
+            ]
+        },
+        {
+            "id": "lesson_02_introductions",
+            "title": "My Name Is",
+            "titleLt": "Mano vardas",
+            "steps": [
+                {
+                    "type": "teach_phrase",
+                    "phraseId": "mano_vardas",
+                    "showTranslation": true
+                },
+                {
+                    "type": "teach_phrase",
+                    "phraseId": "as_esu",
+                    "showTranslation": true
+                },
+                {
+                    "type": "teach_phrase",
+                    "phraseId": "malonu_susipazinti",
+                    "showTranslation": true
+                },
+                {
+                    "type": "teach_phrase",
+                    "phraseId": "kaip_jus_vadinates",
+                    "showTranslation": true
+                },
+                {
+                    "type": "mcq",
+                    "prompt": "How do you say 'My name is...' in Lithuanian?",
+                    "options": [
+                        "Aš esu...",
+                        "Mano vardas...",
+                        "Labas",
+                        "Iki"
+                    ],
+                    "correctIndex": 1
+                },
+                {
+                    "type": "fill_blank",
+                    "sentence": "___ vardas yra Jonas.",
+                    "blank": "___",
+                    "answer": "Mano"
+                },
+                {
+                    "type": "dialogue_choice",
+                    "context": "Someone says 'Labas! Mano vardas Jonas.' How do you respond?",
+                    "options": [
+                        "Viso gero!",
+                        "Labas! Mano vardas Maria.",
+                        "Iki!",
+                        "Labas rytas!"
+                    ],
+                    "correctIndex": 1
+                },
+                {
+                    "type": "listening_choice",
+                    "audioId": "a1_u01_mano_vardas",
+                    "options": [
+                        "Mano vardas",
+                        "Aš esu",
+                        "Labas",
+                        "Malonu"
+                    ],
+                    "correctIndex": 0
+                },
+                {
+                    "type": "lesson_complete",
+                    "itemsLearned": 4,
+                    "xpEarned": 10
+                }
+            ]
+        }
+    ],
+    "items": {
+        "labas": {
+            "lt": "Labas",
+            "en": "Hello",
+            "audioId": "a1_u01_labas"
+        },
+        "sveikas": {
+            "lt": "Sveikas",
+            "en": "Hi (informal, to a male)",
+            "audioId": "a1_u01_sveikas"
+        },
+        "viso_gero": {
+            "lt": "Viso gero",
+            "en": "Goodbye",
+            "audioId": "a1_u01_viso_gero"
+        },
+        "iki": {
+            "lt": "Iki",
+            "en": "Bye (informal)",
+            "audioId": "a1_u01_iki"
+        },
+        "mano_vardas": {
+            "lt": "Mano vardas",
+            "en": "My name is",
+            "audioId": "a1_u01_mano_vardas"
+        },
+        "as_esu": {
+            "lt": "Aš esu",
+            "en": "I am",
+            "audioId": "a1_u01_as_esu"
+        },
+        "malonu_susipazinti": {
+            "lt": "Malonu susipažinti",
+            "en": "Nice to meet you",
+            "audioId": "a1_u01_malonu_susipazinti"
+        },
+        "kaip_jus_vadinates": {
+            "lt": "Kaip jūs vadinatės?",
+            "en": "What is your name? (formal)",
+            "audioId": "a1_u01_kaip_jus_vadinates"
+        }
+    }
+}

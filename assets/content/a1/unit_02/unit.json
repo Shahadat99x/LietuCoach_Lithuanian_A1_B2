@@ -1,0 +1,199 @@
+{
+    "id": "unit_02",
+    "title": "Numbers & Counting",
+    "titleLt": "Skaičiai ir skaičiavimas",
+    "lessons": [
+        {
+            "id": "lesson_01_numbers_low",
+            "title": "Numbers 1–5",
+            "titleLt": "Skaičiai 1–5",
+            "steps": [
+                {
+                    "type": "teach_phrase",
+                    "phraseId": "vienas",
+                    "showTranslation": true
+                },
+                {
+                    "type": "teach_phrase",
+                    "phraseId": "du",
+                    "showTranslation": true
+                },
+                {
+                    "type": "teach_phrase",
+                    "phraseId": "trys",
+                    "showTranslation": true
+                },
+                {
+                    "type": "teach_phrase",
+                    "phraseId": "keturi",
+                    "showTranslation": true
+                },
+                {
+                    "type": "teach_phrase",
+                    "phraseId": "penki",
+                    "showTranslation": true
+                },
+                {
+                    "type": "mcq",
+                    "prompt": "How do you say 'One' in Lithuanian?",
+                    "options": [
+                        "Du",
+                        "Vienas",
+                        "Trys",
+                        "Keturi"
+                    ],
+                    "correctIndex": 1
+                },
+                {
+                    "type": "mcq",
+                    "prompt": "What does 'Du' mean?",
+                    "options": [
+                        "One",
+                        "Three",
+                        "Five",
+                        "Two"
+                    ],
+                    "correctIndex": 3
+                },
+                {
+                    "type": "listening_choice",
+                    "audioId": "a1_u02_trys",
+                    "options": [
+                        "Vienas",
+                        "Du",
+                        "Trys",
+                        "Keturi"
+                    ],
+                    "correctIndex": 2
+                },
+                {
+                    "type": "lesson_complete",
+                    "itemsLearned": 5,
+                    "xpEarned": 10
+                }
+            ]
+        },
+        {
+            "id": "lesson_02_numbers_high",
+            "title": "Numbers 6–10",
+            "titleLt": "Skaičiai 6–10",
+            "steps": [
+                {
+                    "type": "teach_phrase",
+                    "phraseId": "sesi",
+                    "showTranslation": true
+                },
+                {
+                    "type": "teach_phrase",
+                    "phraseId": "septyni",
+                    "showTranslation": true
+                },
+                {
+                    "type": "teach_phrase",
+                    "phraseId": "astuoni",
+                    "showTranslation": true
+                },
+                {
+                    "type": "teach_phrase",
+                    "phraseId": "devyni",
+                    "showTranslation": true
+                },
+                {
+                    "type": "teach_phrase",
+                    "phraseId": "desimt",
+                    "showTranslation": true
+                },
+                {
+                    "type": "mcq",
+                    "prompt": "How do you say 'Six' in Lithuanian?",
+                    "options": [
+                        "Septyni",
+                        "Šeši",
+                        "Aštuoni",
+                        "Devyni"
+                    ],
+                    "correctIndex": 1
+                },
+                {
+                    "type": "mcq",
+                    "prompt": "What does 'Dešimt' mean?",
+                    "options": [
+                        "Eight",
+                        "Nine",
+                        "Seven",
+                        "Ten"
+                    ],
+                    "correctIndex": 3
+                },
+                {
+                    "type": "listening_choice",
+                    "audioId": "a1_u02_astuoni",
+                    "options": [
+                        "Šeši",
+                        "Septyni",
+                        "Aštuoni",
+                        "Devyni"
+                    ],
+                    "correctIndex": 2
+                },
+                {
+                    "type": "lesson_complete",
+                    "itemsLearned": 5,
+                    "xpEarned": 10
+                }
+            ]
+        }
+    ],
+    "items": {
+        "vienas": {
+            "lt": "Vienas",
+            "en": "One",
+            "audioId": "a1_u02_vienas"
+        },
+        "du": {
+            "lt": "Du",
+            "en": "Two",
+            "audioId": "a1_u02_du"
+        },
+        "trys": {
+            "lt": "Trys",
+            "en": "Three",
+            "audioId": "a1_u02_trys"
+        },
+        "keturi": {
+            "lt": "Keturi",
+            "en": "Four",
+            "audioId": "a1_u02_keturi"
+        },
+        "penki": {
+            "lt": "Penki",
+            "en": "Five",
+            "audioId": "a1_u02_penki"
+        },
+        "sesi": {
+            "lt": "Šeši",
+            "en": "Six",
+            "audioId": "a1_u02_sesi"
+        },
+        "septyni": {
+            "lt": "Septyni",
+            "en": "Seven",
+            "audioId": "a1_u02_septyni"
+        },
+        "astuoni": {
+            "lt": "Aštuoni",
+            "en": "Eight",
+            "audioId": "a1_u02_astuoni"
+        },
+        "devyni": {
+            "lt": "Devyni",
+            "en": "Nine",
+            "audioId": "a1_u02_devyni"
+        },
+        "desimt": {
+            "lt": "Dešimt",
+            "en": "Ten",
+            "audioId": "a1_u02_desimt"
+        }
+    }
+}
