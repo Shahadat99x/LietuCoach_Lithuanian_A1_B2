@@ -18,6 +18,7 @@ Last updated: 2026-01-29
 - [x] Phase 5.5 — Sync Expansion (SRS, Practice, Certs)
 - [x] Phase 6 — PAD integration
 - [x] Phase 7 — Certificate PDF
+- [x] Database Migration `002_sync_expansion.sql` (Tables: `srs_cards`, `practice_stats`, `certificates` + RLS)
 
 ## In Progress
 - [ ] Phase 8: QA + release
