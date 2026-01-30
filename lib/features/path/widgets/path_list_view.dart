@@ -1,3 +1,4 @@
+/// List view implementation for the learning path.
 import 'package:flutter/material.dart';
 import '../models/course_unit_config.dart';
 import '../../../../ui/tokens.dart';

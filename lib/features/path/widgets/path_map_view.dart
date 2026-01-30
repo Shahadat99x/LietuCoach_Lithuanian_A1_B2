@@ -1,3 +1,4 @@
+/// Map view implementation for the learning path.
 import 'package:flutter/material.dart';
 import '../../../../ui/tokens.dart';
 import '../models/course_unit_config.dart';
