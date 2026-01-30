@@ -6,6 +6,7 @@ import 'package:lietucoach/debug/debug_state.dart';
 import 'package:lietucoach/progress/progress.dart';
 import 'package:mockito/mockito.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../mock_progress_store.dart';
 
 // Mock Auth Service (minimal)
@@ -26,6 +27,7 @@ void main() {
   late MockProgressStore mockStore;
 
   setUp(() {
+    SharedPreferences.setMockInitialValues({});
     mockStore = MockProgressStore();
     setMockProgressStore(mockStore); // Correct injection method
     DebugState.forceUnlockContent.value =
