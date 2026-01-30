@@ -14,7 +14,9 @@ class AuroraBackground extends StatelessWidget {
     const bool kDebugAurora = true;
 
     // Colors configuration (Subtle premium tints)
-    const double opacity = kDebugAurora ? 0.8 : 0.08;
+    // Adjust opacity for subtlety (0.06 - 0.12)
+    // Tuned to 0.12 for better visibility on light backgrounds
+    const double opacity = kDebugAurora ? 0.8 : 0.12;
 
     // Top-Left (Cool Mint/Blue)
     final Color color1 = isDark
