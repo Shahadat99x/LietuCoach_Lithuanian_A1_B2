@@ -10,18 +10,15 @@ class AuroraBackground extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Debug toggle to verify visibility (remove before release)
-    const bool kDebugAurora = true;
-
     // Colors configuration (Subtle premium tints)
     // Adjust opacity for subtlety (0.06 - 0.12)
     // Tuned to 0.12 for better visibility on light backgrounds
-    const double opacity = kDebugAurora ? 0.8 : 0.12;
+    const double opacity = 0.12;
 
     // Top-Left (Cool Mint/Blue)
     final Color color1 = isDark
         ? const Color(0xFF004D40) // Dark Teal
-        : (kDebugAurora ? Colors.red : const Color(0xFFB2DFDB)); // Debug Red
+        : const Color(0xFFB2DFDB); // Light Teal
 
     // Center-Right (Soft Purple/Blue)
     final Color color2 = isDark
