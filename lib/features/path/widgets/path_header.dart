@@ -226,8 +226,10 @@ class _StatCard extends StatelessWidget {
         vertical: Spacing.xs,
       ),
       decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceContainer,
-        borderRadius: BorderRadius.circular(Radii.sm),
+        color: theme
+            .colorScheme
+            .surfaceContainerHighest, // Use slightly darker/lighter surface
+        borderRadius: BorderRadius.circular(Radii.md), // Match other cards
         border: isHighlighted
             ? Border.all(color: iconColor.withOpacity(0.3))
             : null,
