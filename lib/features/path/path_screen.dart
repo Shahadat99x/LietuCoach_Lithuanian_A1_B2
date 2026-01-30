@@ -107,10 +107,16 @@ class _PathScreenState extends State<PathScreen> {
   PathStyle _pathStyle = PathStyle.list;
 
   @override
-  void initState() {
     super.initState();
     _loadData(); // existing data load
-    // _loadPreference(); // Will be enabled in next commit
+    _loadPreference();
+  }
+
+  Future<void> _loadPreference() async {
+    final style = await PathPreferencesService().getPathStyle();
+    if (mounted) {
+      setState(() => _pathStyle = style);
+    }
   }
 
   Future<void> _loadData() async {
