@@ -9,13 +9,18 @@ import '../../packs/packs.dart';
 import '../../progress/progress.dart';
 import '../certificate/certificate.dart';
 import '../../auth/auth.dart';
-import '../../ui/tokens.dart';
 import '../../ui/components/components.dart';
 import '../lesson/lesson_list_screen.dart';
 import '../exam/exam_intro_screen.dart';
 import '../content/content_error_screen.dart';
 import 'certificate_node.dart';
 import '../../debug/debug_state.dart';
+import 'widgets/path_header.dart';
+
+import 'widgets/path_list_view.dart';
+import 'widgets/path_map_view.dart';
+import 'models/course_unit_config.dart';
+import 'services/path_preferences_service.dart';
 
 /// Course units configuration
 /// In future this comes from a course manifest
@@ -82,20 +87,6 @@ const List<CourseUnitConfig> courseUnits = [
   ),
 ];
 
-class CourseUnitConfig {
-  final String unitId;
-  final String title;
-  final int lessonCount;
-  final bool hasContent;
-
-  const CourseUnitConfig({
-    required this.unitId,
-    required this.title,
-    required this.lessonCount,
-    required this.hasContent,
-  });
-}
-
 class PathScreen extends StatefulWidget {
   const PathScreen({super.key});
 
@@ -112,10 +103,28 @@ class _PathScreenState extends State<PathScreen> {
   final Map<String, DownloadProgress?> _activeDownloads = {};
   bool _loading = true;
 
+  PathStyle _pathStyle = PathStyle.list;
+
   @override
   void initState() {
     super.initState();
-    _loadData();
+    _loadData(); // existing data load
+    _loadPreference();
+  }
+
+  Future<void> _loadPreference() async {
+    final style = await PathPreferencesService().getPathStyle();
+    if (mounted) {
+      setState(() => _pathStyle = style);
+    }
+  }
+
+  Future<void> _togglePathStyle() async {
+    final newStyle = _pathStyle == PathStyle.list
+        ? PathStyle.map
+        : PathStyle.list;
+    setState(() => _pathStyle = newStyle);
+    await PathPreferencesService().setPathStyle(newStyle);
   }
 
   Future<void> _loadData() async {
@@ -224,58 +233,107 @@ class _PathScreenState extends State<PathScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    // Find last active unit for "Continue" button
+    CourseUnitConfig? continueUnit;
+    for (final config in courseUnits) {
+      final isUnlocked = _isUnitUnlocked(courseUnits.indexOf(config));
+      final completed = _lessonCompletedCount[config.unitId] ?? 0;
+      final unitProgress = _unitProgress[config.unitId];
+      final isFinished =
+          completed >= config.lessonCount &&
+          (unitProgress?.examPassed ?? false);
+
+      if (isUnlocked && !isFinished) {
+        continueUnit = config;
+        break;
+      }
+    }
+    continueUnit ??= courseUnits.first;
+
+    final header = PathHeader(
+      onContinue: () {
+        if (continueUnit != null) {
+          _openUnitLessons(continueUnit.unitId);
+        }
+      },
+      continueLabel: 'Continue ${continueUnit.title}',
+      continueSubLabel: 'Unit ${courseUnits.indexOf(continueUnit) + 1}',
+      trailing: IconButton(
+        icon: Icon(_pathStyle == PathStyle.list ? Icons.map : Icons.list),
+        onPressed: _togglePathStyle,
+        tooltip: _pathStyle == PathStyle.list
+            ? 'Switch to Map'
+            : 'Switch to List',
+      ),
+    );
+
+    final footer = _isCourseCompleted()
+        ? CertificateNode(onTap: () => _openCertificate())
+        : null;
+
+    final child = _pathStyle == PathStyle.list
+        ? PathListView(
+            courseUnits: courseUnits,
+            isUnitUnlocked: _isUnitUnlocked,
+            lessonCompletedCount: _lessonCompletedCount,
+            unitProgress: _unitProgress,
+            unitAvailability: _unitAvailability,
+            activeDownloads: _activeDownloads,
+            onUnitTap: (config) => _handleUnitTap(config),
+            onExamTap: (config) => _handleExamTap(config),
+            header: header,
+            footer: footer,
+          )
+        : PathMapView(
+            courseUnits: courseUnits,
+            isUnitUnlocked: _isUnitUnlocked,
+            lessonCompletedCount: _lessonCompletedCount,
+            unitProgress: _unitProgress,
+            unitAvailability: _unitAvailability,
+            activeDownloads: _activeDownloads,
+            onUnitTap: (config) => _handleUnitTap(config),
+            onExamTap: (config) => _handleExamTap(config),
+            header: header,
+            footer: footer,
+          );
 
     return AppScaffold(
       body: _loading
           ? const Center(child: CircularProgressIndicator())
-          : RefreshIndicator(
-              onRefresh: _loadData,
-              child: ListView(
-                padding: const EdgeInsets.symmetric(vertical: Spacing.m),
-                children: [
-                  // Header
-                  Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: Spacing.pagePadding,
-                    ),
-                    child: Text(
-                      'Learning Path',
-                      style: theme.textTheme.headlineLarge,
-                    ),
-                  ),
-                  const SizedBox(height: Spacing.s),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: Spacing.pagePadding,
-                    ),
-                    child: Text(
-                      'A1 Level - Beginner',
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        color: theme.colorScheme.onSurfaceVariant,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: Spacing.l),
-
-                  // Units with exams
-                  for (var i = 0; i < courseUnits.length; i++) ...[
-                    _buildUnitSection(i),
-                    if (i < courseUnits.length - 1)
-                      const SizedBox(height: Spacing.m),
-                  ],
-
-                  if (_isCourseCompleted()) ...[
-                    const SizedBox(height: Spacing.xl),
-                    CertificateNode(onTap: () => _openCertificate()),
-                    const SizedBox(height: Spacing.xxl),
-                  ] else ...[
-                    const SizedBox(height: Spacing.xxl),
-                  ],
-                ],
-              ),
-            ),
+          : RefreshIndicator(onRefresh: _loadData, child: child),
     );
+  }
+
+  void _handleUnitTap(CourseUnitConfig config) {
+    final isUnlocked = _isUnitUnlocked(courseUnits.indexOf(config));
+    final isAvailable = _unitAvailability[config.unitId] ?? false;
+    final downloadProgress = _activeDownloads[config.unitId];
+
+    if (kDebugMode) {
+      print(
+        'TAP unitId=${config.unitId} unlocked=$isUnlocked available=$isAvailable',
+      );
+    }
+
+    if (!isUnlocked) return;
+
+    if (isAvailable) {
+      _openUnitLessons(config.unitId);
+    } else if (downloadProgress == null) {
+      if (_repository.isPadEnabled) {
+        _startDownload(config.unitId);
+      } else {
+        _openUnitLessons(config.unitId);
+      }
+    }
+  }
+
+  void _handleExamTap(CourseUnitConfig config) {
+    final isAvailable = _unitAvailability[config.unitId] ?? false;
+    if (isAvailable) {
+      final result = _units[config.unitId];
+      if (result != null) _openExam(result);
+    }
   }
 
   bool _isCourseCompleted() {
@@ -332,77 +390,6 @@ class _PathScreenState extends State<PathScreen> {
     );
   }
 
-  Widget _buildUnitSection(int index) {
-    final config = courseUnits[index];
-    final isUnlocked = _isUnitUnlocked(index);
-    final unit = _units[config.unitId];
-    final completedCount = _lessonCompletedCount[config.unitId] ?? 0;
-    final unitProgress = _unitProgress[config.unitId];
-    final allLessonsCompleted = completedCount >= config.lessonCount;
-
-    final isAvailable = _unitAvailability[config.unitId] ?? false;
-    final downloadProgress = _activeDownloads[config.unitId];
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: Spacing.pagePadding),
-      child: Column(
-        children: [
-          // Unit card
-          _UnitCard(
-            config: config,
-            isUnlocked: isUnlocked,
-            isAvailable: isAvailable,
-            downloadProgress: downloadProgress,
-            completedLessons: completedCount,
-            examPassed: unitProgress?.examPassed ?? false,
-            onTap: () {
-              if (kDebugMode) {
-                print(
-                  'TAP unitId=${config.unitId} unlocked=$isUnlocked '
-                  'available=$isAvailable padEnabled=${_repository.isPadEnabled}',
-                );
-              }
-
-              if (!isUnlocked) {
-                if (kDebugMode) print('TAP BLOCKED: Unit locked');
-                return;
-              }
-
-              if (isAvailable) {
-                _openUnitLessons(config.unitId);
-              } else if (downloadProgress == null) {
-                if (_repository.isPadEnabled) {
-                  _startDownload(config.unitId);
-                } else {
-                  // If PAD disabled and not available, still try to open
-                  // to show "Coming soon" or error inside the target screen.
-                  _openUnitLessons(config.unitId);
-                }
-              }
-            },
-          ),
-
-          // Exam node (only for units with content)
-          if (config.hasContent) ...[
-            _PathConnector(),
-            _ExamNode(
-              unitId: config.unitId,
-              isUnlocked: isUnlocked && allLessonsCompleted,
-              examPassed: unitProgress?.examPassed ?? false,
-              examScore: unitProgress?.examScore,
-              onTap:
-                  isUnlocked &&
-                      allLessonsCompleted &&
-                      !(unitProgress?.examPassed ?? false)
-                  ? () => _openExam(unit!)
-                  : null,
-            ),
-          ],
-        ],
-      ),
-    );
-  }
-
   void _openUnitLessons(String unitId) {
     Navigator.of(context)
         .push(
@@ -429,196 +416,5 @@ class _PathScreenState extends State<PathScreen> {
           ),
         )
         .then((_) => _loadData()); // Refresh on return
-  }
-}
-
-class _UnitCard extends StatelessWidget {
-  final CourseUnitConfig config;
-  final bool isUnlocked;
-  final bool isAvailable;
-  final DownloadProgress? downloadProgress;
-  final int completedLessons;
-  final bool examPassed;
-  final VoidCallback? onTap;
-
-  const _UnitCard({
-    required this.config,
-    required this.isUnlocked,
-    this.isAvailable = true,
-    this.downloadProgress,
-    required this.completedLessons,
-    required this.examPassed,
-    this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final progress = completedLessons / config.lessonCount;
-
-    return AppCard(
-      onTap: onTap,
-      color: isUnlocked ? null : theme.colorScheme.surfaceContainerHighest,
-      child: Row(
-        children: [
-          // Unit icon
-          Container(
-            width: 56,
-            height: 56,
-            decoration: BoxDecoration(
-              color: isUnlocked
-                  ? theme.colorScheme.primaryContainer
-                  : theme.colorScheme.surfaceContainer,
-              borderRadius: BorderRadius.circular(Radii.md),
-            ),
-            alignment: Alignment.center,
-            child: Icon(
-              isUnlocked ? Icons.book : Icons.lock,
-              size: 28,
-              color: isUnlocked
-                  ? theme.colorScheme.primary
-                  : theme.colorScheme.onSurfaceVariant,
-            ),
-          ),
-          const SizedBox(width: Spacing.m),
-
-          // Unit info
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  config.title,
-                  style: theme.textTheme.titleMedium?.copyWith(
-                    color: isUnlocked
-                        ? null
-                        : theme.colorScheme.onSurfaceVariant,
-                  ),
-                ),
-                const SizedBox(height: Spacing.xs),
-                if (isUnlocked) ...[
-                  ProgressBar(value: progress, height: 6),
-                  const SizedBox(height: Spacing.xs),
-                  Text(
-                    '$completedLessons of ${config.lessonCount} lessons',
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: theme.colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                ] else
-                  Text(
-                    'Complete previous unit to unlock',
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: theme.colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-              ],
-            ),
-          ),
-
-          // Status indicator
-          if (isUnlocked)
-            Icon(
-              Icons.chevron_right,
-              color: theme.colorScheme.onSurfaceVariant,
-            ),
-        ],
-      ),
-    );
-  }
-}
-
-class _PathConnector extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return Container(width: 2, height: 24, color: theme.dividerColor);
-  }
-}
-
-class _ExamNode extends StatelessWidget {
-  final String unitId;
-  final bool isUnlocked;
-  final bool examPassed;
-  final int? examScore;
-  final VoidCallback? onTap;
-
-  const _ExamNode({
-    required this.unitId,
-    required this.isUnlocked,
-    required this.examPassed,
-    this.examScore,
-    this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    Color backgroundColor;
-    Color iconColor;
-    IconData icon;
-    String label;
-    String? subtitle;
-
-    if (examPassed) {
-      backgroundColor = AppColors.successLight;
-      iconColor = AppColors.success;
-      icon = Icons.check_circle;
-      label = 'Exam Passed';
-      subtitle = examScore != null ? '$examScore%' : null;
-    } else if (isUnlocked) {
-      backgroundColor = theme.colorScheme.primaryContainer;
-      iconColor = theme.colorScheme.primary;
-      icon = Icons.quiz;
-      label = 'Take Exam';
-      subtitle = 'Pass to unlock next unit';
-    } else {
-      backgroundColor = theme.colorScheme.surfaceContainerHighest;
-      iconColor = theme.colorScheme.onSurfaceVariant;
-      icon = Icons.lock;
-      label = 'Unit Exam';
-      subtitle = 'Complete all lessons first';
-    }
-
-    return Material(
-      color: backgroundColor,
-      borderRadius: BorderRadius.circular(Radii.md),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(Radii.md),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(
-            horizontal: Spacing.m,
-            vertical: Spacing.s,
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(icon, color: iconColor, size: 20),
-              const SizedBox(width: Spacing.s),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    label,
-                    style: theme.textTheme.labelLarge?.copyWith(
-                      color: iconColor,
-                    ),
-                  ),
-                  if (subtitle != null)
-                    Text(
-                      subtitle,
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: theme.colorScheme.onSurfaceVariant,
-                      ),
-                    ),
-                ],
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
   }
 }
