@@ -107,6 +107,7 @@ class _PathScreenState extends State<PathScreen> {
   PathStyle _pathStyle = PathStyle.list;
 
   @override
+  void initState() {
     super.initState();
     _loadData(); // existing data load
     _loadPreference();
