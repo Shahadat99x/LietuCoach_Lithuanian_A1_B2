@@ -1,0 +1,173 @@
+{
+    "id": "unit_09",
+    "title": "Shopping",
+    "titleLt": "Apsipirkimas",
+    "lessons": [
+        {
+            "id": "lesson_01_buying",
+            "title": "Buying",
+            "titleLt": "Pirkimas",
+            "steps": [
+                {
+                    "type": "teach_phrase",
+                    "phraseId": "pirkti",
+                    "showTranslation": true
+                },
+                {
+                    "type": "teach_phrase",
+                    "phraseId": "noriu_pirkti",
+                    "showTranslation": true
+                },
+                {
+                    "type": "teach_phrase",
+                    "phraseId": "kiek_kainuoja",
+                    "showTranslation": true
+                },
+                {
+                    "type": "teach_phrase",
+                    "phraseId": "kaina",
+                    "showTranslation": true
+                },
+                {
+                    "type": "match",
+                    "pairs": [
+                        {
+                            "left": "Pirkti",
+                            "right": "To buy"
+                        },
+                        {
+                            "left": "Kaina",
+                            "right": "Price"
+                        },
+                        {
+                            "left": "Noriu pirkti",
+                            "right": "I want to buy"
+                        }
+                    ]
+                },
+                {
+                    "type": "listening_choice",
+                    "audioId": "a1_u09_pirkti",
+                    "options": [
+                        "Pirkti",
+                        "Kaina",
+                        "Noriu",
+                        "Brangu"
+                    ],
+                    "correctIndex": 0
+                },
+                {
+                    "type": "lesson_complete",
+                    "itemsLearned": 4,
+                    "xpEarned": 10
+                }
+            ]
+        },
+        {
+            "id": "lesson_02_items",
+            "title": "Price & Items",
+            "titleLt": "Kaina ir daiktai",
+            "steps": [
+                {
+                    "type": "teach_phrase",
+                    "phraseId": "brangu",
+                    "showTranslation": true
+                },
+                {
+                    "type": "teach_phrase",
+                    "phraseId": "pigu",
+                    "showTranslation": true
+                },
+                {
+                    "type": "teach_phrase",
+                    "phraseId": "pinigai",
+                    "showTranslation": true
+                },
+                {
+                    "type": "teach_phrase",
+                    "phraseId": "man_reikia",
+                    "showTranslation": true
+                },
+                {
+                    "type": "teach_phrase",
+                    "phraseId": "kortele",
+                    "showTranslation": true
+                },
+                {
+                    "type": "mcq",
+                    "prompt": "Translate 'Expensive'",
+                    "options": [
+                        "Pigu",
+                        "Brangu",
+                        "Pinigai",
+                        "Kaina"
+                    ],
+                    "correctIndex": 1
+                },
+                {
+                    "type": "listening_choice",
+                    "audioId": "a1_u09_pinigai",
+                    "options": [
+                        "Pinigai",
+                        "Kortelė",
+                        "Pigu",
+                        "Brangu"
+                    ],
+                    "correctIndex": 0
+                },
+                {
+                    "type": "lesson_complete",
+                    "itemsLearned": 5,
+                    "xpEarned": 10
+                }
+            ]
+        }
+    ],
+    "items": {
+        "pirkti": {
+            "lt": "Pirkti",
+            "en": "To buy",
+            "audioId": "a1_u09_pirkti"
+        },
+        "noriu_pirkti": {
+            "lt": "Noriu pirkti",
+            "en": "I want to buy",
+            "audioId": "a1_u09_noriu_pirkti"
+        },
+        "kiek_kainuoja": {
+            "lt": "Kiek kainuoja?",
+            "en": "How much does it cost?",
+            "audioId": "a1_u09_kiek_kainuoja"
+        },
+        "kaina": {
+            "lt": "Kaina",
+            "en": "Price",
+            "audioId": "a1_u09_kaina"
+        },
+        "brangu": {
+            "lt": "Brangu",
+            "en": "Expensive",
+            "audioId": "a1_u09_brangu"
+        },
+        "pigu": {
+            "lt": "Pigu",
+            "en": "Cheap",
+            "audioId": "a1_u09_pigu"
+        },
+        "pinigai": {
+            "lt": "Pinigai",
+            "en": "Money",
+            "audioId": "a1_u09_pinigai"
+        },
+        "man_reikia": {
+            "lt": "Man reikia",
+            "en": "I need",
+            "audioId": "a1_u09_man_reikia"
+        },
+        "kortele": {
+            "lt": "Kortelė",
+            "en": "Card",
+            "audioId": "a1_u09_kortele"
+        }
+    }
+}

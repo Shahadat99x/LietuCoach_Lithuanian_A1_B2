@@ -1,0 +1,172 @@
+{
+    "id": "unit_10",
+    "title": "Weather",
+    "titleLt": "Orai",
+    "lessons": [
+        {
+            "id": "lesson_01_weather",
+            "title": "Weather Conditions",
+            "titleLt": "Oro sąlygos",
+            "steps": [
+                {
+                    "type": "teach_phrase",
+                    "phraseId": "oras",
+                    "showTranslation": true
+                },
+                {
+                    "type": "teach_phrase",
+                    "phraseId": "koks_oras",
+                    "showTranslation": true
+                },
+                {
+                    "type": "teach_phrase",
+                    "phraseId": "geras",
+                    "showTranslation": true
+                },
+                {
+                    "type": "teach_phrase",
+                    "phraseId": "blogas",
+                    "showTranslation": true
+                },
+                {
+                    "type": "teach_phrase",
+                    "phraseId": "saule",
+                    "showTranslation": true
+                },
+                {
+                    "type": "match",
+                    "pairs": [
+                        {
+                            "left": "Geras",
+                            "right": "Good"
+                        },
+                        {
+                            "left": "Blogas",
+                            "right": "Bad"
+                        },
+                        {
+                            "left": "Saulė",
+                            "right": "Sun"
+                        }
+                    ]
+                },
+                {
+                    "type": "lesson_complete",
+                    "itemsLearned": 5,
+                    "xpEarned": 10
+                }
+            ]
+        },
+        {
+            "id": "lesson_02_rain_temp",
+            "title": "Rain & Temperature",
+            "titleLt": "Lietus ir temperatūra",
+            "steps": [
+                {
+                    "type": "teach_phrase",
+                    "phraseId": "lietus",
+                    "showTranslation": true
+                },
+                {
+                    "type": "teach_phrase",
+                    "phraseId": "lyja",
+                    "showTranslation": true
+                },
+                {
+                    "type": "teach_phrase",
+                    "phraseId": "silta",
+                    "showTranslation": true
+                },
+                {
+                    "type": "teach_phrase",
+                    "phraseId": "salta",
+                    "showTranslation": true
+                },
+                {
+                    "type": "teach_phrase",
+                    "phraseId": "sniegas",
+                    "showTranslation": true
+                },
+                {
+                    "type": "mcq",
+                    "prompt": "Translate 'It is raining'",
+                    "options": [
+                        "Sninga",
+                        "Lyja",
+                        "Šilta",
+                        "Šalta"
+                    ],
+                    "correctIndex": 1
+                },
+                {
+                    "type": "listening_choice",
+                    "audioId": "a1_u10_salta",
+                    "options": [
+                        "Šalta",
+                        "Šilta",
+                        "Lietus",
+                        "Saulė"
+                    ],
+                    "correctIndex": 0
+                },
+                {
+                    "type": "lesson_complete",
+                    "itemsLearned": 5,
+                    "xpEarned": 10
+                }
+            ]
+        }
+    ],
+    "items": {
+        "oras": {
+            "lt": "Oras",
+            "en": "Weather",
+            "audioId": "a1_u10_oras"
+        },
+        "koks_oras": {
+            "lt": "Koks oras?",
+            "en": "How is the weather?",
+            "audioId": "a1_u10_koks_oras"
+        },
+        "geras": {
+            "lt": "Geras",
+            "en": "Good",
+            "audioId": "a1_u10_geras"
+        },
+        "blogas": {
+            "lt": "Blogas",
+            "en": "Bad",
+            "audioId": "a1_u10_blogas"
+        },
+        "saule": {
+            "lt": "Saulė",
+            "en": "Sun",
+            "audioId": "a1_u10_saule"
+        },
+        "lietus": {
+            "lt": "Lietus",
+            "en": "Rain",
+            "audioId": "a1_u10_lietus"
+        },
+        "lyja": {
+            "lt": "Lyja",
+            "en": "It is raining",
+            "audioId": "a1_u10_lyja"
+        },
+        "silta": {
+            "lt": "Šilta",
+            "en": "Warm",
+            "audioId": "a1_u10_silta"
+        },
+        "salta": {
+            "lt": "Šalta",
+            "en": "Cold",
+            "audioId": "a1_u10_salta"
+        },
+        "sniegas": {
+            "lt": "Sniegas",
+            "en": "Snow",
+            "audioId": "a1_u10_sniegas"
+        }
+    }
+}

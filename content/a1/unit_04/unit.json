@@ -1,0 +1,244 @@
+{
+    "id": "unit_04",
+    "title": "Personal Info",
+    "titleLt": "Asmeninė informacija",
+    "lessons": [
+        {
+            "id": "lesson_01_languages",
+            "title": "Languages",
+            "titleLt": "Kalbos",
+            "steps": [
+                {
+                    "type": "teach_phrase",
+                    "phraseId": "kalba",
+                    "showTranslation": true
+                },
+                {
+                    "type": "teach_phrase",
+                    "phraseId": "lietuviskai",
+                    "showTranslation": true
+                },
+                {
+                    "type": "teach_phrase",
+                    "phraseId": "angliskai",
+                    "showTranslation": true
+                },
+                {
+                    "type": "teach_phrase",
+                    "phraseId": "as_kalbu",
+                    "showTranslation": true
+                },
+                {
+                    "type": "match",
+                    "pairs": [
+                        {
+                            "left": "Lietuviškai",
+                            "right": "Lithuanian (language)"
+                        },
+                        {
+                            "left": "Angliškai",
+                            "right": "English (language)"
+                        },
+                        {
+                            "left": "Kalba",
+                            "right": "Language"
+                        }
+                    ]
+                },
+                {
+                    "type": "teach_phrase",
+                    "phraseId": "ar_tu_kalbi",
+                    "showTranslation": true
+                },
+                {
+                    "type": "mcq",
+                    "prompt": "Translate: 'Do you speak Lithuanian?'",
+                    "options": [
+                        "Ar tu kalbi angliškai?",
+                        "Ar tu kalbi lietuviškai?",
+                        "Aš kalbu lietuviškai",
+                        "Mano vardas Jonas"
+                    ],
+                    "correctIndex": 1
+                },
+                {
+                    "type": "reorder",
+                    "words": [
+                        "Aš",
+                        "kalbu",
+                        "lietuviškai"
+                    ],
+                    "correctOrder": [
+                        0,
+                        1,
+                        2
+                    ]
+                },
+                {
+                    "type": "teach_phrase",
+                    "phraseId": "truputi",
+                    "showTranslation": true
+                },
+                {
+                    "type": "listening_choice",
+                    "audioId": "a1_u04_as_kalbu",
+                    "options": [
+                        "Aš kalbu",
+                        "Tu kalbi",
+                        "Lietuviškai",
+                        "Angliškai"
+                    ],
+                    "correctIndex": 0
+                },
+                {
+                    "type": "lesson_complete",
+                    "itemsLearned": 6,
+                    "xpEarned": 10
+                }
+            ]
+        },
+        {
+            "id": "lesson_02_numbers_age",
+            "title": "Numbers & Age",
+            "titleLt": "Skaičiai ir amžius",
+            "steps": [
+                {
+                    "type": "teach_phrase",
+                    "phraseId": "vienas",
+                    "showTranslation": true
+                },
+                {
+                    "type": "teach_phrase",
+                    "phraseId": "du",
+                    "showTranslation": true
+                },
+                {
+                    "type": "teach_phrase",
+                    "phraseId": "trys",
+                    "showTranslation": true
+                },
+                {
+                    "type": "teach_phrase",
+                    "phraseId": "metai",
+                    "showTranslation": true
+                },
+                {
+                    "type": "match",
+                    "pairs": [
+                        {
+                            "left": "Vienas",
+                            "right": "One"
+                        },
+                        {
+                            "left": "Du",
+                            "right": "Two"
+                        },
+                        {
+                            "left": "Trys",
+                            "right": "Three"
+                        }
+                    ]
+                },
+                {
+                    "type": "teach_phrase",
+                    "phraseId": "kiek",
+                    "showTranslation": true
+                },
+                {
+                    "type": "teach_phrase",
+                    "phraseId": "kiek_tau_metu",
+                    "showTranslation": true
+                },
+                {
+                    "type": "mcq",
+                    "prompt": "How do you ask 'How old are you?'",
+                    "options": [
+                        "Koks tavo vardas?",
+                        "Kiek tau metų?",
+                        "Kur tu esi?",
+                        "Kaip sekasi?"
+                    ],
+                    "correctIndex": 1
+                },
+                {
+                    "type": "listening_choice",
+                    "audioId": "a1_u04_du",
+                    "options": [
+                        "Du",
+                        "Vienas",
+                        "Trys",
+                        "Metai"
+                    ],
+                    "correctIndex": 0
+                },
+                {
+                    "type": "lesson_complete",
+                    "itemsLearned": 7,
+                    "xpEarned": 10
+                }
+            ]
+        }
+    ],
+    "items": {
+        "kalba": {
+            "lt": "Kalba",
+            "en": "Language",
+            "audioId": "a1_u04_kalba"
+        },
+        "lietuviskai": {
+            "lt": "Lietuviškai",
+            "en": "Lithuanian (adverb)",
+            "audioId": "a1_u04_lietuviskai"
+        },
+        "angliskai": {
+            "lt": "Angliškai",
+            "en": "English (adverb)",
+            "audioId": "a1_u04_angliskai"
+        },
+        "as_kalbu": {
+            "lt": "Aš kalbu",
+            "en": "I speak",
+            "audioId": "a1_u04_as_kalbu"
+        },
+        "ar_tu_kalbi": {
+            "lt": "Ar tu kalbi?",
+            "en": "Do you speak?",
+            "audioId": "a1_u04_ar_tu_kalbi"
+        },
+        "truputi": {
+            "lt": "Truputį",
+            "en": "A little",
+            "audioId": "a1_u04_truputi"
+        },
+        "vienas": {
+            "lt": "Vienas",
+            "en": "One",
+            "audioId": "a1_u04_vienas"
+        },
+        "du": {
+            "lt": "Du",
+            "en": "Two",
+            "audioId": "a1_u04_du"
+        },
+        "trys": {
+            "lt": "Trys",
+            "en": "Three",
+            "audioId": "a1_u04_trys"
+        },
+        "metai": {
+            "lt": "Metai",
+            "en": "Years",
+            "audioId": "a1_u04_metai"
+        },
+        "kiek": {
+            "lt": "Kiek?",
+            "en": "How much/many?",
+            "audioId": "a1_u04_kiek"
+        },
+        "kiek_tau_metu": {
+            "lt": "Kiek tau metų?",
+            "en": "How old are you?",
+            "audioId": "a1_u04_kiek_tau_metu"
+        }
+    }
+}

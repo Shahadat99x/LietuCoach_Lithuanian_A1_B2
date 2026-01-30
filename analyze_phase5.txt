@@ -1,0 +1,6 @@
+Analyzing LietuCoach_Lithuanian_A1_B2...                        
+
+warning - Dead code - test\sync_test.dart:78:37 - dead_code
+warning - Dead code - test\sync_test.dart:89:34 - dead_code
+
+2 issues found. (ran in 4.6s)

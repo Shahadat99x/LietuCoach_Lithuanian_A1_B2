@@ -1,0 +1,172 @@
+{
+    "id": "unit_06",
+    "title": "Days & Time",
+    "titleLt": "Dienos ir laikas",
+    "lessons": [
+        {
+            "id": "lesson_01_day_parts",
+            "title": "Time of Day",
+            "titleLt": "Paros laikas",
+            "steps": [
+                {
+                    "type": "teach_phrase",
+                    "phraseId": "diena",
+                    "showTranslation": true
+                },
+                {
+                    "type": "teach_phrase",
+                    "phraseId": "naktis",
+                    "showTranslation": true
+                },
+                {
+                    "type": "teach_phrase",
+                    "phraseId": "rytas",
+                    "showTranslation": true
+                },
+                {
+                    "type": "teach_phrase",
+                    "phraseId": "vakaras",
+                    "showTranslation": true
+                },
+                {
+                    "type": "match",
+                    "pairs": [
+                        {
+                            "left": "Diena",
+                            "right": "Day"
+                        },
+                        {
+                            "left": "Naktis",
+                            "right": "Night"
+                        },
+                        {
+                            "left": "Rytas",
+                            "right": "Morning"
+                        }
+                    ]
+                },
+                {
+                    "type": "teach_phrase",
+                    "phraseId": "laikas",
+                    "showTranslation": true
+                },
+                {
+                    "type": "lesson_complete",
+                    "itemsLearned": 5,
+                    "xpEarned": 10
+                }
+            ]
+        },
+        {
+            "id": "lesson_02_now_later",
+            "title": "Now & Days",
+            "titleLt": "Dabar ir dienos",
+            "steps": [
+                {
+                    "type": "teach_phrase",
+                    "phraseId": "siandien",
+                    "showTranslation": true
+                },
+                {
+                    "type": "teach_phrase",
+                    "phraseId": "rytoj",
+                    "showTranslation": true
+                },
+                {
+                    "type": "teach_phrase",
+                    "phraseId": "vakar",
+                    "showTranslation": true
+                },
+                {
+                    "type": "teach_phrase",
+                    "phraseId": "dabar",
+                    "showTranslation": true
+                },
+                {
+                    "type": "teach_phrase",
+                    "phraseId": "veliau",
+                    "showTranslation": true
+                },
+                {
+                    "type": "mcq",
+                    "prompt": "Translate 'Today'",
+                    "options": [
+                        "Rytoj",
+                        "Vakar",
+                        "Šiandien",
+                        "Dabar"
+                    ],
+                    "correctIndex": 2
+                },
+                {
+                    "type": "listening_choice",
+                    "audioId": "a1_u06_dabar",
+                    "options": [
+                        "Dabar",
+                        "Vėliau",
+                        "Šiandien",
+                        "Rytoj"
+                    ],
+                    "correctIndex": 0
+                },
+                {
+                    "type": "lesson_complete",
+                    "itemsLearned": 5,
+                    "xpEarned": 10
+                }
+            ]
+        }
+    ],
+    "items": {
+        "diena": {
+            "lt": "Diena",
+            "en": "Day",
+            "audioId": "a1_u06_diena"
+        },
+        "naktis": {
+            "lt": "Naktis",
+            "en": "Night",
+            "audioId": "a1_u06_naktis"
+        },
+        "rytas": {
+            "lt": "Rytas",
+            "en": "Morning",
+            "audioId": "a1_u06_rytas"
+        },
+        "vakaras": {
+            "lt": "Vakaras",
+            "en": "Evening",
+            "audioId": "a1_u06_vakaras"
+        },
+        "laikas": {
+            "lt": "Laikas",
+            "en": "Time",
+            "audioId": "a1_u06_laikas"
+        },
+        "siandien": {
+            "lt": "Šiandien",
+            "en": "Today",
+            "audioId": "a1_u06_siandien"
+        },
+        "rytoj": {
+            "lt": "Rytoj",
+            "en": "Tomorrow",
+            "audioId": "a1_u06_rytoj"
+        },
+        "vakar": {
+            "lt": "Vakar",
+            "en": "Yesterday",
+            "audioId": "a1_u06_vakar"
+        },
+        "dabar": {
+            "lt": "Dabar",
+            "en": "Now",
+            "audioId": "a1_u06_dabar"
+        },
+        "veliau": {
+            "lt": "Vėliau",
+            "en": "Later",
+            "audioId": "a1_u06_veliau"
+        }
+    }
+}
