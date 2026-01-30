@@ -2,18 +2,18 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'dart:io';
 import 'package:lietucoach/main.dart';
 import 'package:lietucoach/progress/progress.dart';
 import 'package:lietucoach/srs/srs.dart';
 import 'mock_progress_store.dart';
-import 'package:hive_flutter/hive_flutter.dart';
-import 'package:path_provider/path_provider.dart';
+import 'package:hive/hive.dart';
 import 'mock_srs_store.dart';
 
 void main() {
   setUpAll(() async {
     TestWidgetsFlutterBinding.ensureInitialized();
-    final tempDir = await getTemporaryDirectory();
+    final tempDir = Directory.systemTemp.createTempSync();
     Hive.init(tempDir.path);
   });
 

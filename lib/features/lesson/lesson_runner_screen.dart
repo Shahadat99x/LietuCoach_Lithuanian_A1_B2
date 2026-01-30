@@ -9,6 +9,7 @@ import '../../progress/progress.dart';
 import '../../srs/srs.dart';
 import '../../ui/tokens.dart';
 import '../../ui/components/components.dart';
+import '../practice/practice_stats_service.dart';
 import 'step_widgets/step_widgets.dart';
 
 class LessonRunnerScreen extends StatefulWidget {
@@ -98,6 +99,14 @@ class _LessonRunnerScreenState extends State<LessonRunnerScreen> {
       xpEarned: xpEarned,
     );
     await progressStore.saveLessonProgress(progress);
+
+    // Record Practice Stats
+    await practiceStatsService.recordPracticeEvent(
+      type: PracticeEventType.lessonCompletion,
+      xpDelta: xpEarned,
+      minutesDelta:
+          5, // Estimate 5 mins per lesson for now, or track actual duration
+    );
 
     // Create SRS cards from teach_phrase steps
     await _createSrsCards();

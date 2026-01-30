@@ -23,11 +23,7 @@ class LessonProgress {
   /// Composite key for storage
   String get key => '${unitId}_$lessonId';
 
-  LessonProgress copyWith({
-    bool? completed,
-    int? score,
-    int? xpEarned,
-  }) {
+  LessonProgress copyWith({bool? completed, int? score, int? xpEarned}) {
     return LessonProgress(
       unitId: unitId,
       lessonId: lessonId,
@@ -40,13 +36,13 @@ class LessonProgress {
 
   /// Convert to Map for Hive storage
   Map<String, dynamic> toMap() => {
-        'unitId': unitId,
-        'lessonId': lessonId,
-        'completed': completed,
-        'score': score,
-        'xpEarned': xpEarned,
-        'updatedAt': updatedAt.toIso8601String(),
-      };
+    'unitId': unitId,
+    'lessonId': lessonId,
+    'completed': completed,
+    'score': score,
+    'xpEarned': xpEarned,
+    'updatedAt': updatedAt.toIso8601String(),
+  };
 
   /// Create from Map
   factory LessonProgress.fromMap(Map<dynamic, dynamic> map) {
@@ -95,12 +91,12 @@ class UnitProgress {
 
   /// Convert to Map for Hive storage
   Map<String, dynamic> toMap() => {
-        'unitId': unitId,
-        'examPassed': examPassed,
-        'examScore': examScore,
-        'examPassedAt': examPassedAt?.toIso8601String(),
-        'updatedAt': updatedAt.toIso8601String(),
-      };
+    'unitId': unitId,
+    'examPassed': examPassed,
+    'examScore': examScore,
+    'examPassedAt': examPassedAt?.toIso8601String(),
+    'updatedAt': updatedAt.toIso8601String(),
+  };
 
   /// Create from Map
   factory UnitProgress.fromMap(Map<dynamic, dynamic> map) {
@@ -118,13 +114,20 @@ class UnitProgress {
   }
 }
 
-/// User aggregate stats (optional, TODO for Phase 5)
+/// User aggregate stats
 class UserStats {
   int totalXp;
   int currentStreak;
-  DateTime? lastActivityDate;
+  DateTime?
+  lastActivityDate; // The date of the last meaningful activity (streak tracking)
   int lessonsCompleted;
   int examsCompleted;
+
+  // New fields for Practice Stats
+  int dailyGoalMinutes;
+  int minutesToday;
+  DateTime? lastSessionDate; // To track minutesToday reset
+
   DateTime updatedAt;
 
   UserStats({
@@ -133,18 +136,24 @@ class UserStats {
     this.lastActivityDate,
     this.lessonsCompleted = 0,
     this.examsCompleted = 0,
+    this.dailyGoalMinutes = 10,
+    this.minutesToday = 0,
+    this.lastSessionDate,
     DateTime? updatedAt,
   }) : updatedAt = updatedAt ?? DateTime.now();
 
   /// Convert to Map for Hive storage
   Map<String, dynamic> toMap() => {
-        'totalXp': totalXp,
-        'currentStreak': currentStreak,
-        'lastActivityDate': lastActivityDate?.toIso8601String(),
-        'lessonsCompleted': lessonsCompleted,
-        'examsCompleted': examsCompleted,
-        'updatedAt': updatedAt.toIso8601String(),
-      };
+    'totalXp': totalXp,
+    'currentStreak': currentStreak,
+    'lastActivityDate': lastActivityDate?.toIso8601String(),
+    'lessonsCompleted': lessonsCompleted,
+    'examsCompleted': examsCompleted,
+    'dailyGoalMinutes': dailyGoalMinutes,
+    'minutesToday': minutesToday,
+    'lastSessionDate': lastSessionDate?.toIso8601String(),
+    'updatedAt': updatedAt.toIso8601String(),
+  };
 
   /// Create from Map
   factory UserStats.fromMap(Map<dynamic, dynamic> map) {
@@ -156,9 +165,38 @@ class UserStats {
           : null,
       lessonsCompleted: map['lessonsCompleted'] as int? ?? 0,
       examsCompleted: map['examsCompleted'] as int? ?? 0,
+      dailyGoalMinutes: map['dailyGoalMinutes'] as int? ?? 10,
+      minutesToday: map['minutesToday'] as int? ?? 0,
+      lastSessionDate: map['lastSessionDate'] != null
+          ? DateTime.parse(map['lastSessionDate'] as String)
+          : null,
       updatedAt: map['updatedAt'] != null
           ? DateTime.parse(map['updatedAt'] as String)
           : DateTime.now(),
+    );
+  }
+
+  UserStats copyWith({
+    int? totalXp,
+    int? currentStreak,
+    DateTime? lastActivityDate,
+    int? lessonsCompleted,
+    int? examsCompleted,
+    int? dailyGoalMinutes,
+    int? minutesToday,
+    DateTime? lastSessionDate,
+    DateTime? updatedAt,
+  }) {
+    return UserStats(
+      totalXp: totalXp ?? this.totalXp,
+      currentStreak: currentStreak ?? this.currentStreak,
+      lastActivityDate: lastActivityDate ?? this.lastActivityDate,
+      lessonsCompleted: lessonsCompleted ?? this.lessonsCompleted,
+      examsCompleted: examsCompleted ?? this.examsCompleted,
+      dailyGoalMinutes: dailyGoalMinutes ?? this.dailyGoalMinutes,
+      minutesToday: minutesToday ?? this.minutesToday,
+      lastSessionDate: lastSessionDate ?? this.lastSessionDate,
+      updatedAt: updatedAt ?? DateTime.now(),
     );
   }
 }

@@ -4,24 +4,37 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'dart:io';
 import 'package:lietucoach/main.dart';
 import 'package:lietucoach/progress/progress.dart';
 import 'package:lietucoach/srs/srs.dart';
 import 'mock_progress_store.dart';
-import 'package:hive_flutter/hive_flutter.dart';
-import 'package:path_provider/path_provider.dart';
+import 'package:hive/hive.dart';
 import 'mock_srs_store.dart';
 
 void main() {
   setUpAll(() async {
     TestWidgetsFlutterBinding.ensureInitialized();
-    final tempDir = await getTemporaryDirectory();
+    final tempDir = Directory.systemTemp.createTempSync();
     Hive.init(tempDir.path);
   });
 
   setUp(() {
+    final mockSrs = MockSrsStore();
+    // Add dummy due card to trigger Daily Review
+    mockSrs.upsertCards([
+      SrsCard(
+        cardId: 'card1',
+        unitId: 'unit1',
+        phraseId: 'phrase1',
+        front: 'front',
+        back: 'back',
+        audioId: 'audio1',
+        dueAt: DateTime.now().subtract(const Duration(days: 1)),
+      ),
+    ]);
     setMockProgressStore(MockProgressStore());
-    setMockSrsStore(MockSrsStore());
+    setMockSrsStore(mockSrs);
   });
 
   tearDown(() {
