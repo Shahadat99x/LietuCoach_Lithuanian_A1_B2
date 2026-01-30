@@ -16,6 +16,7 @@ import '../content/content_error_screen.dart';
 import 'certificate_node.dart';
 import '../../debug/debug_state.dart';
 import 'widgets/path_header.dart';
+import 'widgets/segmented_view_toggle.dart';
 
 import 'widgets/path_list_view.dart';
 import 'widgets/path_map_view.dart';
@@ -109,22 +110,7 @@ class _PathScreenState extends State<PathScreen> {
   void initState() {
     super.initState();
     _loadData(); // existing data load
-    _loadPreference();
-  }
-
-  Future<void> _loadPreference() async {
-    final style = await PathPreferencesService().getPathStyle();
-    if (mounted) {
-      setState(() => _pathStyle = style);
-    }
-  }
-
-  Future<void> _togglePathStyle() async {
-    final newStyle = _pathStyle == PathStyle.list
-        ? PathStyle.map
-        : PathStyle.list;
-    setState(() => _pathStyle = newStyle);
-    await PathPreferencesService().setPathStyle(newStyle);
+    // _loadPreference(); // Will be enabled in next commit
   }
 
   Future<void> _loadData() async {
@@ -258,12 +244,15 @@ class _PathScreenState extends State<PathScreen> {
       },
       continueLabel: 'Continue ${continueUnit.title}',
       continueSubLabel: 'Unit ${courseUnits.indexOf(continueUnit) + 1}',
-      trailing: IconButton(
-        icon: Icon(_pathStyle == PathStyle.list ? Icons.map : Icons.list),
-        onPressed: _togglePathStyle,
-        tooltip: _pathStyle == PathStyle.list
-            ? 'Switch to Map'
-            : 'Switch to List',
+      trailing: SegmentedViewToggle(
+        isMap: _pathStyle == PathStyle.map,
+        onToggle: (isMap) async {
+          final newStyle = isMap ? PathStyle.map : PathStyle.list;
+          if (newStyle != _pathStyle) {
+            setState(() => _pathStyle = newStyle);
+            await PathPreferencesService().setPathStyle(newStyle);
+          }
+        },
       ),
     );
 
