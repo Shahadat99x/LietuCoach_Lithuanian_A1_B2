@@ -296,7 +296,18 @@ class _PathScreenState extends State<PathScreen> {
     return AppScaffold(
       body: _loading
           ? const Center(child: CircularProgressIndicator())
-          : RefreshIndicator(onRefresh: _loadData, child: child),
+          : RefreshIndicator(
+              onRefresh: _loadData,
+              child: AnimatedSwitcher(
+                duration: const Duration(milliseconds: 400),
+                switchInCurve: Curves.easeInOut,
+                switchOutCurve: Curves.easeInOut,
+                transitionBuilder: (child, animation) {
+                  return FadeTransition(opacity: animation, child: child);
+                },
+                child: KeyedSubtree(key: ValueKey(_pathStyle), child: child),
+              ),
+            ),
     );
   }
 
