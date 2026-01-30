@@ -1,3 +1,4 @@
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import '../../../../ui/tokens.dart';
 import '../../models/course_unit_config.dart';
@@ -73,8 +74,7 @@ class UnitSection extends StatelessWidget {
                   nodeCount: nodeCount,
                   nodeSize: 72.0,
                   spacing: 32.0, // Spacing.xl
-                  getOffset: (index) =>
-                      40.0 * (index % 2 == 0 ? 0 : (index % 4 == 1 ? -1 : 1)),
+                  getOffset: (index) => 60.0 * math.sin(index * math.pi / 2.5),
                 ),
               ),
             ),
@@ -115,8 +115,8 @@ class UnitSection extends StatelessWidget {
                   icon = Icons.chat_bubble_rounded;
                 }
 
-                final double offset =
-                    40.0 * (index % 2 == 0 ? 0 : (index % 4 == 1 ? -1 : 1));
+                // Smooth Sine Wave
+                final double offset = 60.0 * math.sin(index * math.pi / 2.5);
 
                 return Container(
                   margin: EdgeInsets.only(

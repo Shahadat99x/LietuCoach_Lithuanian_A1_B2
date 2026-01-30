@@ -68,29 +68,44 @@ class _MapNodeState extends State<MapNode> with SingleTickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    // Colors
-    final Color outerRingColor = widget.isCurrent
-        ? theme.colorScheme.primary.withOpacity(0.3)
-        : Colors.transparent;
+    // Size constants
+    final double size = widget.isCurrent ? 80.0 : 72.0;
 
-    final Color nodeColor = widget.isUnlocked
-        ? (widget.isCompleted ? AppColors.success : theme.colorScheme.primary)
-        : theme.colorScheme.surfaceContainerHighest;
+    // State Colors (Reference Style)
+    Color backgroundColor;
+    Color iconColor;
+    Color borderColor;
 
-    final Color iconColor = widget.isUnlocked
-        ? theme.colorScheme.onPrimary
-        : theme.colorScheme.onSurfaceVariant;
+    if (widget.isCompleted) {
+      backgroundColor = const Color(0xFFE8F5E9); // Light Green
+      iconColor = const Color(0xFF43A047); // Green (Darker for Icon)
+      borderColor = const Color(0xFF43A047);
+    } else if (widget.isUnlocked) {
+      // Current or Unlocked but not done
+      backgroundColor = const Color(0xFFE8F5E9);
+      iconColor = const Color(0xFF43A047);
+      borderColor = const Color(0xFF43A047);
 
-    final double size = 72.0;
+      if (widget.isCurrent) {
+        backgroundColor = const Color(0xFF4CAF50); // Filled for current?
+        iconColor = Colors.white;
+        borderColor = Colors.white; // Border ring handles the other color
+      }
+    } else {
+      // Locked
+      backgroundColor = const Color(0xFFF5F5F5); // Grey
+      iconColor = const Color(0xFFBDBDBD); // Light Grey
+      borderColor = Colors.transparent;
+    }
 
     return GestureDetector(
       onTap: widget.onTap,
       onLongPress: widget.onLongPress,
       child: Stack(
         alignment: Alignment.center,
+        clipBehavior: Clip.none,
         children: [
-          // Pulse Ring
+          // Pulse Ring (Current only)
           if (widget.isCurrent)
             AnimatedBuilder(
               animation: _pulseAnimation,
@@ -100,43 +115,94 @@ class _MapNodeState extends State<MapNode> with SingleTickerProviderStateMixin {
                   height: size * _pulseAnimation.value,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: outerRingColor,
+                    color: const Color(0xFF4CAF50).withOpacity(0.3),
                   ),
                 );
               },
             ),
 
-          // Main Node
+          // Main Node Circle
           Container(
-            width: size * 0.9, // Slightly smaller than pulse
-            height: size * 0.9,
+            width: size,
+            height: size,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: nodeColor,
+              color: backgroundColor,
+              border: Border.all(
+                color: borderColor.withOpacity(0.3),
+                width: widget.isUnlocked ? 4 : 0,
+              ),
               boxShadow: widget.isUnlocked
                   ? [
                       BoxShadow(
-                        color: nodeColor.withOpacity(0.4),
-                        blurRadius: 8,
+                        color: borderColor.withOpacity(0.4),
                         offset: const Offset(0, 4),
+                        blurRadius: 0, // Solid shadow "3D" effect
                       ),
                     ]
                   : null,
-              border: Border.all(color: Colors.white, width: 4),
             ),
-            child: Icon(
-              widget.icon ??
-                  (widget.isCompleted
-                      ? Icons.check_rounded
-                      : (widget.isUnlocked
-                            ? Icons.star_rounded
-                            : Icons.lock_rounded)),
-              color: widget.isCompleted ? Colors.white : iconColor,
-              size: 32,
-            ),
+            child: Icon(widget.icon ?? Icons.star, color: iconColor, size: 32),
           ),
+
+          // Badges
+          if (widget.isCompleted)
+            Positioned(
+              right: 0,
+              bottom: 0,
+              child: _StatusBadge(
+                color: const Color(0xFF4CAF50),
+                icon: Icons.check,
+              ),
+            ),
+
+          if (!widget.isUnlocked)
+            Positioned(
+              right: 8, // Locked nodes usually smaller looking, badge closer?
+              bottom: 0,
+              child: _StatusBadge(
+                color: Colors.white,
+                icon: Icons.lock,
+                iconColor: const Color(0xFFBDBDBD),
+                shadowColor: Colors.black12,
+              ),
+            ),
         ],
       ),
+    );
+  }
+}
+
+class _StatusBadge extends StatelessWidget {
+  final Color color;
+  final IconData icon;
+  final Color iconColor;
+  final Color? shadowColor;
+
+  const _StatusBadge({
+    required this.color,
+    required this.icon,
+    this.iconColor = Colors.white,
+    this.shadowColor,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(4),
+      decoration: BoxDecoration(
+        color: color,
+        shape: BoxShape.circle,
+        boxShadow: [
+          if (shadowColor != null)
+            BoxShadow(
+              color: shadowColor!,
+              blurRadius: 4,
+              offset: const Offset(0, 2),
+            ),
+        ],
+      ),
+      child: Icon(icon, size: 14, color: iconColor),
     );
   }
 }

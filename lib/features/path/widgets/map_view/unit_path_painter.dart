@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../../../../ui/tokens.dart';
 
 class UnitPathPainter extends CustomPainter {
   final int nodeCount;
@@ -18,17 +17,11 @@ class UnitPathPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
       ..style = PaintingStyle.stroke
-      ..strokeWidth =
-          4.0 // "Soft" but visible
+      ..strokeWidth = 5.0
       ..strokeCap = StrokeCap.round
-      ..color = AppColors.surfaceVariantDark.withOpacity(
-        0.2,
-      ); // Default path color
+      ..color = const Color(0xFFB3E5FC); // Light blue for dots
 
     final centerX = size.width / 2;
-
-    // We need to draw segments connecting nodes.
-    // Node center Y = index * (nodeSize + spacing) + nodeSize / 2
 
     for (int i = 0; i < nodeCount - 1; i++) {
       final currentY = i * (nodeSize + spacing) + nodeSize / 2;
@@ -44,13 +37,30 @@ class UnitPathPainter extends CustomPainter {
       final path = Path();
       path.moveTo(start.dx, start.dy);
 
-      // Control points for S-curve
       final controlY1 = start.dy + (end.dy - start.dy) / 2;
       final controlY2 = start.dy + (end.dy - start.dy) / 2;
 
       path.cubicTo(start.dx, controlY1, end.dx, controlY2, end.dx, end.dy);
 
-      canvas.drawPath(path, paint);
+      // Dash the path
+      final dashWidth = 1.0;
+      final dashSpace = 12.0;
+      double distance = 0.0;
+
+      for (final metric in path.computeMetrics()) {
+        while (distance < metric.length) {
+          final pos = metric.getTangentForOffset(distance);
+          if (pos != null) {
+            canvas.drawCircle(
+              pos.position,
+              3.0,
+              paint..style = PaintingStyle.fill,
+            );
+          }
+
+          distance += dashSpace;
+        }
+      }
     }
   }
 
