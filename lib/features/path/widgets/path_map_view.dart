@@ -37,33 +37,41 @@ class PathMapView extends StatelessWidget {
     // Add bottom padding for FAB or just general spacing
     final bottomPadding = MediaQuery.of(context).padding.bottom + Spacing.xxl;
 
-    return ListView(
-      padding: EdgeInsets.fromLTRB(
-        Spacing.pagePadding,
-        Spacing.m,
-        Spacing.pagePadding,
-        bottomPadding,
+    // Frosted/Translucent surface for Map View
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final surfaceColor = isDark ? Colors.black : Colors.white;
+    final opacity = isDark ? 0.3 : 0.6;
+
+    return Container(
+      decoration: BoxDecoration(color: surfaceColor.withOpacity(opacity)),
+      child: ListView(
+        padding: EdgeInsets.fromLTRB(
+          Spacing.pagePadding,
+          Spacing.m,
+          Spacing.pagePadding,
+          bottomPadding,
+        ),
+        children: [
+          if (header != null) header!,
+          const SizedBox(height: Spacing.l),
+
+          ...courseUnits.asMap().entries.map((entry) {
+            final index = entry.key;
+            final config = entry.value;
+
+            return UnitSection(
+              config: config,
+              completedLessons: lessonCompletedCount[config.unitId] ?? 0,
+              isUnlocked: isUnitUnlocked(index),
+              examPassed: unitProgress[config.unitId]?.examPassed ?? false,
+              onNodeTap: (_) => onUnitTap(config),
+              onExamTap: () => onExamTap(config),
+            );
+          }),
+
+          if (footer != null) ...[const SizedBox(height: Spacing.xl), footer!],
+        ],
       ),
-      children: [
-        if (header != null) header!,
-        const SizedBox(height: Spacing.l),
-
-        ...courseUnits.asMap().entries.map((entry) {
-          final index = entry.key;
-          final config = entry.value;
-
-          return UnitSection(
-            config: config,
-            completedLessons: lessonCompletedCount[config.unitId] ?? 0,
-            isUnlocked: isUnitUnlocked(index),
-            examPassed: unitProgress[config.unitId]?.examPassed ?? false,
-            onNodeTap: (_) => onUnitTap(config),
-            onExamTap: () => onExamTap(config),
-          );
-        }),
-
-        if (footer != null) ...[const SizedBox(height: Spacing.xl), footer!],
-      ],
     );
   }
 }
