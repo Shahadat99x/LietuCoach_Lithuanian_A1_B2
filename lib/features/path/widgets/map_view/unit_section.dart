@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../../ui/tokens.dart';
 import '../../models/course_unit_config.dart';
 import 'map_node.dart';
+import 'unit_path_painter.dart';
 
 class UnitSection extends StatelessWidget {
   final CourseUnitConfig config;
@@ -63,78 +64,85 @@ class UnitSection extends StatelessWidget {
         ),
 
         // Nodes Path
-        ListView.separated(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          itemCount: nodeCount,
-          separatorBuilder: (_, __) => const SizedBox(height: Spacing.xl),
-          itemBuilder: (context, index) {
-            final isExam = index == config.lessonCount;
-
-            // State Logic
-            bool nodeUnlocked = false;
-            bool nodeCompleted = false;
-            bool nodeCurrent = false;
-
-            if (!isUnlocked) {
-              // Unit locked -> all locked
-              nodeUnlocked = false;
-            } else {
-              if (isExam) {
-                // Exam is unlocked if all lessons done
-                nodeUnlocked = completedLessons >= config.lessonCount;
-                nodeCompleted = examPassed;
-                nodeCurrent = nodeUnlocked && !nodeCompleted;
-              } else {
-                // Lesson node
-                nodeUnlocked = index <= completedLessons;
-                nodeCompleted = index < completedLessons;
-                nodeCurrent = index == completedLessons;
-              }
-            }
-
-            // Icons
-            IconData icon;
-            if (isExam) {
-              icon = Icons.emoji_events_rounded; // Trophy
-            } else if (index % 3 == 0) {
-              icon = Icons.menu_book_rounded;
-            } else if (index % 3 == 1) {
-              icon = Icons.record_voice_over_rounded;
-            } else {
-              icon = Icons.chat_bubble_rounded;
-            }
-
-            // Visual Staggering (Zig-zag)
-            // 0: Center, 1: Left, 2: Right, ...
-            /*
-            alignment logic: 
-            index % 2 == 0 ? center : (index % 4 == 1 ? left : right)
-            Actually a simple sine wave is nice:
-            */
-            final double offset =
-                40.0 * (index % 2 == 0 ? 0 : (index % 4 == 1 ? -1 : 1));
-
-            return Transform.translate(
-              offset: Offset(offset, 0),
-              child: MapNode(
-                index: index,
-                isUnlocked: nodeUnlocked,
-                isCompleted: nodeCompleted,
-                isCurrent: nodeCurrent,
-                icon: icon,
-                onTap: () {
-                  if (isExam) {
-                    onExamTap();
-                  } else {
-                    onNodeTap(
-                      index,
-                    ); // This index needs mapping to lesson ID logic if needed, or just open list
-                  }
-                },
+        Stack(
+          children: [
+            // Painter
+            Positioned.fill(
+              child: CustomPaint(
+                painter: UnitPathPainter(
+                  nodeCount: nodeCount,
+                  nodeSize: 72.0,
+                  spacing: 32.0, // Spacing.xl
+                  getOffset: (index) =>
+                      40.0 * (index % 2 == 0 ? 0 : (index % 4 == 1 ? -1 : 1)),
+                ),
               ),
-            );
-          },
+            ),
+
+            // Nodes
+            Column(
+              children: List.generate(nodeCount, (index) {
+                final isExam = index == config.lessonCount;
+
+                // State Logic
+                bool nodeUnlocked = false;
+                bool nodeCompleted = false;
+                bool nodeCurrent = false;
+
+                if (!isUnlocked) {
+                  nodeUnlocked = false;
+                } else {
+                  if (isExam) {
+                    nodeUnlocked = completedLessons >= config.lessonCount;
+                    nodeCompleted = examPassed;
+                    nodeCurrent = nodeUnlocked && !nodeCompleted;
+                  } else {
+                    nodeUnlocked = index <= completedLessons;
+                    nodeCompleted = index < completedLessons;
+                    nodeCurrent = index == completedLessons;
+                  }
+                }
+
+                // Icons
+                IconData icon;
+                if (isExam) {
+                  icon = Icons.emoji_events_rounded;
+                } else if (index % 3 == 0) {
+                  icon = Icons.menu_book_rounded;
+                } else if (index % 3 == 1) {
+                  icon = Icons.record_voice_over_rounded;
+                } else {
+                  icon = Icons.chat_bubble_rounded;
+                }
+
+                final double offset =
+                    40.0 * (index % 2 == 0 ? 0 : (index % 4 == 1 ? -1 : 1));
+
+                return Container(
+                  margin: EdgeInsets.only(
+                    bottom: index == nodeCount - 1 ? 0 : Spacing.xl,
+                  ),
+                  child: Transform.translate(
+                    offset: Offset(offset, 0),
+                    child: MapNode(
+                      index: index,
+                      isUnlocked: nodeUnlocked,
+                      isCompleted: nodeCompleted,
+                      isCurrent: nodeCurrent,
+                      icon: icon,
+                      onTap: () {
+                        if (isExam) {
+                          onExamTap();
+                        } else {
+                          onNodeTap(index);
+                        }
+                      },
+                    ),
+                  ),
+                );
+              }),
+            ),
+          ],
         ),
       ],
     );

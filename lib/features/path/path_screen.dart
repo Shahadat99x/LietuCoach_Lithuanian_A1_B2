@@ -311,7 +311,16 @@ class _PathScreenState extends State<PathScreen> {
       );
     }
 
-    if (!isUnlocked) return;
+    if (!isUnlocked) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('Pass previous unit exam to unlock.'),
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+        ),
+      );
+      return;
+    }
 
     if (isAvailable) {
       _openUnitLessons(config.unitId);
