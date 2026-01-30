@@ -17,6 +17,7 @@ import 'certificate_node.dart';
 import '../../debug/debug_state.dart';
 import 'widgets/path_header.dart';
 import 'widgets/segmented_view_toggle.dart';
+import '../../design_system/aurora_background.dart';
 
 import 'widgets/path_list_view.dart';
 import 'widgets/path_map_view.dart';
@@ -296,16 +297,19 @@ class _PathScreenState extends State<PathScreen> {
     return AppScaffold(
       body: _loading
           ? const Center(child: CircularProgressIndicator())
-          : RefreshIndicator(
-              onRefresh: _loadData,
-              child: AnimatedSwitcher(
-                duration: const Duration(milliseconds: 400),
-                switchInCurve: Curves.easeInOut,
-                switchOutCurve: Curves.easeInOut,
-                transitionBuilder: (child, animation) {
-                  return FadeTransition(opacity: animation, child: child);
-                },
-                child: KeyedSubtree(key: ValueKey(_pathStyle), child: child),
+          : AuroraBackground(
+              isDark: Theme.of(context).brightness == Brightness.dark,
+              child: RefreshIndicator(
+                onRefresh: _loadData,
+                child: AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 400),
+                  switchInCurve: Curves.easeInOut,
+                  switchOutCurve: Curves.easeInOut,
+                  transitionBuilder: (child, animation) {
+                    return FadeTransition(opacity: animation, child: child);
+                  },
+                  child: KeyedSubtree(key: ValueKey(_pathStyle), child: child),
+                ),
               ),
             ),
     );

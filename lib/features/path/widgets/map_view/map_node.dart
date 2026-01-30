@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../../../../ui/tokens.dart';
 
 class MapNode extends StatefulWidget {
   final int index;
