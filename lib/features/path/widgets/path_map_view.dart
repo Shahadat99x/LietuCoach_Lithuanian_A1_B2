@@ -40,7 +40,8 @@ class PathMapView extends StatelessWidget {
     // Frosted/Translucent surface for Map View
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final surfaceColor = isDark ? Colors.black : Colors.white;
-    final opacity = isDark ? 0.3 : 0.6;
+    // Reduce opacity to ensure aurora is visible (was 0.6)
+    final opacity = isDark ? 0.3 : 0.2;
 
     return Container(
       decoration: BoxDecoration(color: surfaceColor.withOpacity(opacity)),
