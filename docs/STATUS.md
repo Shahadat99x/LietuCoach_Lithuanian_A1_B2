@@ -20,6 +20,7 @@ Last updated: 2026-01-30
 - [x] Phase 6.5 — PAD integration
 - [x] Phase 7 — Certificate PDF
 - [x] Database Migration `002_sync_expansion.sql` (Tables: `srs_cards`, `practice_stats`, `certificates` + RLS)
+- [x] UI Polish: Implemented Premium Aurora Background (Option B) for Map/Path screens.
 
 ## In Progress
 - [ ] Phase 8: QA + release
