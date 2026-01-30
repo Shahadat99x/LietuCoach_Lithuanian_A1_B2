@@ -9,6 +9,8 @@ class MapNode extends StatefulWidget {
   final VoidCallback onTap;
   final VoidCallback? onLongPress;
 
+  final IconData? icon;
+
   const MapNode({
     super.key,
     required this.index,
@@ -17,6 +19,7 @@ class MapNode extends StatefulWidget {
     required this.isCurrent,
     required this.onTap,
     this.onLongPress,
+    this.icon,
   });
 
   @override
@@ -122,32 +125,14 @@ class _MapNodeState extends State<MapNode> with SingleTickerProviderStateMixin {
               border: Border.all(color: Colors.white, width: 4),
             ),
             child: Icon(
-              widget.isCompleted
-                  ? Icons.check_rounded
-                  : (widget.isUnlocked
-                        ? Icons.star_rounded
-                        : Icons.lock_rounded),
+              widget.icon ??
+                  (widget.isCompleted
+                      ? Icons.check_rounded
+                      : (widget.isUnlocked
+                            ? Icons.star_rounded
+                            : Icons.lock_rounded)),
               color: widget.isCompleted ? Colors.white : iconColor,
               size: 32,
-            ),
-          ),
-
-          // Level Indicator Pill (optional, maybe below)
-          Positioned(
-            bottom: 0,
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-              decoration: BoxDecoration(
-                color: theme.colorScheme.surface,
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: theme.colorScheme.outlineVariant),
-              ),
-              child: Text(
-                '${widget.index + 1}',
-                style: theme.textTheme.labelSmall?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
             ),
           ),
         ],
