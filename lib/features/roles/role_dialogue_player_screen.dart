@@ -5,8 +5,9 @@ import '../../ui/tokens.dart';
 // import '../../ui/components/components.dart'; // Unused
 // import '../../ui/components/audio_play_button.dart'; // Unused
 import 'domain/role_model.dart';
+import 'role_takeaways_screen.dart';
 import 'widgets/role_exercise_runner.dart'; // Phase 4
-import 'service/role_progress_service.dart';
+// import 'service/role_progress_service.dart'; // Handled in Takeaways now
 
 class RoleDialoguePlayerScreen extends StatefulWidget {
   final RoleDialogue dialogue;
@@ -148,19 +149,18 @@ class _RoleDialoguePlayerScreenState extends State<RoleDialoguePlayerScreen> {
         builder: (context) => RoleExerciseRunner(
           dialogue: widget.dialogue,
           onComplete: () {
-            // Mark done and pop back to Detail
-            roleProgressService.markDialogueComplete(
-              widget.dialogue.id,
-            ); // Save here or in Takeaways? phase 6 says completion logic.
-            // We will defer actual completion marking to the end of flow (Phase 5/6).
-
-            // For now, if we don't have Exercises/Takeaways implemented fully,
-            // we might want temporary logic.
-            // But RoleExerciseRunner will be the next step.
-            // If RoleExerciseRunner doesn't exist yet (Phase 4), this will error.
-            // I will stub RoleExerciseRunner in next step.
-            Navigator.of(context).pop(); // Back to player
-            Navigator.of(context).pop(); // Back to detail
+            // Proceed to Takeaways
+            Navigator.of(context).pushReplacement(
+              MaterialPageRoute(
+                builder: (context) => RoleTakeawaysScreen(
+                  dialogue: widget.dialogue,
+                  pack: widget.pack,
+                  onFinish: () {
+                    Navigator.of(context).pop(); // Perform final pop to Detail
+                  },
+                ),
+              ),
+            );
           },
         ),
       ),
