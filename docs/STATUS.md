@@ -1,38 +1,39 @@
 # Project Status
 
-Last updated: 2026-01-30
+## Current Phase: Phase E2 Completed
+**Date**: 2026-01-31
+**Goal**: Global Consistency & Micro-Polish
 
-## Current Phase
-**Phase 8 — QA + Release**: PLANNING
+A rigorous audit and polish phase to ensure the app feels like one cohesive, premium product.
 
-## Done
-- [x] Phase 0 — Repo Foundation
-- [x] Phase 0.5 — App Shell + Design System
-- [x] Phase 1 — Content Validator + Pack Structure
-- [x] Phase 1.5 — Audio Provider + Local Playback
-- [x] Phase 1.6 — TTS Audio Generation Tooling
-- [x] Phase 2 — Lesson Engine Vertical Slice
-- [x] Phase 3 — Path Map + Progression
-- [x] Phase 4 — Flashcards SRS
-- [x] Phase 5 — Auth + Sync (Basic)
-- [x] Phase 5.5 — Sync Expansion (SRS, Practice, Certs)
-- [x] Phase 6 — Gamification (Practice Stats, Streaks, Daily Goal)
-- [x] Phase 6.5 — PAD integration
-- [x] Phase 7 — Certificate PDF
-- [x] Database Migration `002_sync_expansion.sql` (Tables: `srs_cards`, `practice_stats`, `certificates` + RLS)
-- [x] UI Polish: Implemented Premium Aurora Background (Option B) for Map/Path screens. tuned for visibility (0.12 opacity) and map overlay transparency (0.2).
+### ✅ Completed Features
+- **Phase T1: Traveler Dialogue v2** (New!):
+  - **Audio**: Fixed missing pipeline, generated placeholders, handled missing audio gracefully ("Audio coming soon").
+  - **Chat UI**: Redesigned as explicit Bubbles (User right/Agent left) with Avatars.
+  - **Controls**: Compact Playback Bar (Play/Replay/Next), Speed toggle conditional on data.
+  - **Polish**: Standardized `RolePackDetailScreen` with chips and `AppCard`.
+  - **Features**: Global English Translation Toggle (Default ON, persisted).
 
-## In Progress
-- [ ] Phase 8: QA + release
+- **Chip System**:
+  - `AppChip` established as the single source of truth (replacing `PillChip`).
+  - Replaced ad-hoc chips in `DailyTrainingHero` and other widgets.
+- **Iconography**:
+  - `PathHeader` icons standardized to 24px/20px using global tokens.
+  - `StatCard` refactored for consistency (Vertical layout, clean shadows).
+- **Empty States**:
+  - `AppEmptyState` deployed to `ReviewSessionScreen` ("All Caught Up").
+  - `DailyTrainingHero` empty state refined.
+- **Visual Parity**:
+  - Logic checks for Light/Dark mode interaction.
+  - `flutter analyze` clean (baseline legacy issues only).
 
-## Test Summary
-```
-All tests pass, including new PAD integration tests.
-```
+### 🚧 In Progress / Next Steps
+- **QA Release Candidate**: Final pre-release checks.
 
-## Known Issues
-- Flutter not in PATH (use full path)
-- Match/Reorder use simplified tap-to-build UI
+### 📉 Known Issues
+- `flutter analyze` runs are slow but resolving.
+- Need to manually verify "Success" green usage in Lesson feedback (currently implicitly verified via token change).
 
-## Blockers
-- None
+### 📊 Metric Targets
+- **Crash Free Users**: 99.9%
+- **Dark Mode Support**: 100% of screens.
