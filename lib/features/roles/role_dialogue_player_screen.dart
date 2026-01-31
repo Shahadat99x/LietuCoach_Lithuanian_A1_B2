@@ -1,10 +1,11 @@
 import 'dart:async';
-import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:just_audio/just_audio.dart';
 import '../../ui/tokens.dart';
 // import '../../ui/components/components.dart'; // Unused
 // import '../../ui/components/audio_play_button.dart'; // Unused
+import 'package:lietucoach/features/common/services/asset_audio_resolver.dart';
 import 'domain/role_model.dart';
 import 'role_takeaways_screen.dart';
 import 'widgets/role_exercise_runner.dart'; // Phase 4
@@ -40,34 +41,26 @@ class _RoleDialoguePlayerScreenState extends State<RoleDialoguePlayerScreen> {
     super.initState();
     // STEP 1: DEBUG PROBE
     // Check if assets are actually bundled
+    // Initialize resolver and check assets
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      try {
-        final manifestJson = await DefaultAssetBundle.of(
-          context,
-        ).loadString('AssetManifest.json');
-        final Map<String, dynamic> manifest =
-            await jsonDecode(manifestJson)
-                as Map<String, dynamic>; // Need dart:convert
+      await assetAudioResolver.ensureInitialized(
+        DefaultAssetBundle.of(context),
+      );
+      if (!mounted) return;
 
-        final travelerAssets = manifest.keys
-            .where((key) => key.contains('roles/traveler'))
-            .toList();
-
-        debugPrint(
-          'DEBUG: Found ${travelerAssets.length} traveler audio assets.',
-        );
-        if (travelerAssets.isNotEmpty) {
-          debugPrint('DEBUG: First 5: ${travelerAssets.take(5).toList()}');
-          // Check specific known file
-          final sample = 'assets/audio/roles/traveler/airport/checkin_01.mp3';
-          debugPrint(
-            'DEBUG: Contains "$sample"? ${manifest.containsKey(sample)}',
-          );
-        } else {
-          debugPrint('DEBUG: NO traveler assets found in manifest!');
+      final missing = <int>{};
+      for (int i = 0; i < widget.dialogue.turns.length; i++) {
+        final path = widget.dialogue.turns[i].audioNormalPath;
+        if (!assetAudioResolver.exists(path)) {
+          // debugPrint('Debug: Asset not found in manifest: $path');
+          missing.add(i);
         }
-      } catch (e) {
-        debugPrint('DEBUG: Error probing AssetManifest: $e');
+      }
+
+      if (missing.isNotEmpty) {
+        setState(() {
+          _missingAudioIndices.addAll(missing);
+        });
       }
     });
 
