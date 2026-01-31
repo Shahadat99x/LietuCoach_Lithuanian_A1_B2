@@ -234,53 +234,62 @@ class _RoleDialoguePlayerScreenState extends State<RoleDialoguePlayerScreen> {
               ],
             ),
             child: SafeArea(
-              child: Row(
-                children: [
-                  // Replay current
-                  IconButton(
-                    onPressed:
-                        _currentTurnIndex >= 0 &&
-                            _currentTurnIndex < turns.length
-                        ? () => _playTurn(_currentTurnIndex, autoPlay: false)
-                        : null,
-                    icon: const Icon(
-                      Icons.replay_10_rounded,
-                    ), // Or generic replay
-                  ),
-                  const Spacer(),
-
-                  // Play/Pause Main
-                  FloatingActionButton.large(
-                    elevation: 0,
-                    backgroundColor: theme.colorScheme.primary,
-                    foregroundColor: theme.colorScheme.onPrimary,
-                    shape: const CircleBorder(),
-                    onPressed: _onPlayPause,
-                    child: Icon(
-                      _isPlaying
-                          ? Icons.pause_rounded
-                          : Icons.play_arrow_rounded,
-                      size: 40,
+              child: SafeArea(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    // Replay
+                    IconButton(
+                      onPressed:
+                          _currentTurnIndex >= 0 &&
+                              _currentTurnIndex < turns.length
+                          ? () => _playTurn(_currentTurnIndex, autoPlay: false)
+                          : null,
+                      icon: const Icon(Icons.replay_10_rounded),
+                      tooltip: 'Replay line',
                     ),
-                  ),
+                    const SizedBox(width: Spacing.l),
 
-                  const Spacer(),
-
-                  // Next / Continue (Only if finished or manual)
-                  // Or just "Start Exercises" button?
-                  // Prompt says: "After Listen, run two mini sections".
-                  // We need a way to go to next section.
-                  TextButton(
-                    onPressed: _onContinue,
-                    child: const Row(
-                      children: [
-                        Text('Next'),
-                        SizedBox(width: 4),
-                        Icon(Icons.chevron_right_rounded),
-                      ],
+                    // Play/Pause (Compact)
+                    Container(
+                      height: 56,
+                      width: 56,
+                      decoration: BoxDecoration(
+                        color: theme.colorScheme.primary,
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: theme.colorScheme.primary.withValues(
+                              alpha: 0.3,
+                            ),
+                            blurRadius: 8,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
+                      ),
+                      child: IconButton(
+                        onPressed: _onPlayPause,
+                        icon: Icon(
+                          _isPlaying
+                              ? Icons.pause_rounded
+                              : Icons.play_arrow_rounded,
+                          size: 32,
+                          color: theme.colorScheme.onPrimary,
+                        ),
+                        tooltip: _isPlaying ? 'Pause' : 'Play',
+                      ),
                     ),
-                  ),
-                ],
+
+                    const SizedBox(width: Spacing.l),
+
+                    // Next / Continue
+                    IconButton(
+                      onPressed: _onContinue,
+                      icon: const Icon(Icons.skip_next_rounded),
+                      tooltip: 'Next / Finish',
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
