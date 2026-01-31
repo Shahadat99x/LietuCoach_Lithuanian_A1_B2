@@ -13,6 +13,9 @@ A rigorous audit and polish phase to ensure the app feels like one cohesive, pre
   - **Controls**: Compact Playback Bar (Play/Replay/Next), Speed toggle conditional on data.
   - **Polish**: Standardized `RolePackDetailScreen` with chips and `AppCard`.
   - **Features**: Global English Translation Toggle (Default ON, persisted).
+  - **Fixes (T1.1)**:
+    - **Asset Bundling**: Fixed `pubspec.yaml` to include recursive audio directories.
+    - **Playback Robustness**: Replaced `File.exists` with `AssetAudioResolver` to correctly detect bundled assets.
 
 - **Chip System**:
   - `AppChip` established as the single source of truth (replacing `PillChip`).
