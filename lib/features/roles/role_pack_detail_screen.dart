@@ -105,33 +105,45 @@ class _RolePackDetailScreenState extends State<RolePackDetailScreen> {
 
           // Progress
           AppCard(
-            color: theme.colorScheme.primaryContainer.withValues(alpha: 0.3),
-            child: Row(
+            color: theme.colorScheme.surfaceContainer,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Container(
-                  padding: const EdgeInsets.all(Spacing.s),
-                  decoration: BoxDecoration(
-                    color: theme.colorScheme.primary,
-                    shape: BoxShape.circle,
-                  ),
-                  child: Icon(
-                    Icons.check,
-                    color: theme.colorScheme.onPrimary,
-                    size: 20,
-                  ),
-                ),
-                const SizedBox(width: Spacing.m),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                Row(
                   children: [
+                    Icon(
+                      Icons.auto_graph_rounded,
+                      color: theme.colorScheme.primary,
+                    ),
+                    const SizedBox(width: Spacing.s),
                     Text(
-                      '$completedCount / $totalDialogues completed',
+                      'Your Progress',
                       style: theme.textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    Text('Keep going!', style: theme.textTheme.bodySmall),
                   ],
+                ),
+                const SizedBox(height: Spacing.m),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(4),
+                  child: LinearProgressIndicator(
+                    value: totalDialogues > 0
+                        ? completedCount / totalDialogues
+                        : 0.0,
+                    minHeight: 8,
+                    backgroundColor: theme.colorScheme.surfaceContainerHighest,
+                    valueColor: AlwaysStoppedAnimation(
+                      theme.colorScheme.primary,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: Spacing.s),
+                Text(
+                  '$completedCount of $totalDialogues dialogues completed',
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
                 ),
               ],
             ),
@@ -171,7 +183,8 @@ class _RolePackDetailScreenState extends State<RolePackDetailScreen> {
                 );
               }
             },
-            label: 'Continue',
+            label: 'Continue Journey',
+            icon: Icons.play_arrow_rounded,
             isFullWidth: true,
           ),
         ),
@@ -190,31 +203,56 @@ class _RolePackDetailScreenState extends State<RolePackDetailScreen> {
 
     return Padding(
       padding: const EdgeInsets.only(bottom: Spacing.m),
-      child: Card(
-        // Use standard Card for now, or AppCard
-        elevation: 0,
-        color: theme.colorScheme.surfaceContainerLow,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        clipBehavior: Clip.antiAlias,
-        child: ExpansionTile(
-          initiallyExpanded: true, // Auto-expand for v1 since only Traveler
-          title: Text(
-            scenario.title,
-            style: theme.textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.bold,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: Spacing.xs,
+              vertical: Spacing.s,
+            ),
+            child: Row(
+              children: [
+                Icon(
+                  Icons.folder_open_rounded,
+                  size: 20,
+                  color: theme.colorScheme.secondary,
+                ),
+                const SizedBox(width: Spacing.s),
+                Text(
+                  scenario.title,
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    color: theme.colorScheme.onSurface,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const Spacer(),
+                Text(
+                  '$done/$total',
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              ],
             ),
           ),
-          subtitle: Text(
-            '${scenario.subtitle} • $done/$total',
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant,
+          Card(
+            elevation: 0,
+            color: theme.colorScheme.surfaceContainerLow,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(Radii.lg),
+              side: BorderSide(
+                color: theme.colorScheme.outlineVariant.withValues(alpha: 0.3),
+              ),
+            ),
+            clipBehavior: Clip.antiAlias,
+            child: Column(
+              children: scenario.dialogues
+                  .map((d) => _buildDialogueItem(context, d))
+                  .toList(),
             ),
           ),
-          childrenPadding: EdgeInsets.zero,
-          children: scenario.dialogues
-              .map((d) => _buildDialogueItem(context, d))
-              .toList(),
-        ),
+        ],
       ),
     );
   }
@@ -226,33 +264,31 @@ class _RolePackDetailScreenState extends State<RolePackDetailScreen> {
     return InkWell(
       onTap: () => _onDialogueTap(dialogue),
       child: Container(
-        padding: const EdgeInsets.symmetric(
-          horizontal: Spacing.m,
-          vertical: Spacing.m,
-        ),
+        padding: const EdgeInsets.all(Spacing.m),
         decoration: BoxDecoration(
           border: Border(
-            top: BorderSide(
-              color: theme.colorScheme.outlineVariant.withValues(alpha: 0.5),
+            bottom: BorderSide(
+              color: theme.colorScheme.outlineVariant.withValues(alpha: 0.3),
+              width: 0.5,
             ),
           ),
         ),
         child: Row(
           children: [
             Container(
-              width: 40,
-              height: 40,
+              padding: const EdgeInsets.all(Spacing.xs),
               decoration: BoxDecoration(
                 color: isDone
-                    ? theme.colorScheme.primary
+                    ? theme.colorScheme.primaryContainer
                     : theme.colorScheme.surfaceContainerHigh,
                 shape: BoxShape.circle,
               ),
               child: Icon(
-                isDone ? Icons.check : Icons.play_arrow_rounded,
+                Icons.chat_bubble_outline_rounded,
+                size: 20,
                 color: isDone
-                    ? theme.colorScheme.onPrimary
-                    : theme.colorScheme.primary,
+                    ? theme.colorScheme.primary
+                    : theme.colorScheme.onSurfaceVariant,
               ),
             ),
             const SizedBox(width: Spacing.m),
@@ -262,11 +298,10 @@ class _RolePackDetailScreenState extends State<RolePackDetailScreen> {
                 children: [
                   Text(
                     dialogue.title,
-                    style: theme.textTheme.titleSmall?.copyWith(
+                    style: theme.textTheme.bodyLarge?.copyWith(
                       fontWeight: FontWeight.w600,
                     ),
                   ),
-                  const SizedBox(height: 2),
                   Text(
                     '${dialogue.durationMinutes} min • ${dialogue.difficulty}',
                     style: theme.textTheme.bodySmall?.copyWith(
@@ -276,7 +311,18 @@ class _RolePackDetailScreenState extends State<RolePackDetailScreen> {
                 ],
               ),
             ),
-            Icon(Icons.chevron_right, color: theme.colorScheme.outline),
+            const SizedBox(width: Spacing.s),
+            if (isDone)
+              AppChip(
+                label: 'DONE',
+                color: theme.colorScheme.primary,
+                isSelected: true,
+              )
+            else
+              Icon(
+                Icons.chevron_right_rounded,
+                color: theme.colorScheme.outlineVariant,
+              ),
           ],
         ),
       ),
