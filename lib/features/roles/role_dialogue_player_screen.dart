@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:just_audio/just_audio.dart';
 import '../../ui/tokens.dart';
@@ -37,6 +38,39 @@ class _RoleDialoguePlayerScreenState extends State<RoleDialoguePlayerScreen> {
   @override
   void initState() {
     super.initState();
+    // STEP 1: DEBUG PROBE
+    // Check if assets are actually bundled
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      try {
+        final manifestJson = await DefaultAssetBundle.of(
+          context,
+        ).loadString('AssetManifest.json');
+        final Map<String, dynamic> manifest =
+            await jsonDecode(manifestJson)
+                as Map<String, dynamic>; // Need dart:convert
+
+        final travelerAssets = manifest.keys
+            .where((key) => key.contains('roles/traveler'))
+            .toList();
+
+        debugPrint(
+          'DEBUG: Found ${travelerAssets.length} traveler audio assets.',
+        );
+        if (travelerAssets.isNotEmpty) {
+          debugPrint('DEBUG: First 5: ${travelerAssets.take(5).toList()}');
+          // Check specific known file
+          final sample = 'assets/audio/roles/traveler/airport/checkin_01.mp3';
+          debugPrint(
+            'DEBUG: Contains "$sample"? ${manifest.containsKey(sample)}',
+          );
+        } else {
+          debugPrint('DEBUG: NO traveler assets found in manifest!');
+        }
+      } catch (e) {
+        debugPrint('DEBUG: Error probing AssetManifest: $e');
+      }
+    });
+
     // Optional: auto-play start? Prompt says "do NOT auto-play immediately"
     _player.playerStateStream.listen((state) {
       if (state.processingState == ProcessingState.completed) {
