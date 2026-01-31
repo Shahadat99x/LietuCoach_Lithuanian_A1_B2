@@ -7,7 +7,7 @@ import '../../ui/tokens.dart';
 import 'domain/role_model.dart';
 import 'role_takeaways_screen.dart';
 import 'widgets/role_exercise_runner.dart'; // Phase 4
-// import 'service/role_progress_service.dart'; // Handled in Takeaways now
+import 'service/role_progress_service.dart';
 
 class RoleDialoguePlayerScreen extends StatefulWidget {
   final RoleDialogue dialogue;
@@ -30,7 +30,7 @@ class _RoleDialoguePlayerScreenState extends State<RoleDialoguePlayerScreen> {
 
   int _currentTurnIndex = -1; // -1 = stopped, 0..N = playing line
   bool _isPlaying = false;
-  bool _showEnglish = false;
+  bool _showEnglish = true; // Phase 3: Default ON
   bool _isAutoPlaying = false;
   final Set<int> _missingAudioIndices = {};
 
@@ -50,6 +50,14 @@ class _RoleDialoguePlayerScreenState extends State<RoleDialoguePlayerScreen> {
         }
       }
     });
+    _loadSettings();
+  }
+
+  Future<void> _loadSettings() async {
+    final show = await roleProgressService.getTranslationPreference();
+    if (mounted) {
+      setState(() => _showEnglish = show);
+    }
   }
 
   @override
@@ -145,6 +153,7 @@ class _RoleDialoguePlayerScreenState extends State<RoleDialoguePlayerScreen> {
     setState(() {
       _showEnglish = !_showEnglish;
     });
+    roleProgressService.setTranslationPreference(_showEnglish);
   }
 
   void _onContinue() {

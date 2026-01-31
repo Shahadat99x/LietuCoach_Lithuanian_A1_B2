@@ -2,6 +2,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class RoleProgressService {
   static const String _completedDialoguesKey = 'role_completed_dialogues';
+  static const String _showTranslationKey = 'role_show_translation';
 
   Future<List<String>> getCompletedDialogueIds() async {
     final prefs = await SharedPreferences.getInstance();
@@ -33,6 +34,17 @@ class RoleProgressService {
       }
     }
     return count;
+  }
+
+  Future<bool> getTranslationPreference() async {
+    final prefs = await SharedPreferences.getInstance();
+    // Default to true as per Phase 3 requirement
+    return prefs.getBool(_showTranslationKey) ?? true;
+  }
+
+  Future<void> setTranslationPreference(bool show) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_showTranslationKey, show);
   }
 }
 
