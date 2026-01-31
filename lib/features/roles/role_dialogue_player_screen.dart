@@ -297,69 +297,128 @@ class _RoleDialoguePlayerScreenState extends State<RoleDialoguePlayerScreen> {
   ) {
     final theme = Theme.of(context);
 
-    return GestureDetector(
-      onTap: () => _playTurn(index, autoPlay: false),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 300),
-        margin: const EdgeInsets.symmetric(vertical: Spacing.s),
-        padding: const EdgeInsets.all(Spacing.m),
-        decoration: BoxDecoration(
-          color: isActive
-              ? theme.colorScheme.primaryContainer.withOpacity(0.5)
-              : (isUser
-                    ? theme.colorScheme.surfaceContainerHigh
-                    : theme.colorScheme.surfaceContainer),
-          borderRadius: BorderRadius.only(
-            topLeft: const Radius.circular(16),
-            topRight: const Radius.circular(16),
-            bottomLeft: isUser ? const Radius.circular(16) : Radius.zero,
-            bottomRight: isUser ? Radius.zero : const Radius.circular(16),
-          ),
-          border: isActive
-              ? Border.all(color: theme.colorScheme.primary, width: 2)
-              : null,
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              turn.ltText,
-              style: theme.textTheme.bodyLarge?.copyWith(
-                fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: Spacing.xs),
+      child: Row(
+        mainAxisAlignment: isUser
+            ? MainAxisAlignment.end
+            : MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          if (!isUser) ...[
+            CircleAvatar(
+              radius: 16,
+              backgroundColor: theme.colorScheme.secondaryContainer,
+              child: Icon(
+                Icons.support_agent_rounded,
+                size: 20,
+                color: theme.colorScheme.onSecondaryContainer,
               ),
             ),
-            if (_showEnglish || turn.enText.isEmpty) ...[
-              const SizedBox(height: Spacing.xs),
-              Text(
-                turn.enText,
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant,
-                  fontStyle: FontStyle.italic,
+            const SizedBox(width: Spacing.s),
+          ],
+          Flexible(
+            child: GestureDetector(
+              onTap: () => _playTurn(index, autoPlay: false),
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 300),
+                padding: const EdgeInsets.all(Spacing.m),
+                decoration: BoxDecoration(
+                  color: isActive
+                      ? theme.colorScheme.primaryContainer.withValues(
+                          alpha: 0.3,
+                        )
+                      : (isUser
+                            ? theme.colorScheme.primary.withValues(alpha: 0.1)
+                            : theme.colorScheme.surfaceContainerHigh),
+                  borderRadius: BorderRadius.only(
+                    topLeft: const Radius.circular(16),
+                    topRight: const Radius.circular(16),
+                    bottomLeft: isUser
+                        ? const Radius.circular(16)
+                        : const Radius.circular(4),
+                    bottomRight: isUser
+                        ? const Radius.circular(4)
+                        : const Radius.circular(16),
+                  ),
+                  border: isActive
+                      ? Border.all(color: theme.colorScheme.primary, width: 2)
+                      : Border.all(
+                          color: theme.colorScheme.outlineVariant.withValues(
+                            alpha: 0.5,
+                          ),
+                        ),
+                  boxShadow: [
+                    if (isActive)
+                      BoxShadow(
+                        color: theme.colorScheme.primary.withValues(alpha: 0.2),
+                        blurRadius: 8,
+                        offset: const Offset(0, 4),
+                      ),
+                  ],
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      turn.ltText,
+                      style: theme.textTheme.bodyLarge?.copyWith(
+                        fontWeight: isActive
+                            ? FontWeight.bold
+                            : FontWeight.normal,
+                        color: theme.colorScheme.onSurface,
+                      ),
+                    ),
+                    if (_showEnglish || turn.enText.isEmpty) ...[
+                      const SizedBox(height: Spacing.xs),
+                      Text(
+                        turn.enText,
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: theme.colorScheme.onSurfaceVariant,
+                          fontStyle: FontStyle.italic,
+                          fontSize: 13,
+                        ),
+                      ),
+                    ],
+                    if (_missingAudioIndices.contains(index)) ...[
+                      const SizedBox(height: Spacing.xs),
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.volume_off_rounded,
+                            size: 14,
+                            color: theme.colorScheme.error,
+                          ),
+                          const SizedBox(width: Spacing.xxs),
+                          Text(
+                            'No Audio',
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: theme.colorScheme.error,
+                              fontSize: 11,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ],
                 ),
               ),
-            ],
-            if (_missingAudioIndices.contains(index)) ...[
-              const SizedBox(height: Spacing.xs),
-              Row(
-                children: [
-                  Icon(
-                    Icons.volume_off_rounded,
-                    size: 16,
-                    color: theme.colorScheme.error,
-                  ),
-                  const SizedBox(width: Spacing.xxs),
-                  Text(
-                    'Audio coming soon',
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: theme.colorScheme.error,
-                      fontSize: 12,
-                    ),
-                  ),
-                ],
+            ),
+          ),
+          if (isUser) ...[
+            const SizedBox(width: Spacing.s),
+            CircleAvatar(
+              radius: 16,
+              backgroundColor: theme.colorScheme.tertiaryContainer,
+              child: Icon(
+                Icons.person_rounded,
+                size: 20,
+                color: theme.colorScheme.onTertiaryContainer,
               ),
-            ],
+            ),
           ],
-        ),
+        ],
       ),
     );
   }
