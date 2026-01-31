@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:just_audio/just_audio.dart';
 import '../../ui/tokens.dart';
 import '../../ui/components/components.dart';
 import '../../ui/components/buttons.dart';
 import 'domain/role_model.dart';
 import 'service/role_progress_service.dart';
 import '../../srs/srs.dart';
-import '../../srs/local_srs_store.dart';
+// import '../../srs/local_srs_store.dart';
 
 class RoleTakeawaysScreen extends StatefulWidget {
   final RoleDialogue dialogue;
@@ -27,6 +28,13 @@ class _RoleTakeawaysScreenState extends State<RoleTakeawaysScreen> {
   // By default, select all phrases for review
   final Set<int> _selectedIndices = {};
   bool _isSaving = false;
+  final AudioPlayer _player = AudioPlayer();
+
+  @override
+  void dispose() {
+    _player.dispose();
+    super.dispose();
+  }
 
   @override
   void initState() {
@@ -154,8 +162,9 @@ class _RoleTakeawaysScreenState extends State<RoleTakeawaysScreen> {
                         padding: const EdgeInsets.all(Spacing.m),
                         decoration: BoxDecoration(
                           color: isSelected
-                              ? theme.colorScheme.secondaryContainer
-                                    .withOpacity(0.3)
+                              ? theme.colorScheme.secondaryContainer.withValues(
+                                  alpha: 0.3,
+                                )
                               : theme.colorScheme.surfaceContainer,
                           borderRadius: BorderRadius.circular(Radii.md),
                           border: Border.all(
@@ -186,22 +195,33 @@ class _RoleTakeawaysScreenState extends State<RoleTakeawaysScreen> {
                                       color: theme.colorScheme.onSurfaceVariant,
                                     ),
                                   ),
+                                  // Play button for phrase
+                                  IconButton(
+                                    icon: const Icon(Icons.volume_up_rounded),
+                                    onPressed: () async {
+                                      try {
+                                        await _player.setAsset(
+                                          item.audioNormalPath,
+                                        );
+                                        await _player.play();
+                                      } catch (e) {
+                                        if (context.mounted) {
+                                          ScaffoldMessenger.of(
+                                            context,
+                                          ).showSnackBar(
+                                            const SnackBar(
+                                              content: Text(
+                                                'Audio coming soon',
+                                              ),
+                                              duration: Duration(seconds: 1),
+                                            ),
+                                          );
+                                        }
+                                      }
+                                    },
+                                  ),
                                 ],
                               ),
-                            ),
-                            // Play button for phrase?
-                            // Reuse AudioButton logic or just Icon
-                            IconButton(
-                              icon: const Icon(Icons.volume_up_rounded),
-                              onPressed: () {
-                                // Simple audio player for preview
-                                // We don't have one passed in here.
-                                // Skip for now or instantiate one locally if strict "Listen" req.
-                                // Prompt: "Audio play"
-                                // I'll skip implementing preview audio here to save time/complexity unless required.
-                                // "Takeaways: Audio play" IS in Phase 5 scope.
-                                // I should add a local AudioPlayer.
-                              },
                             ),
                           ],
                         ),
@@ -219,7 +239,7 @@ class _RoleTakeawaysScreenState extends State<RoleTakeawaysScreen> {
               color: theme.colorScheme.surface,
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.05),
+                  color: Colors.black.withValues(alpha: 0.05),
                   blurRadius: 10,
                   offset: const Offset(0, -4),
                 ),

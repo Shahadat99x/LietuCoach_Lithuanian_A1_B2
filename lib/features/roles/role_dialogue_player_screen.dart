@@ -32,6 +32,7 @@ class _RoleDialoguePlayerScreenState extends State<RoleDialoguePlayerScreen> {
   bool _isPlaying = false;
   bool _showEnglish = false;
   bool _isAutoPlaying = false;
+  final Set<int> _missingAudioIndices = {};
 
   @override
   void initState() {
@@ -85,6 +86,10 @@ class _RoleDialoguePlayerScreenState extends State<RoleDialoguePlayerScreen> {
       // Audio might be missing, handle gracefully
       debugPrint('Audio missing: ${turn.audioNormalPath}');
       if (mounted) {
+        setState(() {
+          _missingAudioIndices.add(index);
+        });
+
         if (autoPlay) {
           // Skip to next after short delay
           await Future.delayed(const Duration(seconds: 2));
@@ -322,6 +327,26 @@ class _RoleDialoguePlayerScreenState extends State<RoleDialoguePlayerScreen> {
                   color: theme.colorScheme.onSurfaceVariant,
                   fontStyle: FontStyle.italic,
                 ),
+              ),
+            ],
+            if (_missingAudioIndices.contains(index)) ...[
+              const SizedBox(height: Spacing.xs),
+              Row(
+                children: [
+                  Icon(
+                    Icons.volume_off_rounded,
+                    size: 16,
+                    color: theme.colorScheme.error,
+                  ),
+                  const SizedBox(width: Spacing.xxs),
+                  Text(
+                    'Audio coming soon',
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: theme.colorScheme.error,
+                      fontSize: 12,
+                    ),
+                  ),
+                ],
               ),
             ],
           ],
