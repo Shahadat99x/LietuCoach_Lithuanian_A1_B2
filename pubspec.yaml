@@ -103,6 +103,8 @@ flutter:
     - assets/audio/a1/unit_08/
     - assets/audio/a1/unit_09/
     - assets/audio/a1/unit_10/
+    - assets/packs/roles/
+    - assets/audio/roles/
     - .env
 
   # An image asset can refer to one or more resolution-specific "variants", see
