@@ -69,34 +69,55 @@ class _ExamResultScreenState extends State<ExamResultScreen> {
             children: [
               const SizedBox(height: Spacing.xl),
 
-              // Result icon
-              Container(
-                padding: const EdgeInsets.all(Spacing.l),
-                decoration: BoxDecoration(
-                  color: _passed
-                      ? AppColors.successLight
-                      : AppColors.dangerLight,
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  _passed ? Icons.celebration : Icons.refresh,
-                  size: 64,
-                  color: _passed ? AppColors.success : AppColors.danger,
+              // Result icon with Glow
+              Center(
+                child: TweenAnimationBuilder<double>(
+                  tween: Tween(begin: 0.0, end: 1.0),
+                  duration: const Duration(seconds: 1),
+                  curve: Curves.elasticOut,
+                  builder: (context, value, child) {
+                    return Transform.scale(scale: value, child: child);
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.all(Spacing.xxl),
+                    decoration: BoxDecoration(
+                      color: (_passed ? AppColors.success : AppColors.danger)
+                          .withValues(alpha: 0.1),
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: (_passed ? AppColors.success : AppColors.danger)
+                            .withValues(alpha: 0.3),
+                        width: 4,
+                      ),
+                    ),
+                    child: Icon(
+                      _passed
+                          ? Icons.emoji_events_rounded
+                          : Icons.refresh_rounded, // Trophy for Exam
+                      size: 80,
+                      color: _passed ? AppColors.success : AppColors.danger,
+                    ),
+                  ),
                 ),
               ),
-              const SizedBox(height: Spacing.l),
+
+              const SizedBox(height: Spacing.xl),
 
               // Result text
               Text(
-                _passed ? 'Congratulations!' : 'Keep Practicing',
-                style: theme.textTheme.headlineMedium?.copyWith(
+                _passed ? 'Exam Passed!' : 'Exam Failed',
+                style: theme.textTheme.displaySmall?.copyWith(
                   fontWeight: FontWeight.bold,
+                  color: theme.colorScheme.onSurface, // Neutral
                 ),
+                textAlign: TextAlign.center,
               ),
-              const SizedBox(height: Spacing.s),
+
+              const SizedBox(height: Spacing.m),
+
               Text(
                 _passed
-                    ? 'You passed the ${widget.unit.title} exam!'
+                    ? 'You mastered the ${widget.unit.title} exam!'
                     : 'You need 80% to pass. Try again!',
                 style: theme.textTheme.bodyLarge?.copyWith(
                   color: theme.colorScheme.onSurfaceVariant,
@@ -105,38 +126,95 @@ class _ExamResultScreenState extends State<ExamResultScreen> {
               ),
               const SizedBox(height: Spacing.xl),
 
-              // Score card
-              AppCard(
+              // Score card (Premium Style)
+              Container(
+                padding: const EdgeInsets.all(Spacing.l),
+                decoration: BoxDecoration(
+                  color: theme.cardTheme.color, // Surface2
+                  borderRadius: BorderRadius.circular(Radii.xl),
+                  border: Border.all(
+                    color: theme.colorScheme.outlineVariant.withValues(
+                      alpha: 0.3,
+                    ),
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.05),
+                      blurRadius: 10,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
                 child: Column(
                   children: [
-                    Text(
-                      '${widget.score}%',
-                      style: theme.textTheme.displayLarge?.copyWith(
-                        color: _passed ? AppColors.success : AppColors.danger,
-                        fontWeight: FontWeight.bold,
-                      ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        // Score
+                        Column(
+                          children: [
+                            Text(
+                              '${widget.score}%',
+                              style: theme.textTheme.headlineMedium?.copyWith(
+                                color: _passed
+                                    ? AppColors.success
+                                    : AppColors.danger,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            Text(
+                              'SCORE',
+                              style: theme.textTheme.labelSmall?.copyWith(
+                                color: theme.colorScheme.onSurfaceVariant,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
+
+                        Container(
+                          height: 40,
+                          width: 1,
+                          color: theme.colorScheme.outlineVariant,
+                          margin: const EdgeInsets.symmetric(
+                            horizontal: Spacing.xl,
+                          ),
+                        ),
+
+                        // Correct
+                        Column(
+                          children: [
+                            Text(
+                              '${widget.correctCount}/${widget.totalCount}',
+                              style: theme.textTheme.headlineMedium?.copyWith(
+                                color: theme.colorScheme.onSurface,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            Text(
+                              'CORRECT',
+                              style: theme.textTheme.labelSmall?.copyWith(
+                                color: theme.colorScheme.onSurfaceVariant,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
                     ),
-                    const SizedBox(height: Spacing.s),
-                    Text(
-                      '${widget.correctCount} of ${widget.totalCount} correct',
-                      style: theme.textTheme.bodyMedium,
-                    ),
+
                     const SizedBox(height: Spacing.m),
-                    LinearProgressIndicator(
-                      value: widget.score / 100,
-                      backgroundColor:
-                          theme.colorScheme.surfaceContainerHighest,
-                      valueColor: AlwaysStoppedAnimation(
-                        _passed ? AppColors.success : AppColors.danger,
-                      ),
-                      minHeight: 8,
+
+                    ClipRRect(
                       borderRadius: BorderRadius.circular(Radii.full),
-                    ),
-                    const SizedBox(height: Spacing.s),
-                    Text(
-                      'Pass: $examPassThreshold%',
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: theme.colorScheme.onSurfaceVariant,
+                      child: LinearProgressIndicator(
+                        value: widget.score / 100,
+                        backgroundColor:
+                            theme.colorScheme.surfaceContainerHighest,
+                        valueColor: AlwaysStoppedAnimation(
+                          _passed ? AppColors.success : AppColors.danger,
+                        ),
+                        minHeight: 8,
                       ),
                     ),
                   ],
@@ -207,9 +285,10 @@ class _ExamResultScreenState extends State<ExamResultScreen> {
 
       // Resolve user details
       final user = authService.currentUser;
-      final String userName = user?.userMetadata?['full_name'] as String? ?? 
-                       user?.email?.split('@')[0] ?? 
-                       'Guest User';
+      final String userName =
+          user?.userMetadata?['full_name'] as String? ??
+          user?.email?.split('@')[0] ??
+          'Guest User';
       final String userId = user?.id ?? 'guest_user';
 
       final path = await service.generateAndSaveCertificate(

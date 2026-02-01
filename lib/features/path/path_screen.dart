@@ -16,9 +16,13 @@ import '../content/content_error_screen.dart';
 import 'certificate_node.dart';
 import '../../debug/debug_state.dart';
 import 'widgets/path_header.dart';
+import 'widgets/segmented_view_toggle.dart';
+import '../../ui/app_background.dart';
+import '../../ui/components/app_scaffold.dart';
 
 import 'widgets/path_list_view.dart';
 import 'widgets/path_map_view.dart';
+import 'widgets/lock_bottom_sheet.dart';
 import 'models/course_unit_config.dart';
 import 'services/path_preferences_service.dart';
 
@@ -117,14 +121,6 @@ class _PathScreenState extends State<PathScreen> {
     if (mounted) {
       setState(() => _pathStyle = style);
     }
-  }
-
-  Future<void> _togglePathStyle() async {
-    final newStyle = _pathStyle == PathStyle.list
-        ? PathStyle.map
-        : PathStyle.list;
-    setState(() => _pathStyle = newStyle);
-    await PathPreferencesService().setPathStyle(newStyle);
   }
 
   Future<void> _loadData() async {
@@ -258,12 +254,15 @@ class _PathScreenState extends State<PathScreen> {
       },
       continueLabel: 'Continue ${continueUnit.title}',
       continueSubLabel: 'Unit ${courseUnits.indexOf(continueUnit) + 1}',
-      trailing: IconButton(
-        icon: Icon(_pathStyle == PathStyle.list ? Icons.map : Icons.list),
-        onPressed: _togglePathStyle,
-        tooltip: _pathStyle == PathStyle.list
-            ? 'Switch to Map'
-            : 'Switch to List',
+      trailing: SegmentedViewToggle(
+        isMap: _pathStyle == PathStyle.map,
+        onToggle: (isMap) async {
+          final newStyle = isMap ? PathStyle.map : PathStyle.list;
+          if (newStyle != _pathStyle) {
+            setState(() => _pathStyle = newStyle);
+            await PathPreferencesService().setPathStyle(newStyle);
+          }
+        },
       ),
     );
 
@@ -298,9 +297,22 @@ class _PathScreenState extends State<PathScreen> {
           );
 
     return AppScaffold(
+      backgroundColor: Colors.transparent,
+      backgroundPolicy: BackgroundPolicy.aurora,
       body: _loading
           ? const Center(child: CircularProgressIndicator())
-          : RefreshIndicator(onRefresh: _loadData, child: child),
+          : RefreshIndicator(
+              onRefresh: _loadData,
+              child: AnimatedSwitcher(
+                duration: const Duration(milliseconds: 400),
+                switchInCurve: Curves.easeInOut,
+                switchOutCurve: Curves.easeInOut,
+                transitionBuilder: (child, animation) {
+                  return FadeTransition(opacity: animation, child: child);
+                },
+                child: KeyedSubtree(key: ValueKey(_pathStyle), child: child),
+              ),
+            ),
     );
   }
 
@@ -315,7 +327,15 @@ class _PathScreenState extends State<PathScreen> {
       );
     }
 
-    if (!isUnlocked) return;
+    if (!isUnlocked) {
+      final unitIndex = courseUnits.indexOf(config);
+      LockBottomSheet.show(
+        context,
+        title: 'Unit Locked',
+        message: 'Pass the exam for Unit $unitIndex to unlock this module.',
+      );
+      return;
+    }
 
     if (isAvailable) {
       _openUnitLessons(config.unitId);

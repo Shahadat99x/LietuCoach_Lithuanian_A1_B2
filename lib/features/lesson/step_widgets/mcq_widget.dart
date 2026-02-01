@@ -5,7 +5,7 @@
 import 'package:flutter/material.dart';
 import '../../../content/content.dart';
 import '../../../ui/tokens.dart';
-import '../../../ui/components/app_card.dart';
+import '../widgets/answer_tile.dart';
 
 class McqWidget extends StatelessWidget {
   final McqStep step;
@@ -29,110 +29,38 @@ class McqWidget extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         // Prompt
-        Text(
-          step.prompt,
-          style: theme.textTheme.headlineSmall,
-        ),
+        Text(step.prompt, style: theme.textTheme.headlineSmall),
         const SizedBox(height: Spacing.l),
-        
+
         // Options
         ...List.generate(step.options.length, (index) {
           final isSelected = selectedIndex == index;
           final isCorrect = index == step.correctIndex;
-          
+
+          AnswerState state = AnswerState.defaultState;
+          if (hasAnswered) {
+            if (isCorrect) {
+              state = AnswerState.correct;
+            } else if (isSelected) {
+              state = AnswerState.incorrect;
+            } else {
+              state = AnswerState.disabled; // or default?
+            }
+          } else if (isSelected) {
+            state = AnswerState.selected;
+          }
+
           return Padding(
             padding: const EdgeInsets.only(bottom: Spacing.s),
-            child: _OptionCard(
+            child: AnswerTile(
               text: step.options[index],
-              isSelected: isSelected,
-              isCorrect: hasAnswered ? isCorrect : null,
-              showResult: hasAnswered,
+              state: state,
+              shortcutLabel: String.fromCharCode(65 + index), // A, B, C...
               onTap: hasAnswered ? null : () => onSelect(index),
             ),
           );
         }),
       ],
-    );
-  }
-}
-
-class _OptionCard extends StatelessWidget {
-  final String text;
-  final bool isSelected;
-  final bool? isCorrect;
-  final bool showResult;
-  final VoidCallback? onTap;
-
-  const _OptionCard({
-    required this.text,
-    required this.isSelected,
-    this.isCorrect,
-    required this.showResult,
-    this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    
-    Color? backgroundColor;
-    Color? borderColor;
-    
-    if (showResult && isCorrect == true) {
-      backgroundColor = AppColors.successLight;
-      borderColor = AppColors.success;
-    } else if (showResult && isSelected && isCorrect == false) {
-      backgroundColor = AppColors.dangerLight;
-      borderColor = AppColors.danger;
-    } else if (isSelected) {
-      borderColor = theme.colorScheme.primary;
-    }
-
-    return AppCard(
-      color: backgroundColor,
-      padding: EdgeInsets.zero,
-      onTap: onTap,
-      child: Container(
-        decoration: BoxDecoration(
-          border: Border.all(
-            color: borderColor ?? theme.dividerColor,
-            width: isSelected ? 2 : 1,
-          ),
-          borderRadius: BorderRadius.circular(Radii.md),
-        ),
-        padding: const EdgeInsets.all(Spacing.m),
-        child: Row(
-          children: [
-            // Radio indicator
-            Container(
-              width: 24,
-              height: 24,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                border: Border.all(
-                  color: isSelected 
-                      ? (borderColor ?? theme.colorScheme.primary)
-                      : theme.colorScheme.outline,
-                  width: 2,
-                ),
-                color: isSelected
-                    ? (borderColor ?? theme.colorScheme.primary)
-                    : null,
-              ),
-              child: isSelected
-                  ? const Icon(Icons.check, size: 16, color: Colors.white)
-                  : null,
-            ),
-            const SizedBox(width: Spacing.m),
-            Expanded(
-              child: Text(
-                text,
-                style: theme.textTheme.bodyLarge,
-              ),
-            ),
-          ],
-        ),
-      ),
     );
   }
 }

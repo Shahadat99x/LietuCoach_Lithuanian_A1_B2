@@ -12,6 +12,8 @@ class PrimaryButton extends StatelessWidget {
     this.icon,
     this.isLoading = false,
     this.isFullWidth = false,
+    this.backgroundColor,
+    this.foregroundColor,
   });
 
   final String label;
@@ -19,18 +21,34 @@ class PrimaryButton extends StatelessWidget {
   final IconData? icon;
   final bool isLoading;
   final bool isFullWidth;
+  final Color? backgroundColor;
+  final Color? foregroundColor;
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final button = ElevatedButton(
-      onPressed: isLoading ? null : onPressed,
+      // If loading, keep enabled style but disable interaction
+      onPressed: isLoading ? () {} : onPressed,
+      style: ElevatedButton.styleFrom(
+        backgroundColor: backgroundColor ?? theme.colorScheme.primary,
+        foregroundColor: foregroundColor ?? theme.colorScheme.onPrimary,
+        disabledBackgroundColor: theme.colorScheme.onSurface.withValues(
+          alpha: 0.12,
+        ),
+        disabledForegroundColor: theme.colorScheme.onSurface.withValues(
+          alpha: 0.38,
+        ),
+        elevation: onPressed == null ? 0 : 2,
+      ),
       child: isLoading
-          ? const SizedBox(
+          ? SizedBox(
               width: 20,
               height: 20,
               child: CircularProgressIndicator(
                 strokeWidth: 2,
-                color: Colors.white,
+                // Ensure spinner is visible against primary background
+                color: foregroundColor ?? theme.colorScheme.onPrimary,
               ),
             )
           : Row(
@@ -46,10 +64,7 @@ class PrimaryButton extends StatelessWidget {
     );
 
     if (isFullWidth) {
-      return SizedBox(
-        width: double.infinity,
-        child: button,
-      );
+      return SizedBox(width: double.infinity, child: button);
     }
 
     return button;
@@ -88,10 +103,7 @@ class SecondaryButton extends StatelessWidget {
     );
 
     if (isFullWidth) {
-      return SizedBox(
-        width: double.infinity,
-        child: button,
-      );
+      return SizedBox(width: double.infinity, child: button);
     }
 
     return button;

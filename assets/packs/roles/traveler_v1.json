@@ -1,0 +1,469 @@
+{
+  "id": "traveler_v1",
+  "title": "Traveler Pack",
+  "level": "A1-A2",
+  "description": "Essential conversations for your trip to Lithuania.",
+  "scenarios": [
+    {
+      "id": "airport",
+      "title": "At the Airport",
+      "subtitle": "Check-in and finding your way",
+      "dialogues": [
+        {
+          "id": "airport_checkin",
+          "title": "Checking In",
+          "durationMinutes": 2,
+          "difficulty": "Easy",
+          "turns": [
+            {
+              "speaker": "A",
+              "ltText": "Labas rytas. Kur skrendate?",
+              "enText": "Good morning. Where are you flying?",
+              "audioNormalPath": "assets/audio/roles/traveler/airport/checkin_01.mp3"
+            },
+            {
+              "speaker": "B",
+              "ltText": "Labas rytas. Į Vilnių.",
+              "enText": "Good morning. To Vilnius.",
+              "audioNormalPath": "assets/audio/roles/traveler/airport/checkin_02.mp3"
+            },
+            {
+              "speaker": "A",
+              "ltText": "Ar turite bagažo?",
+              "enText": "Do you have luggage?",
+              "audioNormalPath": "assets/audio/roles/traveler/airport/checkin_03.mp3"
+            },
+            {
+              "speaker": "B",
+              "ltText": "Taip, vieną lagaminą.",
+              "enText": "Yes, one suitcase.",
+              "audioNormalPath": "assets/audio/roles/traveler/airport/checkin_04.mp3"
+            },
+            {
+              "speaker": "A",
+              "ltText": "Padėkite jį čia. Ačiū. Štai jūsų bilietas.",
+              "enText": "Put it here. Thank you. Here is your ticket.",
+              "audioNormalPath": "assets/audio/roles/traveler/airport/checkin_05.mp3"
+            },
+            {
+              "speaker": "B",
+              "ltText": "Ačiū. Viso gero.",
+              "enText": "Thank you. Goodbye.",
+              "audioNormalPath": "assets/audio/roles/traveler/airport/checkin_06.mp3"
+            }
+          ],
+          "exercises": [
+            {
+              "type": "mcq",
+              "promptLt": "Kur keleivis skrenda?",
+              "promptEn": "Where is the passenger flying?",
+              "optionsLt": ["Į Kauną", "Į Vilnių", "Į Rygą"],
+              "optionsEn": ["To Kaunas", "To Vilnius", "To Riga"],
+              "correctIndex": 1
+            },
+            {
+              "type": "mcq",
+              "promptLt": "Kiek lagaminų jis turi?",
+              "promptEn": "How many suitcases does he have?",
+              "optionsLt": ["Vieną", "Du", "Jokių"],
+              "optionsEn": ["One", "Two", "None"],
+              "correctIndex": 0
+            },
+            {
+              "type": "reorder",
+              "promptEn": "Translate: Yes, one suitcase.",
+              "correctSequence": ["Taip,", "vieną", "lagaminą."]
+            }
+          ],
+          "takeaways": [
+            {
+              "lt": "Kur skrendate?",
+              "en": "Where are you flying?",
+              "audioNormalPath": "assets/audio/roles/traveler/takeaways/kur_skrendate.mp3",
+              "tags": ["traveler", "airport"]
+            },
+            {
+              "lt": "Ar turite bagažo?",
+              "en": "Do you have luggage?",
+              "audioNormalPath": "assets/audio/roles/traveler/takeaways/ar_turite_bagago.mp3",
+              "tags": ["traveler", "airport"]
+            },
+            {
+              "lt": "Vieną lagaminą.",
+              "en": "One suitcase.",
+              "audioNormalPath": "assets/audio/roles/traveler/takeaways/viena_lagamina.mp3",
+              "tags": ["traveler", "airport"]
+            }
+          ]
+        },
+        {
+          "id": "airport_gate",
+          "title": "Finding the Gate",
+          "durationMinutes": 2,
+          "difficulty": "Medium",
+          "turns": [
+            {
+              "speaker": "B",
+              "ltText": "Atsiprašau, kur yra vartai numeris penki?",
+              "enText": "Excuse me, where is gate number five?",
+              "audioNormalPath": "assets/audio/roles/traveler/airport/gate_01.mp3"
+            },
+            {
+              "speaker": "A",
+              "ltText": "Eikite tiesiai, tada sukite į kairę.",
+              "enText": "Go straight, then turn left.",
+              "audioNormalPath": "assets/audio/roles/traveler/airport/gate_02.mp3"
+            },
+            {
+              "speaker": "B",
+              "ltText": "Ar tai toli?",
+              "enText": "Is it far?",
+              "audioNormalPath": "assets/audio/roles/traveler/airport/gate_03.mp3"
+            },
+            {
+              "speaker": "A",
+              "ltText": "Ne, tik dvi minutės pėsčiomis.",
+              "enText": "No, just two minutes on foot.",
+              "audioNormalPath": "assets/audio/roles/traveler/airport/gate_04.mp3"
+            },
+            {
+              "speaker": "B",
+              "ltText": "Ačiū už pagalbą.",
+              "enText": "Thanks for the help.",
+              "audioNormalPath": "assets/audio/roles/traveler/airport/gate_05.mp3"
+            }
+          ],
+          "exercises": [
+            {
+              "type": "mcq",
+              "promptLt": "Kur reikia eiti?",
+              "promptEn": "Where to go?",
+              "optionsLt": ["Tiesiai ir į dešinę", "Tiesiai ir į kairę", "Atgal"],
+              "optionsEn": ["Straight and right", "Straight and left", "Back"],
+              "correctIndex": 1
+            },
+            {
+              "type": "reorder",
+              "promptEn": "Translate: Is it far?",
+              "correctSequence": ["Ar", "tai", "toli?"]
+            }
+          ],
+          "takeaways": [
+            {
+              "lt": "Kur yra vartai?",
+              "en": "Where is the gate?",
+              "audioNormalPath": "assets/audio/roles/traveler/takeaways/kur_yra_vartai.mp3",
+              "tags": ["traveler", "airport"]
+            },
+            {
+              "lt": "Eikite tiesiai.",
+              "en": "Go straight.",
+              "audioNormalPath": "assets/audio/roles/traveler/takeaways/eikite_tiesiai.mp3",
+              "tags": ["traveler", "airport"]
+            },
+            {
+              "lt": "Sukite į kairę.",
+              "en": "Turn left.",
+              "audioNormalPath": "assets/audio/roles/traveler/takeaways/sukite_i_kaire.mp3",
+              "tags": ["traveler", "airport"]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "hotel",
+      "title": "At the Hotel",
+      "subtitle": "Check-in and service",
+      "dialogues": [
+        {
+          "id": "hotel_checkin",
+          "title": "Hotel Check-in",
+          "durationMinutes": 3,
+          "difficulty": "Easy",
+          "turns": [
+            {
+              "speaker": "B",
+              "ltText": "Laba diena. Aš turiu rezervaciją.",
+              "enText": "Good afternoon. I have a reservation.",
+              "audioNormalPath": "assets/audio/roles/traveler/hotel/checkin_01.mp3"
+            },
+            {
+              "speaker": "A",
+              "ltText": "Laba diena. Kokia jūsų pavardė?",
+              "enText": "Good afternoon. What is your surname?",
+              "audioNormalPath": "assets/audio/roles/traveler/hotel/checkin_02.mp3"
+            },
+            {
+              "speaker": "B",
+              "ltText": "Mano pavardė Jonaitis.",
+              "enText": "My surname is Jonaitis.",
+              "audioNormalPath": "assets/audio/roles/traveler/hotel/checkin_03.mp3"
+            },
+            {
+              "speaker": "A",
+              "ltText": "Taip, matau. Jūsų kambarys 205.",
+              "enText": "Yes, I see. Your room is 205.",
+              "audioNormalPath": "assets/audio/roles/traveler/hotel/checkin_04.mp3"
+            },
+            {
+              "speaker": "B",
+              "ltText": "Kada pusryčiai?",
+              "enText": "When is breakfast?",
+              "audioNormalPath": "assets/audio/roles/traveler/hotel/checkin_05.mp3"
+            },
+            {
+              "speaker": "A",
+              "ltText": "Nuo septynių iki dešimt.",
+              "enText": "From seven to ten.",
+              "audioNormalPath": "assets/audio/roles/traveler/hotel/checkin_06.mp3"
+            }
+          ],
+          "exercises": [
+             {
+              "type": "mcq",
+              "promptLt": "Koks kambario numeris?",
+              "promptEn": "What is the room number?",
+              "optionsLt": ["105", "205", "305"],
+              "optionsEn": ["105", "205", "305"],
+              "correctIndex": 1
+            },
+            {
+              "type": "reorder",
+              "promptEn": "Translate: When is breakfast?",
+              "correctSequence": ["Kada", "pusryčiai?"]
+            }
+          ],
+          "takeaways": [
+            {
+              "lt": "Aš turiu rezervaciją.",
+              "en": "I have a reservation.",
+              "audioNormalPath": "assets/audio/roles/traveler/takeaways/turiu_reservacija.mp3",
+              "tags": ["traveler", "hotel"]
+            },
+            {
+              "lt": "Kokia jūsų pavardė?",
+              "en": "What is your surname?",
+              "audioNormalPath": "assets/audio/roles/traveler/takeaways/kokia_pavarde.mp3",
+              "tags": ["traveler", "hotel"]
+            },
+            {
+              "lt": "Kada pusryčiai?",
+              "en": "When is breakfast?",
+              "audioNormalPath": "assets/audio/roles/traveler/takeaways/kada_pusryciai.mp3",
+              "tags": ["traveler", "hotel"]
+            }
+          ]
+        },
+        {
+          "id": "hotel_wifi",
+          "title": "Asking for WiFi",
+          "durationMinutes": 1,
+          "difficulty": "Easy",
+          "turns": [
+             {
+              "speaker": "B",
+              "ltText": "Atsiprašau, koks yra interneto slaptažodis?",
+              "enText": "Excuse me, what is the internet password?",
+              "audioNormalPath": "assets/audio/roles/traveler/hotel/wifi_01.mp3"
+            },
+            {
+              "speaker": "A",
+              "ltText": "Slaptažodis yra 'hotel123'.",
+              "enText": "The password is 'hotel123'.",
+              "audioNormalPath": "assets/audio/roles/traveler/hotel/wifi_02.mp3"
+            },
+            {
+              "speaker": "B",
+              "ltText": "Ačiū. Ar internetas veikia kambaryje?",
+              "enText": "Thanks. Does the internet work in the room?",
+              "audioNormalPath": "assets/audio/roles/traveler/hotel/wifi_03.mp3"
+            },
+             {
+              "speaker": "A",
+              "ltText": "Taip, veikia visur.",
+              "enText": "Yes, it works everywhere.",
+              "audioNormalPath": "assets/audio/roles/traveler/hotel/wifi_04.mp3"
+            }
+          ],
+          "exercises": [
+             {
+              "type": "mcq",
+              "promptLt": "Koks slaptažodis?",
+              "promptEn": "What is the password?",
+              "optionsLt": ["wifi123", "hotel123", "guest123"],
+              "optionsEn": ["wifi123", "hotel123", "guest123"],
+              "correctIndex": 1
+            },
+            {
+              "type": "reorder",
+              "promptEn": "Translate: Does the internet work?",
+              "correctSequence": ["Ar", "internetas", "veikia?"]
+            }
+          ],
+          "takeaways": [
+            {
+              "lt": "Koks interneto slaptažodis?",
+              "en": "What is the internet password?",
+              "audioNormalPath": "assets/audio/roles/traveler/takeaways/koks_slaptazodis.mp3",
+              "tags": ["traveler", "hotel"]
+            },
+            {
+              "lt": "Ar internetas veikia?",
+              "en": "Does the internet work?",
+              "audioNormalPath": "assets/audio/roles/traveler/takeaways/ar_internet_veikia.mp3",
+              "tags": ["traveler", "hotel"]
+            },
+             {
+              "lt": "Veikia visur.",
+              "en": "It works everywhere.",
+              "audioNormalPath": "assets/audio/roles/traveler/takeaways/veikia_visur.mp3",
+              "tags": ["traveler", "hotel"]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "directions",
+      "title": "Directions",
+      "subtitle": "Getting around the city",
+      "dialogues": [
+         {
+          "id": "directions_bus",
+          "title": "Bus Stop",
+          "durationMinutes": 2,
+          "difficulty": "Medium",
+          "turns": [
+             {
+              "speaker": "B",
+              "ltText": "Atsiprašau, ar šis autobusas važiuoja į centrą?",
+              "enText": "Excuse me, does this bus go to the center?",
+              "audioNormalPath": "assets/audio/roles/traveler/directions/bus_01.mp3"
+            },
+            {
+              "speaker": "A",
+              "ltText": "Ne, šis važiuoja į stotį.",
+              "enText": "No, this one goes to the station.",
+              "audioNormalPath": "assets/audio/roles/traveler/directions/bus_02.mp3"
+            },
+             {
+              "speaker": "B",
+              "ltText": "Kur man reikia įlipti?",
+              "enText": "Where do I need to get on?",
+              "audioNormalPath": "assets/audio/roles/traveler/directions/bus_03.mp3"
+            },
+            {
+              "speaker": "A",
+              "ltText": "Kitoje gatvės pusėje.",
+              "enText": "On the other side of the street.",
+              "audioNormalPath": "assets/audio/roles/traveler/directions/bus_04.mp3"
+            }
+          ],
+          "exercises": [
+             {
+              "type": "mcq",
+              "promptLt": "Kur važiuoja autobusas?",
+              "promptEn": "Where does the bus go?",
+              "optionsLt": ["Į centrą", "Į stotį", "Į oro uostą"],
+              "optionsEn": ["To the center", "To the station", "To the airport"],
+              "correctIndex": 1
+            },
+            {
+              "type": "reorder",
+              "promptEn": "Translate: On the other side.",
+              "correctSequence": ["Kitoje", "pusėje."]
+            }
+          ],
+          "takeaways": [
+             {
+              "lt": "Ar šis autobusas važiuoja į centrą?",
+              "en": "Does this bus go to the center?",
+              "audioNormalPath": "assets/audio/roles/traveler/takeaways/ar_autobusas_i_centra.mp3",
+              "tags": ["traveler", "directions"]
+            },
+            {
+              "lt": "Važiuoja į stotį.",
+              "en": "Goes to the station.",
+              "audioNormalPath": "assets/audio/roles/traveler/takeaways/vaziuoja_i_stoti.mp3",
+              "tags": ["traveler", "directions"]
+            },
+              {
+              "lt": "Kitoje gatvės pusėje.",
+              "en": "On the other side of the street.",
+              "audioNormalPath": "assets/audio/roles/traveler/takeaways/kitoje_gatves_puseje.mp3",
+              "tags": ["traveler", "directions"]
+            }
+          ]
+        },
+        {
+          "id": "directions_taxi",
+          "title": "Taking a Taxi",
+          "durationMinutes": 3,
+          "difficulty": "Easy",
+          "turns": [
+             {
+              "speaker": "B",
+              "ltText": "Sveiki. Į Gedimino prospektą, prašau.",
+              "enText": "Hello. To Gediminas Avenue, please.",
+              "audioNormalPath": "assets/audio/roles/traveler/directions/taxi_01.mp3"
+            },
+            {
+              "speaker": "A",
+              "ltText": "Gerai. Ar skubate?",
+              "enText": "Okay. Are you in a hurry?",
+              "audioNormalPath": "assets/audio/roles/traveler/directions/taxi_02.mp3"
+            },
+             {
+              "speaker": "B",
+              "ltText": "Ne, neskubu.",
+              "enText": "No, I am not in a hurry.",
+              "audioNormalPath": "assets/audio/roles/traveler/directions/taxi_03.mp3"
+            },
+            {
+              "speaker": "A",
+              "ltText": "Supratau. Kelionė truks dešimt minučių.",
+              "enText": "Understood. The trip will take ten minutes.",
+              "audioNormalPath": "assets/audio/roles/traveler/directions/taxi_04.mp3"
+            }
+          ],
+          "exercises": [
+             {
+              "type": "mcq",
+              "promptLt": "Kiek laiko truks kelionė?",
+              "promptEn": "How long will the trip take?",
+              "optionsLt": ["Penkias minutes", "Dešimt minučių", "Valandą"],
+              "optionsEn": ["Five minutes", "Ten minutes", "An hour"],
+              "correctIndex": 1
+            },
+            {
+              "type": "reorder",
+              "promptEn": "Translate: I am not in a hurry.",
+              "correctSequence": ["Aš", "neskubu."]
+            }
+          ],
+          "takeaways": [
+             {
+              "lt": "Į Gedimino prospektą, prašau.",
+              "en": "To Gediminas Avenue, please.",
+              "audioNormalPath": "assets/audio/roles/traveler/takeaways/i_gedimino_prospekta.mp3",
+              "tags": ["traveler", "directions"]
+            },
+            {
+              "lt": "Ar skubate?",
+              "en": "Are you in a hurry?",
+              "audioNormalPath": "assets/audio/roles/traveler/takeaways/ar_skubate.mp3",
+              "tags": ["traveler", "directions"]
+            },
+            {
+              "lt": "Kelionė truks truks dešimt minučių.",
+              "en": "The trip will take ten minutes.",
+              "audioNormalPath": "assets/audio/roles/traveler/takeaways/kelione_truks.mp3",
+              "tags": ["traveler", "directions"]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

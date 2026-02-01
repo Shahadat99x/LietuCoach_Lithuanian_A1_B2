@@ -8,17 +8,14 @@ import '../../audio/audio.dart';
 import '../../srs/srs.dart';
 import '../../ui/tokens.dart';
 import '../../ui/components/components.dart';
-import 'flashcard_widget.dart';
+import 'widgets/review_card_system/card_stack.dart';
+import 'widgets/review_card_system/premium_grade_bar.dart';
 
 class ReviewSessionScreen extends StatefulWidget {
   final List<SrsCard>? customCards;
   final VoidCallback? onComplete;
 
-  const ReviewSessionScreen({
-    super.key,
-    this.customCards,
-    this.onComplete,
-  });
+  const ReviewSessionScreen({super.key, this.customCards, this.onComplete});
 
   @override
   State<ReviewSessionScreen> createState() => _ReviewSessionScreenState();
@@ -127,23 +124,17 @@ class _ReviewSessionScreenState extends State<ReviewSessionScreen> {
       );
     }
 
-    if (_cards.isEmpty) {
+    if (_cards.isEmpty || _currentIndex >= _cards.length) {
+      // Show completion or empty state
       return Scaffold(
         appBar: AppBar(title: const Text('Review')),
-        body: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(Icons.check_circle, size: 64, color: Colors.green),
-              const SizedBox(height: Spacing.m),
-              Text('No cards due!', style: theme.textTheme.headlineSmall),
-              const SizedBox(height: Spacing.l),
-              PrimaryButton(
-                label: 'Go Back',
-                onPressed: () => Navigator.of(context).pop(),
-              ),
-            ],
-          ),
+        body: AppEmptyState(
+          title: 'All Caught Up!',
+          message:
+              'You have no cards due for review properly. Great job keeping up!',
+          icon: Icons.check_circle_outline_rounded,
+          ctaLabel: 'Return to Path',
+          onCta: () => Navigator.of(context).pop(),
         ),
       );
     }
@@ -152,125 +143,82 @@ class _ReviewSessionScreenState extends State<ReviewSessionScreen> {
     final progress = (_currentIndex + 1) / _cards.length;
 
     return Scaffold(
+      backgroundColor: theme.colorScheme.surface, // Neutral background
       appBar: AppBar(
         title: Text('Review (${_currentIndex + 1}/${_cards.length})'),
         leading: IconButton(
           icon: const Icon(Icons.close),
           onPressed: () => Navigator.of(context).pop(),
         ),
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(4),
+          child: LinearProgressIndicator(
+            value: progress,
+            backgroundColor: theme.colorScheme.surfaceContainerHighest,
+            valueColor: AlwaysStoppedAnimation(theme.colorScheme.primary),
+            minHeight: 4,
+          ),
+        ),
       ),
       body: SafeArea(
         child: Column(
           children: [
-            // Progress bar
-            Padding(
-              padding: const EdgeInsets.all(Spacing.m),
-              child: ProgressBar(value: progress),
-            ),
+            const SizedBox(height: Spacing.m),
 
-            // Flashcard
+            // CARD STACK
             Expanded(
               child: Padding(
-                padding: const EdgeInsets.all(Spacing.m),
-                child: GestureDetector(
-                  onTap: _flipCard,
-                  child: FlashcardWidget(
-                    front: currentCard.front,
-                    back: currentCard.back,
-                    isFlipped: _isFlipped,
-                    onPlayAudio: _playAudio,
-                  ),
+                padding: const EdgeInsets.symmetric(horizontal: Spacing.m),
+                child: CardStack(
+                  cards: _cards,
+                  currentIndex: _currentIndex,
+                  isFlipped: _isFlipped,
+                  onFlip: _flipCard,
+                  onPlayAudio: _playAudio,
+                  onSwipe: (direction) {
+                    SrsRating rating;
+                    switch (direction) {
+                      case SwipeDirection.left:
+                        rating = SrsRating.hard;
+                        break;
+                      case SwipeDirection.right:
+                        rating = SrsRating.good;
+                        break;
+                      case SwipeDirection.up:
+                        rating = SrsRating.easy;
+                        break;
+                    }
+                    _rateCard(rating);
+                  },
                 ),
               ),
             ),
 
-            // Flip hint
-            if (!_isFlipped)
-              Padding(
-                padding: const EdgeInsets.only(bottom: Spacing.s),
-                child: Text(
-                  'Tap card to reveal',
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: theme.colorScheme.onSurfaceVariant,
-                  ),
-                ),
-              ),
-
-            // Rating buttons (only show when flipped)
-            if (_isFlipped)
-              Padding(
-                padding: const EdgeInsets.all(Spacing.m),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: _RatingButton(
-                        label: 'Hard',
-                        subtitle: '1 day',
-                        color: Colors.red.shade400,
-                        onPressed: () => _rateCard(SrsRating.hard),
-                      ),
-                    ),
-                    const SizedBox(width: Spacing.s),
-                    Expanded(
-                      child: _RatingButton(
-                        label: 'Good',
-                        subtitle:
-                            '${currentCard.isNew ? 3 : (currentCard.intervalDays * currentCard.ease).round()} days',
-                        color: Colors.green.shade400,
-                        onPressed: () => _rateCard(SrsRating.good),
-                      ),
-                    ),
-                    const SizedBox(width: Spacing.s),
-                    Expanded(
-                      child: _RatingButton(
-                        label: 'Easy',
-                        subtitle:
-                            '${currentCard.isNew ? 7 : (currentCard.intervalDays * currentCard.ease * 1.3).round()} days',
-                        color: Colors.blue.shade400,
-                        onPressed: () => _rateCard(SrsRating.easy),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-
+            // GRADE BAR (Only when flipped)
+            // Or should we allow rating anytime? Usually only after flip.
+            // Requirement logic: "left=Hard, right=Good" usually works always in Tinder,
+            // but for SRS, seeing the answer is key.
+            // Let's show "Tap to flip" hint if not flipped, GradeBar if flipped.
             const SizedBox(height: Spacing.m),
+
+            AnimatedSwitcher(
+              duration: const Duration(milliseconds: 300),
+              child: _isFlipped
+                  ? PremiumGradeBar(card: currentCard, onRate: _rateCard)
+                  : Padding(
+                      padding: const EdgeInsets.all(Spacing.l),
+                      child: Text(
+                        'Tap card to flip • Swipe for shortcuts',
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: theme.colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                    ),
+            ),
+
+            const SizedBox(height: Spacing.l),
           ],
         ),
-      ),
-    );
-  }
-}
-
-class _RatingButton extends StatelessWidget {
-  final String label;
-  final String subtitle;
-  final Color color;
-  final VoidCallback onPressed;
-
-  const _RatingButton({
-    required this.label,
-    required this.subtitle,
-    required this.color,
-    required this.onPressed,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return ElevatedButton(
-      onPressed: onPressed,
-      style: ElevatedButton.styleFrom(
-        backgroundColor: color,
-        foregroundColor: Colors.white,
-        padding: const EdgeInsets.symmetric(vertical: Spacing.m),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(label, style: const TextStyle(fontWeight: FontWeight.bold)),
-          Text(subtitle, style: const TextStyle(fontSize: 12)),
-        ],
       ),
     );
   }

@@ -57,6 +57,8 @@ void main() {
         mockStore.getUnitLessonProgress('unit_01'),
       ).thenAnswer((_) async => []);
       when(mockStore.getUnitProgress('unit_01')).thenAnswer((_) async => null);
+
+      when(mockStore.getUserStats()).thenAnswer((_) async => UserStats());
       when(
         mockStore.areAllLessonsCompleted(any, any),
       ).thenAnswer((_) async => false);

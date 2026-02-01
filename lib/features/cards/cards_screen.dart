@@ -7,6 +7,9 @@ import '../../srs/srs.dart';
 import '../../ui/tokens.dart';
 import '../../ui/components/components.dart';
 import 'review_session_screen.dart';
+import 'widgets/srs_stats_strip.dart';
+import 'widgets/caught_up_view.dart';
+import 'widgets/empty_cards_view.dart';
 
 class CardsScreen extends StatefulWidget {
   const CardsScreen({super.key});
@@ -62,169 +65,108 @@ class _CardsScreenState extends State<CardsScreen> with WidgetsBindingObserver {
         .then((_) => _loadStats()); // Refresh on return
   }
 
+  void _goToPath() {
+    // TODO: Navigation to Path tab.
+    // For now, we interact via a snackbar or just pop if this was pushed (it's a tab though).
+    // Ideally we use a TabController or a global navigation service.
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Switching to Path tab (Simulated)')),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final isCaughtUp = _stats.dueToday == 0 && _stats.totalCards > 0;
+    final isEmpty = _stats.totalCards == 0;
 
-    return AppScaffold(
-      body: RefreshIndicator(
-        onRefresh: _loadStats,
-        child: ListView(
-          padding: const EdgeInsets.symmetric(vertical: Spacing.m),
-          children: [
-            Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: Spacing.pagePadding,
-              ),
-              child: Text('Flashcards', style: theme.textTheme.headlineLarge),
-            ),
-            const SizedBox(height: Spacing.s),
-            Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: Spacing.pagePadding,
-              ),
-              child: Text(
-                'Spaced repetition review',
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant,
-                ),
-              ),
-            ),
-            const SizedBox(height: Spacing.l),
+    return Scaffold(
+      backgroundColor: theme.colorScheme.surface,
+      body: SafeArea(
+        child: _loading
+            ? const Center(child: CircularProgressIndicator())
+            : CustomScrollView(
+                slivers: [
+                  SliverPadding(
+                    padding: const EdgeInsets.all(Spacing.pagePadding),
+                    sliver: SliverList(
+                      delegate: SliverChildListDelegate([
+                        Text(
+                          'Flashcards',
+                          style: theme.textTheme.headlineLarge?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: Spacing.xs),
+                        Text(
+                          'Your personal collection',
+                          style: theme.textTheme.titleMedium?.copyWith(
+                            color: theme.colorScheme.onSurfaceVariant,
+                          ),
+                        ),
+                        const SizedBox(height: Spacing.l),
 
-            // Stats cards
-            Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: Spacing.pagePadding,
-              ),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: AppCard(
-                      child: Column(
-                        children: [
-                          Text(
-                            _loading ? '-' : '${_stats.dueToday}',
-                            style: theme.textTheme.headlineLarge?.copyWith(
-                              color: theme.colorScheme.primary,
-                            ),
-                          ),
-                          Text('Due Today', style: theme.textTheme.bodySmall),
+                        // Stats
+                        SrsStatsStrip(
+                          dueCount: _stats.dueToday,
+                          totalCount: _stats.totalCards,
+                          isLoading: _loading,
+                        ),
+                        const SizedBox(height: Spacing.xl),
+
+                        // Action or Empty State
+                        if (isEmpty)
+                          EmptyCardsView(onStartPath: _goToPath)
+                        else if (isCaughtUp)
+                          CaughtUpView(
+                            nextDue: _stats.nextDue,
+                            onLearnMore: _goToPath,
+                          )
+                        else ...[
+                          // Review Available
+                          _buildReviewCallToAction(theme),
                         ],
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: Spacing.s),
-                  Expanded(
-                    child: AppCard(
-                      child: Column(
-                        children: [
-                          Text(
-                            _loading ? '-' : '${_stats.totalCards}',
-                            style: theme.textTheme.headlineLarge?.copyWith(
-                              color: theme.colorScheme.secondary,
-                            ),
-                          ),
-                          Text('Total Cards', style: theme.textTheme.bodySmall),
-                        ],
-                      ),
+                      ]),
                     ),
                   ),
                 ],
               ),
-            ),
-            const SizedBox(height: Spacing.l),
-
-            Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: Spacing.pagePadding,
-              ),
-              child: PrimaryButton(
-                label: 'Start Review',
-                onPressed: _stats.dueToday > 0 ? _startReview : null,
-                isFullWidth: true,
-              ),
-            ),
-            const SizedBox(height: Spacing.l),
-
-            if (_stats.totalCards == 0) ...[
-              Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: Spacing.pagePadding,
-                ),
-                child: AppCard(
-                  color: theme.colorScheme.surfaceContainerHighest,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Icon(
-                            Icons.info_outline,
-                            color: theme.colorScheme.primary,
-                          ),
-                          const SizedBox(width: Spacing.s),
-                          Text(
-                            'No Cards Yet',
-                            style: theme.textTheme.titleMedium,
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: Spacing.s),
-                      const Text(
-                        'Complete lessons to add vocabulary cards for review.',
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ],
-
-            if (_stats.dueToday == 0 &&
-                _stats.totalCards > 0 &&
-                _stats.nextDue != null) ...[
-              Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: Spacing.pagePadding,
-                ),
-                child: AppCard(
-                  color: theme.colorScheme.surfaceContainerHighest,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Icon(Icons.check_circle, color: Colors.green),
-                          const SizedBox(width: Spacing.s),
-                          Text(
-                            'All Caught Up!',
-                            style: theme.textTheme.titleMedium,
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: Spacing.s),
-                      Text('Next review: ${_formatNextDue(_stats.nextDue!)}'),
-                    ],
-                  ),
-                ),
-              ),
-            ],
-          ],
-        ),
       ),
     );
   }
 
-  String _formatNextDue(DateTime nextDue) {
-    final now = DateTime.now();
-    final difference = nextDue.difference(now);
-
-    if (difference.inDays > 0) {
-      return 'in ${difference.inDays} day${difference.inDays == 1 ? '' : 's'}';
-    } else if (difference.inHours > 0) {
-      return 'in ${difference.inHours} hour${difference.inHours == 1 ? '' : 's'}';
-    } else {
-      return 'soon';
-    }
+  Widget _buildReviewCallToAction(ThemeData theme) {
+    return AppCard(
+      // Standard Surface2 for calm feel (Step 4)
+      color: theme.colorScheme.surfaceContainerHighest,
+      child: Column(
+        children: [
+          const SizedBox(height: Spacing.m),
+          Icon(Icons.style_rounded, size: 48, color: theme.colorScheme.primary),
+          const SizedBox(height: Spacing.m),
+          Text(
+            'Review Time!',
+            style: theme.textTheme.headlineSmall?.copyWith(
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: Spacing.s),
+          Text(
+            '${_stats.dueToday} cards are ready for review.',
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
+          ),
+          const SizedBox(height: Spacing.l),
+          PrimaryButton(
+            label: 'Start Review Session',
+            icon: Icons.play_arrow_rounded,
+            onPressed: _startReview,
+            isFullWidth: true,
+          ),
+          const SizedBox(height: Spacing.m),
+        ],
+      ),
+    );
   }
 }

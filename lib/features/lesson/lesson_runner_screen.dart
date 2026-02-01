@@ -11,6 +11,8 @@ import '../../ui/tokens.dart';
 import '../../ui/components/components.dart';
 import '../practice/practice_stats_service.dart';
 import 'step_widgets/step_widgets.dart';
+import 'widgets/exercise_shell.dart';
+import 'widgets/bottom_result_sheet.dart';
 
 class LessonRunnerScreen extends StatefulWidget {
   final Unit unit;
@@ -33,13 +35,23 @@ class _LessonRunnerScreenState extends State<LessonRunnerScreen> {
   int _attemptedCount = 0;
 
   // Step answer state
+  // Double-submit protection
+  bool _isProcessing = false;
+
+  // Step answer state
   bool _hasAnswered = false;
   bool _wasCorrect = false;
   dynamic _selectedAnswer;
 
   Step get _currentStep => widget.lesson.steps[_currentStepIndex];
   bool get _isLastStep => _currentStepIndex >= widget.lesson.steps.length - 1;
-  double get _progress => (_currentStepIndex + 1) / widget.lesson.steps.length;
+
+  // Progress animates forward if the user has answered correctly, even before clicking continue
+  double get _progress {
+    final base = _currentStepIndex.toDouble();
+    final bonus = (_hasAnswered && _wasCorrect) ? 1.0 : 0.0;
+    return (base + bonus) / widget.lesson.steps.length;
+  }
 
   @override
   void initState() {
@@ -54,30 +66,29 @@ class _LessonRunnerScreenState extends State<LessonRunnerScreen> {
     super.dispose();
   }
 
-  void _onAnswer(dynamic answer, bool isCorrect) {
-    setState(() {
-      _selectedAnswer = answer;
-      _hasAnswered = true;
-      _wasCorrect = isCorrect;
-      if (_currentStep.isGraded) {
-        _attemptedCount++;
-        if (isCorrect) _correctCount++;
-      }
-    });
-  }
-
   void _nextStep() {
+    if (_isProcessing) return;
+
     if (_isLastStep) {
-      // Lesson complete - save progress and pop back
       _completeLesson();
       return;
     }
 
     setState(() {
-      _currentStepIndex++;
-      _hasAnswered = false;
-      _wasCorrect = false;
-      _selectedAnswer = null;
+      _isProcessing = true;
+    });
+
+    // Small delay to prevent accidental double-taps if the UI hasn't rebuilt yet
+    Future.delayed(const Duration(milliseconds: 50), () {
+      if (mounted) {
+        setState(() {
+          _currentStepIndex++;
+          _hasAnswered = false;
+          _wasCorrect = false;
+          _selectedAnswer = null;
+          _isProcessing = false;
+        });
+      }
     });
   }
 
@@ -181,47 +192,12 @@ class _LessonRunnerScreenState extends State<LessonRunnerScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.lesson.title),
-        leading: IconButton(
-          icon: const Icon(Icons.close),
-          onPressed: () => _showExitConfirmation(context),
-        ),
-      ),
-      body: SafeArea(
-        child: Column(
-          children: [
-            // Progress bar
-            Padding(
-              padding: const EdgeInsets.all(Spacing.m),
-              child: Column(
-                children: [
-                  ProgressBar(value: _progress),
-                  const SizedBox(height: Spacing.xs),
-                  Text(
-                    'Step ${_currentStepIndex + 1} of ${widget.lesson.steps.length}',
-                    style: Theme.of(context).textTheme.bodySmall,
-                  ),
-                ],
-              ),
-            ),
-
-            // Step content
-            Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.all(Spacing.pagePadding),
-                child: _buildStepWidget(),
-              ),
-            ),
-
-            // Feedback + action button
-            _buildBottomSection(theme),
-          ],
-        ),
-      ),
+    return ExerciseShell(
+      progress: _progress,
+      title: widget.lesson.title,
+      onClose: () => _showExitConfirmation(context),
+      content: _buildStepWidget(),
+      footer: _buildFooter(),
     );
   }
 
@@ -234,6 +210,12 @@ class _LessonRunnerScreenState extends State<LessonRunnerScreen> {
         item: widget.unit.getItem(s.phraseId),
         onPlayAudio: _playAudio,
         onContinue: () {
+          // For teach phrase, immediate continue is fine,
+          // OR we could just mark answered and let footer handle "Continue".
+          // Current TeachPhraseWidget usually has its own layout.
+          // We should ideally let it just fill the content and use the footer for "Continue".
+          // But TeachPhraseWidget has its own "Continue" logic often?
+          // Actually existing widget calls onContinue immediately.
           if (!_hasAnswered) {
             setState(() => _hasAnswered = true);
           }
@@ -245,7 +227,9 @@ class _LessonRunnerScreenState extends State<LessonRunnerScreen> {
         hasAnswered: _hasAnswered,
         onSelect: (index) {
           if (!_hasAnswered) {
-            _onAnswer(index, index == s.correctIndex);
+            setState(() {
+              _selectedAnswer = index;
+            });
           }
         },
       ),
@@ -261,9 +245,9 @@ class _LessonRunnerScreenState extends State<LessonRunnerScreen> {
       ReorderStep s => ReorderWidget(
         step: s,
         hasAnswered: _hasAnswered,
-        onComplete: (order, isCorrect) {
+        onOrderChanged: (order) {
           if (!_hasAnswered) {
-            _onAnswer(order, isCorrect);
+            setState(() => _selectedAnswer = order);
           }
         },
       ),
@@ -271,10 +255,14 @@ class _LessonRunnerScreenState extends State<LessonRunnerScreen> {
         step: s,
         hasAnswered: _hasAnswered,
         onAnswer: (answer) {
-          if (!_hasAnswered) {
-            _onAnswer(answer, answer.toLowerCase() == s.answer.toLowerCase());
-          }
+          setState(() {
+            _selectedAnswer = answer;
+          });
         },
+        // We need to support 'onSelect' style for FillBlank if we want "Check" button?
+        // FillBlank usually needs user to type/select then Check.
+        // Current FillBlankWidget might call onAnswer immediately?
+        // Let's assume it updates value.
       ),
       ListeningChoiceStep s => ListeningChoiceWidget(
         step: s,
@@ -283,7 +271,9 @@ class _LessonRunnerScreenState extends State<LessonRunnerScreen> {
         onPlayAudio: () => _playAudio(s.audioId),
         onSelect: (index) {
           if (!_hasAnswered) {
-            _onAnswer(index, index == s.correctIndex);
+            setState(() {
+              _selectedAnswer = index;
+            });
           }
         },
       ),
@@ -293,7 +283,9 @@ class _LessonRunnerScreenState extends State<LessonRunnerScreen> {
         hasAnswered: _hasAnswered,
         onSelect: (index) {
           if (!_hasAnswered) {
-            _onAnswer(index, index == s.correctIndex);
+            setState(() {
+              _selectedAnswer = index;
+            });
           }
         },
       ),
@@ -306,55 +298,103 @@ class _LessonRunnerScreenState extends State<LessonRunnerScreen> {
     };
   }
 
-  Widget _buildBottomSection(ThemeData theme) {
-    // Don't show bottom section for lesson_complete (has its own button)
+  Widget _buildFooter() {
     if (_currentStep is LessonCompleteStep) {
-      return const SizedBox.shrink();
+      return const SizedBox.shrink(); // Widget handles its own footer or is fullscreen
     }
 
-    return Container(
-      padding: const EdgeInsets.all(Spacing.pagePadding),
-      decoration: BoxDecoration(
-        color: _hasAnswered
-            ? (_wasCorrect ? AppColors.successLight : AppColors.dangerLight)
-            : theme.colorScheme.surface,
-        border: Border(top: BorderSide(color: theme.dividerColor)),
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          // Feedback text
-          if (_hasAnswered && _currentStep.isGraded) ...[
-            Row(
-              children: [
-                Icon(
-                  _wasCorrect ? Icons.check_circle : Icons.cancel,
-                  color: _wasCorrect ? AppColors.success : AppColors.danger,
-                ),
-                const SizedBox(width: Spacing.s),
-                Text(
-                  _wasCorrect ? 'Correct!' : 'Incorrect',
-                  style: theme.textTheme.titleMedium?.copyWith(
-                    color: _wasCorrect ? AppColors.success : AppColors.danger,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: Spacing.m),
-          ],
+    if (_hasAnswered && _currentStep.isGraded) {
+      return BottomResultSheet(
+        state: _wasCorrect ? ResultState.correct : ResultState.incorrect,
+        title: _wasCorrect ? 'Correct!' : 'Incorrect',
+        message: _wasCorrect
+            ? 'Good job!'
+            : 'The correct answer is...', // We can improve this if we have data
+        onContinue: _nextStep,
+      );
+    }
 
-          // Action button
-          SizedBox(
-            width: double.infinity,
-            child: PrimaryButton(
-              label: _getButtonLabel(),
-              onPressed: _canProceed() ? _nextStep : null,
-            ),
-          ),
-        ],
+    // Default Footer (Check/Continue)
+    final label = _getButtonLabel();
+    final canProceed = _canProceed();
+
+    // If it's TeachPhrase, usually we just show "Continue" always?
+    // If it's graded, we show "Check" but only if selected.
+
+    // For TeachPhrase, we might want "Continue" enabled always?
+    // Current logic: _canProceed returns _hasAnswered.
+    // TeachPhraseWidget sets _hasAnswered=true on some action?
+    // We might need to auto-enable for TeachPhrase.
+
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: Spacing.s),
+      width: double.infinity,
+      child: PrimaryButton(
+        label: label,
+        onPressed: canProceed
+            ? () {
+                if (_currentStep.isGraded && !_hasAnswered) {
+                  _checkAnswer();
+                } else {
+                  _nextStep();
+                }
+              }
+            : null,
       ),
     );
+  }
+
+  void _checkAnswer() {
+    // Logic to check answer based on step type
+    bool isCorrect = false;
+    final step = _currentStep;
+
+    if (step is McqStep) {
+      isCorrect = (_selectedAnswer == step.correctIndex);
+      // Update selected answer for highlighting?
+      // _selectedAnswer is already set. Widget uses it.
+    } else if (step is ListeningChoiceStep) {
+      isCorrect = (_selectedAnswer == step.correctIndex);
+    } else if (step is DialogueChoiceStep) {
+      isCorrect = (_selectedAnswer == step.correctIndex);
+    } else if (step is FillBlankStep) {
+      isCorrect =
+          (_selectedAnswer.toString().toLowerCase() ==
+          step.answer.toLowerCase());
+    } else if (step is ReorderStep) {
+      if (_selectedAnswer is! List<int>) {
+        isCorrect = false;
+      } else {
+        final order = _selectedAnswer as List<int>;
+        if (order.length != step.correctOrder.length) {
+          isCorrect = false;
+        } else {
+          isCorrect = true;
+          for (int i = 0; i < order.length; i++) {
+            if (order[i] != step.correctOrder[i]) {
+              isCorrect = false;
+              break;
+            }
+          }
+        }
+      }
+    }
+    // Match and Reorder matchers call _onAnswer directly for now.
+
+    _onAnswer(_selectedAnswer, isCorrect);
+  }
+
+  // _onAnswer now just updates state
+  void _onAnswer(dynamic answer, bool isCorrect) {
+    setState(() {
+      _selectedAnswer = answer;
+      _hasAnswered = true;
+      _wasCorrect = isCorrect;
+      if (_currentStep.isGraded) {
+        _attemptedCount++;
+        if (isCorrect) _correctCount++;
+      }
+    });
   }
 
   String _getButtonLabel() {
@@ -365,12 +405,14 @@ class _LessonRunnerScreenState extends State<LessonRunnerScreen> {
   }
 
   bool _canProceed() {
-    // For non-graded steps (teach_phrase), always allow
     if (!_currentStep.isGraded) {
-      return _hasAnswered;
+      return true; // Always allow continue for teach steps (or wait for audio?)
     }
-    // For graded steps, must have answered
-    return _hasAnswered;
+    // For graded, need selection to "Check"
+    if (!_hasAnswered) {
+      return _selectedAnswer != null;
+    }
+    return true; // If answered, can continue
   }
 
   Future<void> _showExitConfirmation(BuildContext context) async {

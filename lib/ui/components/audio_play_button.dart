@@ -1,100 +1,89 @@
-/// AudioPlayButton - Play/pause button for audio (UI only)
+/// AudioButton - Play/pause button for audio (UI only)
 ///
-/// Does not contain playback logic; that will be added in Phase 1.5.
-/// Accepts onPressed callback for parent to handle.
+/// Handles Normal and Slow variants, plus Loading and Playing states.
+/// Does not contain playback logic (pure UI).
 
 import 'package:flutter/material.dart';
-import '../tokens.dart';
 
-class AudioPlayButton extends StatelessWidget {
-  const AudioPlayButton({
+enum AudioButtonVariant { normal, slow }
+
+class AudioButton extends StatelessWidget {
+  const AudioButton({
     super.key,
     required this.onPressed,
+    this.variant = AudioButtonVariant.normal,
     this.isPlaying = false,
-    this.size = 48,
-    this.showLabel = false,
-    this.label,
+    this.isLoading = false,
+    this.isDisabled = false,
+    this.size = 56, // Slightly larger base size
   });
 
-  final VoidCallback onPressed;
+  final VoidCallback? onPressed;
+  final AudioButtonVariant variant;
   final bool isPlaying;
+  final bool isLoading;
+  final bool isDisabled;
   final double size;
-  final bool showLabel;
-  final String? label;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final isSlow = variant == AudioButtonVariant.slow;
 
-    final button = Material(
-      color: theme.colorScheme.primaryContainer,
-      shape: const CircleBorder(),
-      child: InkWell(
-        onTap: onPressed,
-        customBorder: const CircleBorder(),
-        child: SizedBox(
-          width: size,
-          height: size,
-          child: Icon(
-            isPlaying ? Icons.pause_rounded : Icons.play_arrow_rounded,
-            color: theme.colorScheme.primary,
-            size: size * 0.5,
+    // Colors based on variant
+    final Color solidColor = isSlow
+        ? theme.colorScheme.surfaceContainerHighest
+        : theme.colorScheme.primaryContainer;
+
+    final Color iconColor = isSlow
+        ? theme.colorScheme.onSurfaceVariant
+        : theme.colorScheme.primary;
+
+    // Reduce size for slow variant if not overridden?
+    // Usually slow button is smaller.
+    final effectiveSize = isSlow ? size * 0.8 : size;
+
+    return Semantics(
+      label: isSlow ? 'Play slowly' : 'Play audio',
+      button: true,
+      enabled: !isDisabled,
+      child: Material(
+        color: isDisabled ? theme.colorScheme.surfaceContainerLow : solidColor,
+        shape: const CircleBorder(),
+        child: InkWell(
+          onTap: (isDisabled || isLoading) ? null : onPressed,
+          customBorder: const CircleBorder(),
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
+            width: effectiveSize,
+            height: effectiveSize,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              border: isPlaying ? Border.all(color: iconColor, width: 2) : null,
+            ),
+            padding: EdgeInsets.all(effectiveSize * 0.25), // Icon padding
+            child: isLoading
+                ? CircularProgressIndicator(strokeWidth: 2, color: iconColor)
+                : Icon(
+                    _getIcon(),
+                    color: isDisabled
+                        ? theme.colorScheme.onSurface.withValues(alpha: 0.38)
+                        : iconColor,
+                    size: effectiveSize * 0.5,
+                  ),
           ),
         ),
       ),
-    );
-
-    if (!showLabel) {
-      return button;
-    }
-
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        button,
-        const SizedBox(height: Spacing.xs),
-        Text(
-          label ?? (isPlaying ? 'Pause' : 'Play'),
-          style: theme.textTheme.bodySmall,
-        ),
-      ],
     );
   }
-}
 
-/// Slow audio button variant
-class SlowAudioButton extends StatelessWidget {
-  const SlowAudioButton({
-    super.key,
-    required this.onPressed,
-    this.isPlaying = false,
-    this.size = 40,
-  });
-
-  final VoidCallback onPressed;
-  final bool isPlaying;
-  final double size;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Material(
-      color: theme.colorScheme.surfaceContainerHighest,
-      shape: const CircleBorder(),
-      child: InkWell(
-        onTap: onPressed,
-        customBorder: const CircleBorder(),
-        child: SizedBox(
-          width: size,
-          height: size,
-          child: Icon(
-            Icons.slow_motion_video_rounded,
-            color: theme.colorScheme.onSurfaceVariant,
-            size: size * 0.5,
-          ),
-        ),
-      ),
-    );
+  IconData _getIcon() {
+    if (isPlaying) {
+      return Icons.stop_rounded;
+    }
+    if (variant == AudioButtonVariant.slow) {
+      return Icons.speed_rounded;
+    }
+    return Icons.volume_up_rounded;
   }
 }

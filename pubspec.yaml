@@ -103,6 +103,13 @@ flutter:
     - assets/audio/a1/unit_08/
     - assets/audio/a1/unit_09/
     - assets/audio/a1/unit_10/
+    - assets/packs/roles/
+    - assets/audio/roles/
+    # Traveler audio subdirectories (Flutter assets are not recursive)
+    - assets/audio/roles/traveler/airport/
+    - assets/audio/roles/traveler/hotel/
+    - assets/audio/roles/traveler/directions/
+    - assets/audio/roles/traveler/takeaways/
     - .env
 
   # An image asset can refer to one or more resolution-specific "variants", see

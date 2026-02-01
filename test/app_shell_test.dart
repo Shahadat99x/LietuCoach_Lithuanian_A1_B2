@@ -64,7 +64,7 @@ void main() {
     await tester.tap(find.text('Practice'));
     await tester.pump(const Duration(milliseconds: 500));
     expect(find.text('Practice').first, findsOneWidget);
-    expect(find.textContaining('Daily Review'), findsOneWidget);
+    expect(find.text('Daily Training'), findsOneWidget);
 
     // 5. Tap Roles tab
     await tester.tap(find.text('Roles'));
