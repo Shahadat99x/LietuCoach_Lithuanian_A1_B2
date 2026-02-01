@@ -5,30 +5,43 @@ import 'package:flutter/material.dart';
 class AuroraBackground extends StatelessWidget {
   final Widget child;
   final bool isDark;
+  final bool debugLoud;
 
-  const AuroraBackground({super.key, required this.child, this.isDark = false});
+  const AuroraBackground({
+    super.key,
+    required this.child,
+    this.isDark = false,
+    this.debugLoud = false,
+  });
 
   @override
   Widget build(BuildContext context) {
     // Colors configuration (Subtle premium tints)
     // Adjust opacity for subtlety (0.06 - 0.12)
-    // Tuned to 0.12 for better visibility on light backgrounds
-    const double opacity = 0.12;
+    // Tuned to 0.08 for maximum premium subtlety (Step 2)
+    // DEBUG: If debugLoud is true, use high opacity (0.8)
+    final double opacity = debugLoud ? 0.8 : (isDark ? 0.04 : 0.08);
 
-    // Top-Left (Cool Mint/Blue)
-    final Color color1 = isDark
-        ? const Color(0xFF004D40) // Dark Teal
-        : const Color(0xFFB2DFDB); // Light Teal
+    // Top-Left (Cyan/Mint - Cool Atmosphere)
+    final Color color1 = debugLoud
+        ? Colors.cyanAccent
+        : (isDark
+              ? const Color(0xFF00695C) // Dark Teal
+              : const Color(0xFFB2DFDB)); // Light Teal
 
-    // Center-Right (Soft Purple/Blue)
-    final Color color2 = isDark
-        ? const Color(0xFF1A237E) // Dark Indigo
-        : const Color(0xFFE1BEE7); // Light Purple
+    // Center-Right (Deep Blue/Indigo - Knowledge)
+    final Color color2 = debugLoud
+        ? Colors.purpleAccent
+        : (isDark
+              ? const Color(0xFF311B92) // Deep Indigo
+              : const Color(0xFFE8EAF6)); // Light Indigo (very subtle)
 
-    // Bottom-Left (Warm Amber/Yellow)
-    final Color color3 = isDark
-        ? const Color(0xFFE65100) // Dark Orange
-        : const Color(0xFFFFE082); // Light Amber
+    // Bottom-Left (Soft Amber - Warmth)
+    final Color color3 = debugLoud
+        ? Colors.yellowAccent
+        : (isDark
+              ? const Color(0xFFE65100).withValues(alpha: 0.5) // Dark Orange
+              : const Color(0xFFFFECB3)); // Light Amber
 
     return Stack(
       children: [
@@ -52,21 +65,30 @@ class AuroraBackground extends StatelessWidget {
         Positioned(
           top: -100,
           left: -100,
-          child: _AuroraBlob(color: color1.withOpacity(opacity), radius: 300),
+          child: _AuroraBlob(
+            color: color1.withValues(alpha: opacity),
+            radius: 300,
+          ),
         ),
 
         // 3. Blob 2: Center Right (Purple/Blue)
         Positioned(
           top: 200,
           right: -50,
-          child: _AuroraBlob(color: color2.withOpacity(opacity), radius: 350),
+          child: _AuroraBlob(
+            color: color2.withValues(alpha: opacity),
+            radius: 350,
+          ),
         ),
 
         // 4. Blob 3: Bottom Left (Warm)
         Positioned(
           bottom: -50,
           left: -50,
-          child: _AuroraBlob(color: color3.withOpacity(opacity), radius: 400),
+          child: _AuroraBlob(
+            color: color3.withValues(alpha: opacity),
+            radius: 400,
+          ),
         ),
 
         // 5. Content
@@ -90,7 +112,7 @@ class _AuroraBlob extends StatelessWidget {
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         gradient: RadialGradient(
-          colors: [color, color.withOpacity(0.0)],
+          colors: [color, color.withValues(alpha: 0.0)],
           stops: const [0.0, 1.0],
         ),
       ),

@@ -75,6 +75,7 @@ void main() {
       final localCompleted = true;
       final remoteCompleted = true;
 
+      // ignore: dead_code
       final merged = localCompleted || remoteCompleted;
       expect(merged, isTrue);
     });
@@ -86,6 +87,7 @@ void main() {
       final remotePassed = false;
 
       // Merge rule: examPassed=true wins
+      // ignore: dead_code
       final merged = localPassed || remotePassed;
       expect(merged, isTrue);
     });

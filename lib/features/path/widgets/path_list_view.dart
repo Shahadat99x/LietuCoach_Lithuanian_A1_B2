@@ -4,6 +4,7 @@ import '../models/course_unit_config.dart';
 import '../../../../ui/tokens.dart';
 import '../../../../progress/progress.dart';
 import '../../../../packs/packs.dart';
+import '../models/map_ui_models.dart';
 import 'path_unit_card.dart';
 
 // Copy of `_UnitCard` from path_screen.dart, will be moved here or made public there
@@ -20,7 +21,7 @@ import 'path_unit_card.dart';
 
 class PathListView extends StatelessWidget {
   final List<CourseUnitConfig> courseUnits;
-  final Function(int index) isUnitUnlocked;
+  final bool Function(int index) isUnitUnlocked;
   final Map<String, int> lessonCompletedCount;
   final Map<String, UnitProgress?> unitProgress;
   final Map<String, bool> unitAvailability;
@@ -46,45 +47,69 @@ class PathListView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListView(
+    // Convert Data using the same mapper as Map View
+    final sections = MapDataMapper.buildSections(
+      courseUnits: courseUnits,
+      lessonCompletedCount: lessonCompletedCount,
+      unitProgress: unitProgress,
+      isUnitUnlocked: isUnitUnlocked,
+    );
+
+    return ListView.builder(
       padding: const EdgeInsets.symmetric(vertical: Spacing.m),
-      children: [
-        if (header != null) header!,
-        const SizedBox(height: Spacing.l),
-        for (var i = 0; i < courseUnits.length; i++) ...[
-          _buildUnitSection(i),
-          if (i < courseUnits.length - 1) const SizedBox(height: Spacing.m),
-        ],
-        if (footer != null) ...[
-          const SizedBox(height: Spacing.xl),
-          footer!,
-          const SizedBox(height: Spacing.xxl),
-        ] else ...[
-          const SizedBox(height: Spacing.xxl),
-        ],
-      ],
+      itemCount: sections.length + 2, // Header + Sections + Footer
+      itemBuilder: (context, index) {
+        if (index == 0) {
+          return Column(
+            children: [
+              if (header != null) header!,
+              const SizedBox(height: Spacing.l),
+            ],
+          );
+        }
+
+        if (index == sections.length + 1) {
+          return footer != null
+              ? Padding(
+                  padding: const EdgeInsets.only(
+                    top: Spacing.xl,
+                    bottom: Spacing.xxl,
+                  ),
+                  child: footer!,
+                )
+              : const SizedBox(height: Spacing.xxl);
+        }
+
+        final section = sections[index - 1];
+        return _buildUnitSection(context, section, index - 1);
+      },
     );
   }
 
-  Widget _buildUnitSection(int index) {
+  Widget _buildUnitSection(
+    BuildContext context,
+    PathMapUnitSection section,
+    int index,
+  ) {
     final config = courseUnits[index];
-    final isUnlocked = isUnitUnlocked(index);
-    final completedCount = lessonCompletedCount[config.unitId] ?? 0;
-    final uProgress = unitProgress[config.unitId];
     final isAvailable = unitAvailability[config.unitId] ?? false;
     final downloadProgress = activeDownloads[config.unitId];
 
+    // Determine overall unit state from section
+    // In our model, a unit is "Current" if any node is current,
+    // or "Completed" if exam is completed.
+    // For the list view, we can just pass the section and handles logic in the card.
+
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: Spacing.pagePadding),
+      padding: const EdgeInsets.symmetric(
+        horizontal: Spacing.pagePadding,
+        vertical: Spacing.s,
+      ),
       child: PathUnitCard(
-        config: config,
-        index: index,
-        isUnlocked: isUnlocked,
+        section: section,
         isAvailable: isAvailable,
+        hasContent: config.hasContent,
         downloadProgress: downloadProgress?.progress,
-        completedLessons: completedCount,
-        examPassed: uProgress?.examPassed ?? false,
-        examScore: uProgress?.examScore,
         onTap: () => onUnitTap(config),
         onExamTap: () => onExamTap(config),
       ),

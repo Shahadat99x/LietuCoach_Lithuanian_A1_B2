@@ -17,10 +17,12 @@ import 'certificate_node.dart';
 import '../../debug/debug_state.dart';
 import 'widgets/path_header.dart';
 import 'widgets/segmented_view_toggle.dart';
-import '../../design_system/aurora_background.dart';
+import '../../ui/app_background.dart';
+import '../../ui/components/app_scaffold.dart';
 
 import 'widgets/path_list_view.dart';
 import 'widgets/path_map_view.dart';
+import 'widgets/lock_bottom_sheet.dart';
 import 'models/course_unit_config.dart';
 import 'services/path_preferences_service.dart';
 
@@ -295,21 +297,20 @@ class _PathScreenState extends State<PathScreen> {
           );
 
     return AppScaffold(
+      backgroundColor: Colors.transparent,
+      backgroundPolicy: BackgroundPolicy.aurora,
       body: _loading
           ? const Center(child: CircularProgressIndicator())
-          : AuroraBackground(
-              isDark: Theme.of(context).brightness == Brightness.dark,
-              child: RefreshIndicator(
-                onRefresh: _loadData,
-                child: AnimatedSwitcher(
-                  duration: const Duration(milliseconds: 400),
-                  switchInCurve: Curves.easeInOut,
-                  switchOutCurve: Curves.easeInOut,
-                  transitionBuilder: (child, animation) {
-                    return FadeTransition(opacity: animation, child: child);
-                  },
-                  child: KeyedSubtree(key: ValueKey(_pathStyle), child: child),
-                ),
+          : RefreshIndicator(
+              onRefresh: _loadData,
+              child: AnimatedSwitcher(
+                duration: const Duration(milliseconds: 400),
+                switchInCurve: Curves.easeInOut,
+                switchOutCurve: Curves.easeInOut,
+                transitionBuilder: (child, animation) {
+                  return FadeTransition(opacity: animation, child: child);
+                },
+                child: KeyedSubtree(key: ValueKey(_pathStyle), child: child),
               ),
             ),
     );
@@ -327,12 +328,11 @@ class _PathScreenState extends State<PathScreen> {
     }
 
     if (!isUnlocked) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: const Text('Pass previous unit exam to unlock.'),
-          behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-        ),
+      final unitIndex = courseUnits.indexOf(config);
+      LockBottomSheet.show(
+        context,
+        title: 'Unit Locked',
+        message: 'Pass the exam for Unit $unitIndex to unlock this module.',
       );
       return;
     }

@@ -1,19 +1,18 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:lietucoach/auth/auth_service.dart' as local_auth;
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:mockito/mockito.dart';
 
 // Fake User
 class FakeUser extends User {
   FakeUser()
-      : super(
-          id: '123',
-          appMetadata: {},
-          userMetadata: {'full_name': 'Test User'},
-          aud: 'authenticated',
-          createdAt: DateTime.now().toIso8601String(),
-          email: 'test@example.com',
-        );
+    : super(
+        id: '123',
+        appMetadata: {},
+        userMetadata: {'full_name': 'Test User'},
+        aud: 'authenticated',
+        createdAt: DateTime.now().toIso8601String(),
+        email: 'test@example.com',
+      );
 }
 
 void main() {

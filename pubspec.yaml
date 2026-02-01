@@ -107,10 +107,8 @@ flutter:
     - assets/audio/roles/
     # Traveler audio subdirectories (Flutter assets are not recursive)
     - assets/audio/roles/traveler/airport/
-    - assets/audio/roles/traveler/bus/
-    - assets/audio/roles/traveler/gate/
-    - assets/audio/roles/traveler/taxi/
-    - assets/audio/roles/traveler/wifi/
+    - assets/audio/roles/traveler/hotel/
+    - assets/audio/roles/traveler/directions/
     - assets/audio/roles/traveler/takeaways/
     - .env
 

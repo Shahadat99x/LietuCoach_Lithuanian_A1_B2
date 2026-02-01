@@ -4,11 +4,13 @@ import '../../../../ui/tokens.dart';
 import '../models/course_unit_config.dart';
 import '../../../../progress/progress.dart';
 import '../../../../packs/packs.dart';
-import 'map_view/unit_section.dart';
+import '../models/map_ui_models.dart';
+import 'map_view/path_section_layout.dart';
+import 'lock_bottom_sheet.dart';
 
 class PathMapView extends StatelessWidget {
   final List<CourseUnitConfig> courseUnits;
-  final Function(int index) isUnitUnlocked;
+  final bool Function(int index) isUnitUnlocked;
   final Map<String, int> lessonCompletedCount;
   final Map<String, UnitProgress?> unitProgress;
   final Map<String, bool> unitAvailability;
@@ -43,35 +45,73 @@ class PathMapView extends StatelessWidget {
     // Reduce opacity to ensure aurora is visible (was 0.6)
     final opacity = isDark ? 0.3 : 0.2;
 
+    // Convert Data
+    final sections = MapDataMapper.buildSections(
+      courseUnits: courseUnits,
+      lessonCompletedCount: lessonCompletedCount,
+      unitProgress: unitProgress,
+      isUnitUnlocked: isUnitUnlocked,
+    );
+
     return Container(
-      decoration: BoxDecoration(color: surfaceColor.withOpacity(opacity)),
-      child: ListView(
+      decoration: BoxDecoration(color: surfaceColor.withValues(alpha: opacity)),
+      child: ListView.builder(
         padding: EdgeInsets.fromLTRB(
           Spacing.pagePadding,
           Spacing.m,
           Spacing.pagePadding,
           bottomPadding,
         ),
-        children: [
-          if (header != null) header!,
-          const SizedBox(height: Spacing.l),
-
-          ...courseUnits.asMap().entries.map((entry) {
-            final index = entry.key;
-            final config = entry.value;
-
-            return UnitSection(
-              config: config,
-              completedLessons: lessonCompletedCount[config.unitId] ?? 0,
-              isUnlocked: isUnitUnlocked(index),
-              examPassed: unitProgress[config.unitId]?.examPassed ?? false,
-              onNodeTap: (_) => onUnitTap(config),
-              onExamTap: () => onExamTap(config),
+        itemCount: sections.length + 2, // Header + Sections + Footer
+        itemBuilder: (context, index) {
+          if (index == 0) {
+            return Column(
+              children: [
+                if (header != null) header!,
+                const SizedBox(height: Spacing.l),
+              ],
             );
-          }),
+          }
 
-          if (footer != null) ...[const SizedBox(height: Spacing.xl), footer!],
-        ],
+          if (index == sections.length + 1) {
+            return footer != null
+                ? Padding(
+                    padding: const EdgeInsets.only(top: Spacing.xl),
+                    child: footer!,
+                  )
+                : const SizedBox.shrink();
+          }
+
+          final section = sections[index - 1]; // Offset index
+          return PathSectionLayout(
+            section: section,
+            onNodeTap: (node) {
+              if (node.state == PathNodeState.locked) {
+                LockBottomSheet.show(
+                  context,
+                  title: 'Lesson Locked',
+                  message:
+                      'Complete the previous lesson or unit to unlock this content.',
+                );
+              } else {
+                // Find config for this unit
+                final config = courseUnits[index - 1]; // Assume mapped 1:1
+
+                if (node.type == PathNodeType.exam) {
+                  onExamTap(config);
+                } else {
+                  // Assuming Node Index maps effectively to Lesson Index if we ignore exam
+                  // In DataMapper: nodes are 0..lessonCount.
+                  // Call generic onUnitTap which usually resumes/starts?
+                  // OR we need to pass strict lesson index.
+                  // Original just called onUnitTap(config) which handles "Continue".
+                  // Let's stick to that for safe resume.
+                  onUnitTap(config);
+                }
+              }
+            },
+          );
+        },
       ),
     );
   }

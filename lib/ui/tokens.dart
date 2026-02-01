@@ -1,34 +1,41 @@
-/// LietuCoach Design Tokens
+/// LietuCoach Design Tokens (DEPRECATED SHIM)
 ///
-/// Single source of truth for spacing, radii, typography, and colors.
-/// All UI components should use these tokens instead of hardcoded values.
+/// This file is a facade for the new Design System tokens in `lib/design_system/tokens/`.
+/// It exists to maintain backward compatibility while we migrate the app.
+///
+/// New code should import `package:lietucoach/design_system/tokens/*.dart` directly.
 
 import 'package:flutter/material.dart';
+import '../design_system/tokens/spacing.dart' as spacing_ds;
+import '../design_system/tokens/radius.dart' as radius_ds;
+import '../design_system/tokens/colors.dart' as colors_ds;
+import '../design_system/tokens/typography.dart' as typography_ds;
 
 /// Spacing scale (logical pixels)
 abstract final class Spacing {
-  static const double xs = 4;
-  static const double s = 8;
-  static const double m = 16;
-  static const double l = 24;
-  static const double xl = 32;
-  static const double xxl = 48;
+  static const double xxs = spacing_ds.AppSpacing.xxs;
+  static const double xs = spacing_ds.AppSpacing.xs;
+  static const double s = spacing_ds.AppSpacing.s;
+  static const double m = spacing_ds.AppSpacing.m;
+  static const double l = spacing_ds.AppSpacing.l;
+  static const double xl = spacing_ds.AppSpacing.xl;
+  static const double xxl = spacing_ds.AppSpacing.xxl;
 
   /// Page padding (horizontal)
-  static const double pagePadding = 16;
+  static const double pagePadding = spacing_ds.AppSpacing.m;
 
   /// Section spacing (vertical between sections)
-  static const double sectionSpacing = 24;
+  static const double sectionSpacing = spacing_ds.AppSpacing.xl;
 }
 
 /// Border radii
 abstract final class Radii {
-  static const double sm = 4;
-  static const double md = 8;
-  static const double lg = 12;
-  static const double xl = 16;
-  static const double xxl = 24;
-  static const double full = 999;
+  static const double sm = radius_ds.AppRadius.sm;
+  static const double md = radius_ds.AppRadius.md;
+  static const double lg = radius_ds.AppRadius.lg;
+  static const double xl = radius_ds.AppRadius.xl;
+  static const double xxl = radius_ds.AppRadius.xl; // Map to XL
+  static const double full = radius_ds.AppRadius.full;
 
   static const Radius smRadius = Radius.circular(sm);
   static const Radius mdRadius = Radius.circular(md);
@@ -39,120 +46,72 @@ abstract final class Radii {
 /// Color palette
 abstract final class AppColors {
   // Primary brand colors
-  static const Color primary = Color(0xFF4CAF50); // Green - growth/learning
-  static const Color primaryLight = Color(0xFF81C784);
-  static const Color primaryDark = Color(0xFF388E3C);
+  static const Color primary = colors_ds.AppColors.primary;
+  static const Color primaryLight = colors_ds.AppColors.primarySoft;
+  static const Color primaryDark = Color(
+    0xFF388E3C,
+  ); // Legacy, keep literal or approximate
   static const Color onPrimary = Colors.white;
 
   // Secondary accent
-  static const Color secondary = Color(0xFFFFB300); // Amber - achievement
+  static const Color secondary = colors_ds.AppColors.secondary;
   static const Color onSecondary = Colors.black;
 
   // Surface colors (light mode)
-  static const Color surface = Colors.white;
-  static const Color surfaceVariant = Color(0xFFF5F5F5);
-  static const Color onSurface = Color(0xFF1C1B1F);
-  static const Color onSurfaceVariant = Color(0xFF49454F);
+  static const Color surface =
+      colors_ds.AppColors.surface1Light; // Card surface
+  static const Color surfaceVariant = colors_ds.AppColors.surface2Light;
+  static const Color onSurface = colors_ds.AppColors.textPrimaryLight;
+  static const Color onSurfaceVariant = colors_ds.AppColors.textSecondaryLight;
 
   // Background
-  static const Color background = Color(0xFFFAFAFA);
-  static const Color onBackground = Color(0xFF1C1B1F);
+  static const Color background = colors_ds.AppColors.surface0Light;
+  static const Color onBackground = colors_ds.AppColors.textPrimaryLight;
 
   // Semantic colors
-  static const Color success = Color(0xFF4CAF50);
-  static const Color successLight = Color(0xFFE8F5E9);
-  static const Color danger = Color(0xFFE53935);
-  static const Color dangerLight = Color(0xFFFFEBEE);
-  static const Color warning = Color(0xFFFF9800);
-  static const Color warningLight = Color(0xFFFFF3E0);
-  static const Color info = Color(0xFF2196F3);
-  static const Color infoLight = Color(0xFFE3F2FD);
+  static const Color success = colors_ds.AppColors.primary;
+  static const Color successLight = colors_ds.AppColors.primarySoft;
+  static const Color danger = colors_ds.AppColors.danger;
+  static const Color dangerLight = Color(0xFFFFEBEE); // Legacy
+  static const Color warning = colors_ds.AppColors.secondary;
+  static const Color warningLight = Color(0xFFFFF3E0); // Legacy
+  static const Color info = colors_ds.AppColors.info;
+  static const Color infoLight = Color(0xFFE3F2FD); // Legacy
 
   // Text colors
-  static const Color textPrimary = Color(0xFF212121);
-  static const Color textSecondary = Color(0xFF757575);
-  static const Color textHint = Color(0xFFBDBDBD);
+  static const Color textPrimary = colors_ds.AppColors.textPrimaryLight;
+  static const Color textSecondary = colors_ds.AppColors.textSecondaryLight;
+  static const Color textHint = colors_ds.AppColors.textTertiaryLight;
 
   // Dark mode variants
-  static const Color surfaceDark = Color(0xFF1E1E1E);
-  static const Color surfaceVariantDark = Color(0xFF2D2D2D);
-  static const Color backgroundDark = Color(0xFF121212);
+  static const Color surfaceDark = colors_ds.AppColors.surface1Dark;
+  static const Color surfaceVariantDark = colors_ds.AppColors.surface2Dark;
+  static const Color backgroundDark = colors_ds.AppColors.surface0Dark;
 }
 
 /// Typography styles
 abstract final class AppTypography {
-  static const String fontFamily = 'Roboto';
+  static const String fontFamily = 'Nunito';
 
-  static const TextStyle displayLarge = TextStyle(
-    fontSize: 32,
-    fontWeight: FontWeight.bold,
-    letterSpacing: -0.5,
-    height: 1.2,
-  );
+  // Mapping old styles to new hierarchy
+  static const TextStyle displayLarge =
+      typography_ds.AppTypography.titleLarge; // Was 32, now 24
+  static const TextStyle headlineLarge =
+      typography_ds.AppTypography.titleLarge; // Was 24, now 24
+  static const TextStyle headlineMedium =
+      typography_ds.AppTypography.titleMedium; // Was 20, now 20
+  static const TextStyle titleLarge =
+      typography_ds.AppTypography.bodyLarge; // Was 18, now 18
+  static const TextStyle titleMedium =
+      typography_ds.AppTypography.bodyMedium; // Was 16, now 16 (approx)
 
-  static const TextStyle headlineLarge = TextStyle(
-    fontSize: 24,
-    fontWeight: FontWeight.w600,
-    letterSpacing: 0,
-    height: 1.3,
-  );
+  static const TextStyle bodyLarge = typography_ds.AppTypography.bodyLarge;
+  static const TextStyle bodyMedium = typography_ds.AppTypography.bodyMedium;
+  static const TextStyle bodySmall = typography_ds.AppTypography.bodySmall;
 
-  static const TextStyle headlineMedium = TextStyle(
-    fontSize: 20,
-    fontWeight: FontWeight.w600,
-    letterSpacing: 0,
-    height: 1.3,
-  );
+  static const TextStyle labelLarge = typography_ds.AppTypography.labelLarge;
 
-  static const TextStyle titleLarge = TextStyle(
-    fontSize: 18,
-    fontWeight: FontWeight.w600,
-    letterSpacing: 0,
-    height: 1.4,
-  );
-
-  static const TextStyle titleMedium = TextStyle(
-    fontSize: 16,
-    fontWeight: FontWeight.w500,
-    letterSpacing: 0.15,
-    height: 1.4,
-  );
-
-  static const TextStyle bodyLarge = TextStyle(
-    fontSize: 16,
-    fontWeight: FontWeight.normal,
-    letterSpacing: 0.15,
-    height: 1.5,
-  );
-
-  static const TextStyle bodyMedium = TextStyle(
-    fontSize: 14,
-    fontWeight: FontWeight.normal,
-    letterSpacing: 0.25,
-    height: 1.5,
-  );
-
-  static const TextStyle bodySmall = TextStyle(
-    fontSize: 12,
-    fontWeight: FontWeight.normal,
-    letterSpacing: 0.4,
-    height: 1.5,
-  );
-
-  static const TextStyle labelLarge = TextStyle(
-    fontSize: 14,
-    fontWeight: FontWeight.w500,
-    letterSpacing: 0.1,
-    height: 1.4,
-  );
-
-  static const TextStyle caption = TextStyle(
-    fontSize: 12,
-    fontWeight: FontWeight.normal,
-    letterSpacing: 0.4,
-    height: 1.4,
-    color: AppColors.textSecondary,
-  );
+  static const TextStyle caption = typography_ds.AppTypography.caption;
 }
 
 /// Elevation values
@@ -166,7 +125,7 @@ abstract final class Elevations {
 
 /// Animation durations
 abstract final class AppDurations {
-  static const Duration fast = Duration(milliseconds: 150);
+  static const Duration fast = Duration(milliseconds: 200);
   static const Duration medium = Duration(milliseconds: 300);
-  static const Duration slow = Duration(milliseconds: 500);
+  static const Duration slow = Duration(milliseconds: 600);
 }

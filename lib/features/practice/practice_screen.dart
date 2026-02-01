@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import '../../ui/tokens.dart';
-import '../../ui/components/components.dart';
 import '../cards/review_session_screen.dart';
 import 'audio_queue_screen.dart';
 import 'practice_planner.dart';
 import 'practice_stats_service.dart';
-// import '../../progress/progress.dart'; // Unused
+import 'widgets/daily_training_hero.dart';
+import 'widgets/practice_mode_grid.dart';
 
 class PracticeScreen extends StatefulWidget {
   const PracticeScreen({super.key});
@@ -45,7 +45,6 @@ class _PracticeScreenState extends State<PracticeScreen> {
   }
 
   Future<void> _loadData() async {
-    // Only show loader on initial load if needed, or keeping it smooth
     if (!mounted) return;
 
     // Refresh planner
@@ -65,6 +64,11 @@ class _PracticeScreenState extends State<PracticeScreen> {
 
   void _startDailyPractice() {
     if (_dailyPlan == null || _dailyPlan!.isEmpty) {
+      // If empty, navigate to Path? Or maybe just show a toast for now.
+      // Better: navigate to home tab if possible, or show message.
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Go to Path to unlock more content!')),
+      );
       return;
     }
     _launchSession(_dailyPlan!, isDailyMix: true);
@@ -90,11 +94,6 @@ class _PracticeScreenState extends State<PracticeScreen> {
               builder: (_) => ReviewSessionScreen(
                 customCards: plan.itemsFlashcards,
                 onComplete: () {
-                  // Record SRS stats implicitly handled by ReviewSession if configured?
-                  // Or we assume ReviewSession calls store directly?
-                  // ReviewSession should ideally use PracticeStatsService too for card counts.
-                  // For now, we only record session time at end.
-
                   // After cards, check listening
                   if (plan.itemsListening.isNotEmpty) {
                     _navigateToListening(plan, isDailyMix);
@@ -156,12 +155,6 @@ class _PracticeScreenState extends State<PracticeScreen> {
               Text('Streak: $_streak days'),
             ],
           ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text('Awesome'),
-            ),
-          ],
         ),
       );
     }
@@ -171,193 +164,99 @@ class _PracticeScreenState extends State<PracticeScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
+    if (_loading) {
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
+
     return Scaffold(
-      appBar: AppBar(
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+      backgroundColor: theme.colorScheme.surface,
+      body: SafeArea(
+        child: ListView(
+          padding: const EdgeInsets.all(Spacing.pagePadding),
           children: [
-            Text('Practice'),
+            // Header
             Text(
-              'Daily Training',
-              style: theme.textTheme.labelSmall,
-            ), // custom style extension not avail? Use labelSmall
-          ],
-        ),
-      ),
-      body: _loading
-          ? Center(child: CircularProgressIndicator())
-          : ListView(
-              padding: EdgeInsets.all(Spacing.pagePadding),
-              children: [
-                // 1. Stats Row
-                Row(
-                  children: [
-                    _StatChip(
-                      icon: Icons.local_fire_department,
-                      label: '$_streak day streak',
-                      color: Colors.orange,
-                    ),
-                    SizedBox(width: Spacing.s),
-                    Expanded(
-                      child: _StatChip(
-                        icon: Icons.timer,
-                        label: '$_minutesToday / $_goalMinutes min',
-                        color: Colors.blue,
-                      ),
-                    ),
-                  ],
-                ),
-                SizedBox(height: Spacing.l),
-
-                // 2. Primary CTA: Daily Mix
-                AppCard(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Recommended for you',
-                        style: theme.textTheme.labelMedium?.copyWith(
-                          color: theme.colorScheme.primary,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      SizedBox(height: Spacing.s),
-                      Text(
-                        'Daily Training Mix',
-                        style: theme.textTheme.headlineSmall,
-                      ),
-                      SizedBox(height: Spacing.s),
-                      Text(
-                        _dailyPlan?.isEmpty == true
-                            ? 'Complete a lesson to unlock practice.'
-                            : '${_dailyPlan?.estimatedMinutes ?? 5} min • Words & Listening',
-                        style: theme.textTheme.bodyMedium,
-                      ),
-                      SizedBox(height: Spacing.m),
-                      PrimaryButton(
-                        label: 'Start Session',
-                        onPressed: _dailyPlan?.isEmpty == true
-                            ? null
-                            : _startDailyPractice,
-                        isFullWidth: true,
-                      ),
-                    ],
-                  ),
-                ),
-                SizedBox(height: Spacing.l),
-
-                // 3. Modes Grid
-                Text('Practice Modes', style: theme.textTheme.titleMedium),
-                SizedBox(height: Spacing.m),
-
-                GridView.count(
-                  shrinkWrap: true,
-                  physics: NeverScrollableScrollPhysics(),
-                  crossAxisCount: 2,
-                  crossAxisSpacing: Spacing.m,
-                  mainAxisSpacing: Spacing.m,
-                  childAspectRatio: 1.2,
-                  children: [
-                    _ModeTile(
-                      icon: Icons.headphones,
-                      label: 'Listening',
-                      color: Colors.purple.shade100,
-                      iconColor: Colors.purple,
-                      onTap: _launchListeningMode,
-                    ),
-                    _ModeTile(
-                      icon: Icons.bolt,
-                      label: 'Hard Words',
-                      color: Colors.red.shade100,
-                      iconColor: Colors.red,
-                      onTap: () {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('Focus mode coming soon!')),
-                        );
-                      }, // TODO: Implement specific planHardWords launcher
-                    ),
-                  ],
-                ),
-              ],
-            ),
-    );
-  }
-}
-
-class _StatChip extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final Color color;
-
-  const _StatChip({
-    required this.icon,
-    required this.label,
-    required this.color,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: Spacing.m, vertical: Spacing.s),
-      decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: color.withOpacity(0.3)),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, size: 20, color: color),
-          SizedBox(width: Spacing.s),
-          Text(
-            label,
-            style: TextStyle(fontWeight: FontWeight.bold, color: color),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _ModeTile extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final Color color;
-  final Color iconColor;
-  final VoidCallback onTap;
-
-  const _ModeTile({
-    required this.icon,
-    required this.label,
-    required this.color,
-    required this.iconColor,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(16),
-      child: Container(
-        padding: EdgeInsets.all(Spacing.m),
-        decoration: BoxDecoration(
-          color: color,
-          borderRadius: BorderRadius.circular(16),
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(icon, size: 32, color: iconColor),
-            SizedBox(height: Spacing.s),
-            Text(
-              label,
-              style: TextStyle(
+              'Practice',
+              style: theme.textTheme.headlineLarge?.copyWith(
                 fontWeight: FontWeight.bold,
-                color: iconColor.withOpacity(0.8),
               ),
-              textAlign: TextAlign.center,
             ),
+            const SizedBox(height: Spacing.xs),
+
+            // Stats Row (Integrated)
+            Container(
+              padding: const EdgeInsets.symmetric(
+                vertical: Spacing.xs,
+                horizontal: 0,
+              ),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.timer_outlined,
+                    size: 16,
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                  const SizedBox(width: Spacing.xs),
+                  Text(
+                    'Daily Goal: $_minutesToday / $_goalMinutes min',
+                    style: theme.textTheme.labelLarge?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                  const Spacer(),
+                  Icon(
+                    Icons.local_fire_department,
+                    size: 16,
+                    color: Colors.orange,
+                  ),
+                  const SizedBox(width: Spacing.xs),
+                  Text(
+                    '$_streak days',
+                    style: theme.textTheme.labelLarge?.copyWith(
+                      color: Colors.orange,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: Spacing.l),
+
+            // Hero
+            DailyTrainingHero(plan: _dailyPlan, onStart: _startDailyPractice),
+            const SizedBox(height: Spacing.xl),
+
+            // Modes Grid
+            Text(
+              'Practice Modes',
+              style: theme.textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: Spacing.m),
+
+            PracticeModeGrid(
+              onListeningTap: _launchListeningMode,
+              onSpeakingTap: () {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Speaking mode specific unlock needed!'),
+                  ),
+                );
+              },
+              onWordsTap: () {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Focus mode coming soon!')),
+                );
+              },
+              onMistakesTap: () {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Mistake review coming soon!')),
+                );
+              },
+            ),
+
+            const SizedBox(height: Spacing.xl),
           ],
         ),
       ),

@@ -23,119 +23,164 @@ class UnitExamIntroScreen extends StatelessWidget {
     final theme = Theme.of(context);
 
     return Scaffold(
+      backgroundColor: theme.colorScheme.surface,
       appBar: AppBar(
-        title: Text('${unit.title} Exam'),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        leading: IconButton(
+          icon: Icon(Icons.close, color: theme.colorScheme.onSurface),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
       ),
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(Spacing.pagePadding),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: Spacing.l),
-              
-              // Icon
-              Center(
-                child: Container(
-                  padding: const EdgeInsets.all(Spacing.l),
-                  decoration: BoxDecoration(
-                    color: theme.colorScheme.primaryContainer,
-                    shape: BoxShape.circle,
-                  ),
-                  child: Icon(
-                    Icons.quiz,
-                    size: 64,
-                    color: theme.colorScheme.primary,
-                  ),
-                ),
-              ),
-              const SizedBox(height: Spacing.l),
-              
-              // Title
-              Center(
-                child: Text(
-                  'Unit Exam',
-                  style: theme.textTheme.headlineMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-              const SizedBox(height: Spacing.s),
-              Center(
-                child: Text(
-                  unit.title,
-                  style: theme.textTheme.titleMedium?.copyWith(
-                    color: theme.colorScheme.onSurfaceVariant,
-                  ),
-                ),
-              ),
-              const SizedBox(height: Spacing.xl),
-              
-              // Requirements
-              AppCard(
+        child: Column(
+          children: [
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(Spacing.pagePadding),
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    const SizedBox(height: Spacing.xl),
+                    // Hero Icon
+                    Container(
+                      padding: const EdgeInsets.all(Spacing.xxl),
+                      decoration: BoxDecoration(
+                        color: theme.colorScheme.primaryContainer.withValues(
+                          alpha: 0.3,
+                        ),
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                          color: theme.colorScheme.primary.withValues(
+                            alpha: 0.2,
+                          ),
+                          width: 2,
+                        ),
+                      ),
+                      child: Icon(
+                        Icons.school_rounded,
+                        size: 80,
+                        color: theme.colorScheme.primary,
+                      ),
+                    ),
+                    const SizedBox(height: Spacing.xxl),
+
+                    // Title
                     Text(
-                      'Requirements',
-                      style: theme.textTheme.titleMedium,
-                    ),
-                    const SizedBox(height: Spacing.m),
-                    _RequirementRow(
-                      icon: Icons.school,
-                      text: 'Complete all lessons',
-                      isMet: allLessonsCompleted,
+                      'Unit ${unit.id.split('_').last} Exam',
+                      style: theme.textTheme.headlineMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: theme.colorScheme.onSurface,
+                      ),
+                      textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: Spacing.s),
-                    _RequirementRow(
-                      icon: Icons.percent,
-                      text: 'Score at least 80% to pass',
-                      isMet: null, // Not applicable yet
+                    Text(
+                      unit.title,
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                        fontWeight: FontWeight.normal,
+                      ),
+                      textAlign: TextAlign.center,
                     ),
-                    const SizedBox(height: Spacing.s),
-                    _RequirementRow(
-                      icon: Icons.timer,
-                      text: '12 questions',
-                      isMet: null,
+                    const SizedBox(height: Spacing.xxl),
+
+                    // Requirements Card
+                    Container(
+                      padding: const EdgeInsets.all(Spacing.m),
+                      decoration: BoxDecoration(
+                        color: theme.colorScheme.surfaceContainerHighest
+                            .withValues(alpha: 0.3),
+                        borderRadius: BorderRadius.circular(Radii.lg),
+                        border: Border.all(color: theme.dividerColor),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.only(bottom: Spacing.m),
+                            child: Text(
+                              'TO PASS THIS EXAM',
+                              style: theme.textTheme.labelLarge?.copyWith(
+                                color: theme.colorScheme.onSurfaceVariant,
+                                letterSpacing: 1.0,
+                              ),
+                            ),
+                          ),
+                          _RequirementRow(
+                            icon: Icons.checklist_rounded,
+                            text: 'Complete all lessons',
+                            isMet: allLessonsCompleted,
+                            activeColor: theme.colorScheme.primary,
+                          ),
+                          const Divider(height: Spacing.l),
+                          const _RequirementRow(
+                            icon: Icons.timer_outlined,
+                            text: '12 Questions',
+                            isMet: true, // Always met as info
+                            hideCheck: true,
+                          ),
+                          const Divider(height: Spacing.l),
+                          const _RequirementRow(
+                            icon: Icons.percent_rounded,
+                            text: 'Score 80% or higher',
+                            isMet: true,
+                            hideCheck: true,
+                          ),
+                        ],
+                      ),
                     ),
-                  ],
-                ),
-              ),
-              
-              const Spacer(),
-              
-              // Action button
-              if (!allLessonsCompleted) ...[
-                AppCard(
-                  color: AppColors.warningLight,
-                  child: Row(
-                    children: [
-                      Icon(Icons.lock, color: AppColors.warning),
-                      const SizedBox(width: Spacing.m),
-                      Expanded(
-                        child: Text(
-                          'Complete all lessons first to unlock the exam.',
-                          style: theme.textTheme.bodyMedium,
+
+                    if (!allLessonsCompleted) ...[
+                      const SizedBox(height: Spacing.l),
+                      Container(
+                        padding: const EdgeInsets.all(Spacing.m),
+                        decoration: BoxDecoration(
+                          color: AppColors.warningLight,
+                          borderRadius: BorderRadius.circular(Radii.md),
+                          border: Border.all(color: AppColors.warning),
+                        ),
+                        child: Row(
+                          children: [
+                            const Icon(
+                              Icons.lock_rounded,
+                              color: AppColors.warning,
+                            ),
+                            const SizedBox(width: Spacing.m),
+                            Expanded(
+                              child: Text(
+                                'Complete all lessons in this unit to unlock the exam.',
+                                style: theme.textTheme.bodyMedium?.copyWith(
+                                  color: Colors
+                                      .brown[900], // High contrast on warning
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ],
-                  ),
+                  ],
                 ),
-                const SizedBox(height: Spacing.m),
-              ],
-              
-              SizedBox(
+              ),
+            ),
+
+            // Footer
+            Padding(
+              padding: const EdgeInsets.all(Spacing.pagePadding),
+              child: SizedBox(
                 width: double.infinity,
                 child: PrimaryButton(
-                  label: 'Start Exam',
+                  label: allLessonsCompleted ? 'Start Exam' : 'Locked',
+                  icon: allLessonsCompleted
+                      ? Icons.play_arrow_rounded
+                      : Icons.lock_outline,
                   onPressed: allLessonsCompleted
                       ? () => _startExam(context)
                       : null,
                 ),
               ),
-              const SizedBox(height: Spacing.m),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
@@ -143,9 +188,7 @@ class UnitExamIntroScreen extends StatelessWidget {
 
   void _startExam(BuildContext context) {
     Navigator.of(context).pushReplacement(
-      MaterialPageRoute(
-        builder: (_) => ExamRunnerScreen(unit: unit),
-      ),
+      MaterialPageRoute(builder: (_) => ExamRunnerScreen(unit: unit)),
     );
   }
 }
@@ -154,33 +197,44 @@ class _RequirementRow extends StatelessWidget {
   final IconData icon;
   final String text;
   final bool? isMet;
+  final bool hideCheck;
+  final Color? activeColor;
 
   const _RequirementRow({
     required this.icon,
     required this.text,
     this.isMet,
+    this.hideCheck = false,
+    this.activeColor,
   });
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
-    Color iconColor = theme.colorScheme.onSurfaceVariant;
-    if (isMet == true) iconColor = AppColors.success;
-    if (isMet == false) iconColor = AppColors.danger;
+    final color = (isMet == true)
+        ? (activeColor ?? theme.colorScheme.onSurface)
+        : theme.colorScheme.onSurfaceVariant;
 
     return Row(
       children: [
-        Icon(icon, size: 20, color: iconColor),
-        const SizedBox(width: Spacing.s),
+        Icon(icon, size: 24, color: color),
+        const SizedBox(width: Spacing.m),
         Expanded(
-          child: Text(text, style: theme.textTheme.bodyMedium),
+          child: Text(
+            text,
+            style: theme.textTheme.bodyLarge?.copyWith(
+              color: color,
+              fontWeight: (isMet == true && !hideCheck)
+                  ? FontWeight.bold
+                  : FontWeight.normal,
+            ),
+          ),
         ),
-        if (isMet != null)
+        if (!hideCheck && isMet != null)
           Icon(
-            isMet! ? Icons.check_circle : Icons.cancel,
-            size: 20,
-            color: isMet! ? AppColors.success : AppColors.danger,
+            isMet! ? Icons.check_circle_rounded : Icons.cancel_rounded,
+            size: 24,
+            color: isMet! ? AppColors.success : theme.colorScheme.outline,
           ),
       ],
     );

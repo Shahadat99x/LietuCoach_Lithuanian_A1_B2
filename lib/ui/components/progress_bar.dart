@@ -26,17 +26,48 @@ class ProgressBar extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final clampedValue = value.clamp(0.0, 1.0);
+    final effectiveProgressColor = progressColor ?? theme.colorScheme.primary;
 
-    final bar = ClipRRect(
-      borderRadius: BorderRadius.circular(borderRadius ?? Radii.full),
-      child: LinearProgressIndicator(
-        value: clampedValue,
-        minHeight: height,
-        backgroundColor:
-            backgroundColor ?? theme.colorScheme.surfaceContainerHighest,
-        valueColor: AlwaysStoppedAnimation<Color>(
-          progressColor ?? theme.colorScheme.primary,
-        ),
+    final bar = Container(
+      height: height,
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: backgroundColor ?? theme.colorScheme.surfaceContainerHighest,
+        borderRadius: BorderRadius.circular(borderRadius ?? Radii.full),
+      ),
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          return Stack(
+            children: [
+              TweenAnimationBuilder<double>(
+                tween: Tween<double>(begin: 0, end: clampedValue),
+                duration: const Duration(milliseconds: 800),
+                curve: Curves.easeOutQuart,
+                builder: (context, val, _) {
+                  return Container(
+                    width: constraints.maxWidth * val,
+                    height: height,
+                    decoration: BoxDecoration(
+                      color: effectiveProgressColor,
+                      borderRadius: BorderRadius.circular(
+                        borderRadius ?? Radii.full,
+                      ),
+                      boxShadow: [
+                        // Subtle 3D effect (highlight on top part of the bar)
+                        BoxShadow(
+                          color: Colors.white.withValues(alpha: 0.3),
+                          offset: const Offset(0, -2),
+                          blurRadius: 0,
+                          spreadRadius: -2,
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              ),
+            ],
+          );
+        },
       ),
     );
 
@@ -44,13 +75,17 @@ class ProgressBar extends StatelessWidget {
       return bar;
     }
 
-    return Row(
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Expanded(child: bar),
-        const SizedBox(width: Spacing.s),
+        bar,
+        const SizedBox(height: Spacing.xs),
         Text(
           '${(clampedValue * 100).round()}%',
-          style: theme.textTheme.bodySmall,
+          style: theme.textTheme.labelSmall?.copyWith(
+            fontWeight: FontWeight.bold,
+            color: theme.colorScheme.onSurfaceVariant,
+          ),
         ),
       ],
     );
