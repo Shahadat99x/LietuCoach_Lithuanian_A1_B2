@@ -11,13 +11,17 @@ import 'progress/progress.dart';
 import 'srs/srs.dart';
 import 'sync/sync.dart';
 import 'ui/theme.dart';
+import 'package:flutter_native_splash/flutter_native_splash.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'features/onboarding/onboarding_screen.dart';
 
 void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
+  final widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
+  FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
 
   // Initialize environment config
   await Env.init();
-  
+
   // Initialize Hive and Adapters
   await initHive();
 
@@ -25,17 +29,40 @@ void main() async {
   await initProgressStore();
   await initSrsStore();
 
-  // Initialize auth (Supabase) - gracefully handles missing config
+  // Initialize auth (Supabase)
   await authService.init();
 
   // Initialize sync service
   await initSyncService();
 
-  runApp(const LietuCoachApp());
+  // Check Onboarding
+  final prefs = await SharedPreferences.getInstance();
+  final seenOnboarding = prefs.getBool('seen_onboarding') ?? false;
+
+  // ... (inside main)
+  // FlutterNativeSplash.remove(); // Removed from here
+
+  runApp(LietuCoachApp(showOnboarding: !seenOnboarding));
 }
 
-class LietuCoachApp extends StatelessWidget {
-  const LietuCoachApp({super.key});
+class LietuCoachApp extends StatefulWidget {
+  final bool showOnboarding;
+
+  const LietuCoachApp({super.key, this.showOnboarding = false});
+
+  @override
+  State<LietuCoachApp> createState() => _LietuCoachAppState();
+}
+
+class _LietuCoachAppState extends State<LietuCoachApp> {
+  @override
+  void initState() {
+    super.initState();
+    // Remove splash screen once the widget tree is initialized
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      FlutterNativeSplash.remove();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -45,7 +72,7 @@ class LietuCoachApp extends StatelessWidget {
       theme: lightTheme,
       darkTheme: darkTheme,
       themeMode: ThemeMode.system,
-      home: const AppShell(),
+      home: widget.showOnboarding ? const OnboardingScreen() : const AppShell(),
     );
   }
 }
