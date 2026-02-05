@@ -30,10 +30,10 @@ class ProfileHeader extends StatelessWidget {
         child: Column(
           children: [
             const SizedBox(height: Spacing.m),
-            Icon(
-              Icons.account_circle,
-              size: 64,
-              color: theme.colorScheme.primary,
+            Image.asset(
+              'assets/branding/logo_mark_1024.png',
+              width: 80,
+              height: 80,
             ),
             const SizedBox(height: Spacing.m),
             Text(

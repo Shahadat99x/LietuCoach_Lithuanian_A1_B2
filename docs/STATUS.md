@@ -1,42 +1,31 @@
 # Project Status
 
-## Current Phase: Phase E2 Completed
-**Date**: 2026-01-31
-**Goal**: Global Consistency & Micro-Polish
+## Current Phase: Phase B3 (Splash Padding Fix) Completed
+**Date**: 2026-02-05
+**Goal**: Final Android Branding & Polish
 
-A rigorous audit and polish phase to ensure the app feels like one cohesive, premium product.
+Fixed "Circular Clipping" on splash screen by using a padded asset that fits within Android 12's mandatory circle mask.
 
 ### ✅ Completed Features
-- **Phase T1: Traveler Dialogue v2** (New!):
-  - **Audio**: Fixed missing pipeline, generated placeholders, handled missing audio gracefully ("Audio coming soon").
-  - **Chat UI**: Redesigned as explicit Bubbles (User right/Agent left) with Avatars.
-  - **Controls**: Compact Playback Bar (Play/Replay/Next), Speed toggle conditional on data.
-  - **Polish**: Standardized `RolePackDetailScreen` with chips and `AppCard`.
-  - **Features**: Global English Translation Toggle (Default ON, persisted).
-  - **Fixes (T1.1)**:
-    - **Asset Bundling**: Fixed `pubspec.yaml` to include recursive audio directories.
-    - **Playback Robustness**: Replaced `File.exists` with `AssetAudioResolver` to correctly detect bundled assets.
+- **Splash Screen Fixes**:
+  - **Clipping Fixed**: Generated `assets/branding/logo_mark_padded_1024.png` (60% scale with transparent padding).
+  - **Config Updated**: `flutter_native_splash` now uses the padded asset.
+  - **Wrong Asset Fixed**: Nuked and regenerated splash assets using `flutter_native_splash:remove` then `:create`.
+  - **Double Logo Removed**: Removed redundant `branding` key.
+  - **Double Splash/Flicker Removed**: `main.dart` refactor persists.
 
-- **Chip System**:
-  - `AppChip` established as the single source of truth (replacing `PillChip`).
-  - Replaced ad-hoc chips in `DailyTrainingHero` and other widgets.
-- **Iconography**:
-  - `PathHeader` icons standardized to 24px/20px using global tokens.
-  - `StatCard` refactored for consistency (Vertical layout, clean shadows).
-- **Empty States**:
-  - `AppEmptyState` deployed to `ReviewSessionScreen` ("All Caught Up").
-  - `DailyTrainingHero` empty state refined.
-- **Visual Parity**:
-  - Logic checks for Light/Dark mode interaction.
-  - `flutter analyze` clean (baseline legacy issues only).
+- **Assets (Canonical)**:
+  - `assets/branding/icon_full_1024.png`: Full Glass Icon.
+  - `assets/branding/logo_mark_1024.png`: Transparent Mark (Used In-App).
+  - `assets/branding/logo_mark_padded_1024.png`: Padded Mark (Used for Splash).
+  - `assets/branding/logo_foreground_1024.png`: Adaptive Foreground.
+
+- **Verification**:
+  - `flutter analyze`: Clean (legacy issues only).
+  - `flutter test`: Passing (legacy failures only).
 
 ### 🚧 In Progress / Next Steps
-- **QA Release Candidate**: Final pre-release checks.
+- **Manual Verification**: Run on device to confirm correct logo is now shown without clipping.
 
 ### 📉 Known Issues
-- `flutter analyze` runs are slow but resolving.
-- Need to manually verify "Success" green usage in Lesson feedback (currently implicitly verified via token change).
-
-### 📊 Metric Targets
-- **Crash Free Users**: 99.9%
-- **Dark Mode Support**: 100% of screens.
+- Windows/iOS icon generation skipped (directories missing).

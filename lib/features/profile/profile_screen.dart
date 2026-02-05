@@ -56,6 +56,25 @@ class _ProfileScreenState extends State<ProfileScreen> {
     await _syncService.syncNow();
   }
 
+  void _showAboutDialog() {
+    showAboutDialog(
+      context: context,
+      applicationName: 'LietuCoach',
+      applicationVersion: '1.0.0',
+      applicationIcon: Image.asset(
+        'assets/branding/logo_mark_1024.png',
+        width: 48,
+        height: 48,
+      ),
+      children: [
+        const Text(
+          'LietuCoach helps you learn Lithuanian with short lessons, '
+          'real dialogues, and spaced repetition.',
+        ),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -150,7 +169,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   leading: const Icon(Icons.info_outline),
                   title: const Text('About LietuCoach'),
                   trailing: const Text('v1.0.0'),
-                  onTap: () {},
+                  onTap: _showAboutDialog,
                 ),
                 if (isAuthenticated)
                   ListTile(
