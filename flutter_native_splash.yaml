@@ -1,0 +1,9 @@
+flutter_native_splash:
+  color: "#1E1E1E"
+  image: "assets/branding/logo_mark_padded_1024.png"
+  
+  android_12:
+    image: "assets/branding/logo_mark_padded_1024.png"
+    icon_background_color: "#1E1E1E"
+  
+  fullscreen: true
