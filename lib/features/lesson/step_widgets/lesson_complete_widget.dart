@@ -3,11 +3,13 @@
 /// Shows score and completion message.
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../../../content/content.dart';
+import '../../../design_system/glass/glass.dart';
 import '../../../ui/tokens.dart';
 import '../../../ui/components/components.dart';
 
-class LessonCompleteWidget extends StatelessWidget {
+class LessonCompleteWidget extends StatefulWidget {
   final LessonCompleteStep step;
   final int correctCount;
   final int totalCount;
@@ -22,12 +24,28 @@ class LessonCompleteWidget extends StatelessWidget {
   });
 
   @override
+  State<LessonCompleteWidget> createState() => _LessonCompleteWidgetState();
+}
+
+class _LessonCompleteWidgetState extends State<LessonCompleteWidget> {
+  bool _sentHaptic = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_sentHaptic) return;
+    _sentHaptic = true;
+    HapticFeedback.heavyImpact();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final percentage = totalCount > 0
-        ? (correctCount / totalCount * 100).round()
+    final semantic = Theme.of(context).semanticColors;
+    final reduceMotion = AppMotion.reduceMotionOf(context);
+    final percentage = widget.totalCount > 0
+        ? (widget.correctCount / widget.totalCount * 100).round()
         : 100;
-    final isPerfect = correctCount == totalCount;
+    final isPerfect = widget.correctCount == widget.totalCount;
 
     return Center(
       child: SingleChildScrollView(
@@ -39,35 +57,31 @@ class LessonCompleteWidget extends StatelessWidget {
             // Celebration Icon (Animated Pop)
             TweenAnimationBuilder<double>(
               tween: Tween(begin: 0.0, end: 1.0),
-              duration: const Duration(seconds: 1),
-              curve: Curves.elasticOut,
+              duration: reduceMotion ? AppMotion.fast : AppMotion.emphasis,
+              curve: AppMotion.curve(context, AppMotion.emphasisOut),
               builder: (context, value, child) {
-                return Transform.scale(scale: value, child: child);
+                return Opacity(
+                  opacity: value.clamp(0.0, 1.0),
+                  child: Transform.scale(scale: value, child: child),
+                );
               },
               child: Container(
                 padding: const EdgeInsets.all(Spacing.xxl),
                 decoration: BoxDecoration(
-                  color:
-                      (isPerfect
-                              ? AppColors.success
-                              : theme.colorScheme.primary)
-                          .withValues(alpha: 0.1), // Subtle glow background
+                  color: (isPerfect ? semantic.success : semantic.accentPrimary)
+                      .withValues(alpha: 0.12),
                   shape: BoxShape.circle,
                   border: Border.all(
                     color:
-                        (isPerfect
-                                ? AppColors.success
-                                : theme.colorScheme.primary)
-                            .withValues(alpha: 0.3),
-                    width: 4,
+                        (isPerfect ? semantic.success : semantic.accentPrimary)
+                            .withValues(alpha: 0.35),
+                    width: 3,
                   ),
                 ),
                 child: Icon(
                   isPerfect ? Icons.star_rounded : Icons.check_circle_rounded,
                   size: 80,
-                  color: isPerfect
-                      ? AppColors.success
-                      : theme.colorScheme.primary,
+                  color: isPerfect ? semantic.success : semantic.accentPrimary,
                 ),
               ),
             ),
@@ -77,10 +91,8 @@ class LessonCompleteWidget extends StatelessWidget {
             // Calm Semantic Headers
             Text(
               isPerfect ? 'Perfect!' : 'Lesson Complete',
-              style: theme.textTheme.displaySmall?.copyWith(
-                fontWeight: FontWeight.bold,
-                // Neutral text color (Day: Black, Night: White) - Premium Feel
-                color: theme.colorScheme.onSurface,
+              style: AppSemanticTypography.title.copyWith(
+                color: semantic.textPrimary,
               ),
               textAlign: TextAlign.center,
             ),
@@ -91,8 +103,8 @@ class LessonCompleteWidget extends StatelessWidget {
               isPerfect
                   ? 'You made no mistakes.'
                   : 'You scored $percentage% accuracy.',
-              style: theme.textTheme.bodyLarge?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant,
+              style: AppSemanticTypography.body.copyWith(
+                color: semantic.textSecondary,
               ),
               textAlign: TextAlign.center,
             ),
@@ -100,25 +112,24 @@ class LessonCompleteWidget extends StatelessWidget {
             const SizedBox(height: Spacing.xxl),
 
             // Premium Stats Row
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
+            Wrap(
+              alignment: WrapAlignment.center,
+              spacing: AppSemanticSpacing.space16,
+              runSpacing: AppSemanticSpacing.space16,
               children: [
                 _StatCard(
                   icon: Icons.bolt_rounded,
-                  value: step.xpEarned,
+                  value: widget.step.xpEarned,
                   label: 'XP',
-                  color: AppColors.secondary, // Amber for XP
+                  color: semantic.accentWarm,
                   animateValue: true,
                 ),
-                const SizedBox(width: Spacing.m),
                 _StatCard(
                   icon: Icons.track_changes_rounded,
                   value: percentage,
                   label: 'Accuracy',
                   suffix: '%',
-                  color: isPerfect
-                      ? AppColors.success
-                      : theme.colorScheme.primary,
+                  color: isPerfect ? semantic.success : semantic.accentPrimary,
                 ),
               ],
             ),
@@ -132,7 +143,7 @@ class LessonCompleteWidget extends StatelessWidget {
               ),
               child: PrimaryButton(
                 label: 'CONTINUE',
-                onPressed: onFinish,
+                onPressed: widget.onFinish,
                 isFullWidth: true,
               ),
             ),
@@ -163,68 +174,45 @@ class _StatCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final semantic = Theme.of(context).semanticColors;
+    final reduceMotion = AppMotion.reduceMotionOf(context);
 
-    // Surface2 (Card Color) used for Premium Cards
-    final cardColor = theme.cardTheme.color;
-
-    return Container(
+    return SizedBox(
       width: 120,
-      padding: const EdgeInsets.all(Spacing.l),
-      decoration: BoxDecoration(
-        color: cardColor,
-        borderRadius: BorderRadius.circular(Radii.xl),
-        // Subtle Border
-        border: Border.all(
-          color: theme.colorScheme.outlineVariant.withValues(alpha: 0.3),
-        ),
-        // Subtle Shadow
-        boxShadow: [
-          BoxShadow(
-            color: theme.colorScheme.shadow.withValues(alpha: 0.05),
-            blurRadius: 8,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Column(
-        children: [
-          Icon(icon, color: color, size: 28),
-          const SizedBox(height: Spacing.s),
-
-          if (animateValue)
-            TweenAnimationBuilder<int>(
-              tween: IntTween(begin: 0, end: value),
-              duration: const Duration(milliseconds: 1000),
-              curve: Curves.easeOutExpo,
-              builder: (context, val, child) {
-                return Text(
-                  '$val$suffix',
-                  style: theme.textTheme.headlineSmall?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: color,
-                  ),
-                );
-              },
-            )
-          else
+      child: GlassCard(
+        preferPerformance: true,
+        padding: const EdgeInsets.all(AppSemanticSpacing.space24),
+        child: Column(
+          children: [
+            Icon(icon, color: color, size: 28),
+            const SizedBox(height: AppSemanticSpacing.space12),
+            if (animateValue)
+              TweenAnimationBuilder<int>(
+                tween: IntTween(begin: 0, end: value),
+                duration: reduceMotion ? AppMotion.fast : AppMotion.emphasis,
+                curve: AppMotion.curve(context, AppMotion.easeOut),
+                builder: (context, val, child) {
+                  return Text(
+                    '$val$suffix',
+                    style: AppSemanticTypography.section.copyWith(color: color),
+                  );
+                },
+              )
+            else
+              Text(
+                '$value$suffix',
+                style: AppSemanticTypography.section.copyWith(color: color),
+              ),
             Text(
-              '$value$suffix',
-              style: theme.textTheme.headlineSmall?.copyWith(
-                fontWeight: FontWeight.bold,
-                color: color,
+              label.toUpperCase(),
+              style: AppSemanticTypography.caption.copyWith(
+                fontWeight: FontWeight.w700,
+                color: semantic.textSecondary,
+                letterSpacing: 0.8,
               ),
             ),
-
-          Text(
-            label.toUpperCase(),
-            style: theme.textTheme.labelSmall?.copyWith(
-              fontWeight: FontWeight.bold,
-              color: theme.colorScheme.onSurfaceVariant,
-              letterSpacing: 1.0,
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
