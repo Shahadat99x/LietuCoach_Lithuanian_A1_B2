@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../design_system/glass/glass.dart';
 import '../../../../ui/tokens.dart';
 import '../../../../ui/components/components.dart';
 
@@ -29,28 +30,31 @@ class PracticeModeGrid extends StatelessWidget {
         _ModeTile(
           icon: Icons.headphones_rounded,
           label: 'Listening',
-          color: Colors.purple,
+          color: AppColors.primary,
           onTap: onListeningTap,
         ),
         _ModeTile(
           icon: Icons.record_voice_over_rounded,
           label: 'Speaking',
-          color: Colors.blue,
+          color: AppColors.info,
           isLocked: true,
+          unlockHint: 'Finish a lesson to unlock',
           onTap: onSpeakingTap,
         ),
         _ModeTile(
           icon: Icons.bolt_rounded,
           label: 'Difficult Words',
-          color: Colors.red,
+          color: AppColors.danger,
           isLocked: true,
+          unlockHint: 'Finish a lesson to unlock',
           onTap: onWordsTap,
         ),
         _ModeTile(
           icon: Icons.history_edu_rounded,
           label: 'Mistakes',
-          color: Colors.orange,
+          color: AppColors.secondary,
           isLocked: true,
+          unlockHint: 'Finish a lesson to unlock',
           onTap: onMistakesTap,
         ),
       ],
@@ -64,6 +68,7 @@ class _ModeTile extends StatelessWidget {
   final Color color;
   final VoidCallback onTap;
   final bool isLocked;
+  final String unlockHint;
 
   const _ModeTile({
     required this.icon,
@@ -71,6 +76,7 @@ class _ModeTile extends StatelessWidget {
     required this.color,
     required this.onTap,
     this.isLocked = false,
+    this.unlockHint = 'Finish a lesson to unlock',
   });
 
   @override
@@ -82,42 +88,82 @@ class _ModeTile extends StatelessWidget {
 
     return ScaleButton(
       onTap: onTap,
-      child: AppCard(
-        color: isLocked
-            ? theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5)
-            : theme.colorScheme.surface,
-        padding: const EdgeInsets.all(Spacing.m),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+      child: GlassCard(
+        preferPerformance: true,
+        preset: GlassPreset.solid,
+        padding: const EdgeInsets.all(AppSemanticSpacing.space16),
+        child: Stack(
           children: [
-            Container(
-              padding: const EdgeInsets.all(Spacing.m),
-              decoration: BoxDecoration(
-                color: isLocked
-                    ? theme.colorScheme.surfaceContainerHighest
-                    : effectiveColor.withValues(alpha: 0.1),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(
-                isLocked ? Icons.lock_rounded : icon,
-                size: 28,
-                color: isLocked
-                    ? theme.colorScheme.onSurfaceVariant
-                    : effectiveColor,
-              ),
+            Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(AppSemanticSpacing.space16),
+                  decoration: BoxDecoration(
+                    color: isLocked
+                        ? theme.semanticColors.surfaceElevated
+                        : effectiveColor.withValues(alpha: 0.1),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Opacity(
+                    opacity: isLocked ? 0.75 : 1,
+                    child: Icon(icon, size: 28, color: effectiveColor),
+                  ),
+                ),
+                const SizedBox(height: AppSemanticSpacing.space16),
+                Text(
+                  label,
+                  style: AppSemanticTypography.body.copyWith(
+                    color: isLocked
+                        ? theme.semanticColors.textSecondary
+                        : theme.semanticColors.textPrimary,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                if (isLocked) ...[
+                  const SizedBox(height: AppSemanticSpacing.space8),
+                  Text(
+                    unlockHint,
+                    style: AppSemanticTypography.caption.copyWith(
+                      color: theme.semanticColors.textSecondary,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+              ],
             ),
-            const SizedBox(height: Spacing.m),
-            Text(
-              label,
-              style: theme.textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w600,
-                color: isLocked
-                    ? theme.colorScheme.onSurfaceVariant
-                    : theme.colorScheme.onSurface,
-                fontSize: 15,
+            if (isLocked)
+              Positioned(
+                top: 0,
+                right: 0,
+                child: GlassPill(
+                  minHeight: 0,
+                  selected: false,
+                  preferPerformance: true,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppSemanticSpacing.space8,
+                    vertical: AppSemanticSpacing.space4,
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.lock_rounded,
+                        size: 12,
+                        color: theme.semanticColors.textSecondary,
+                      ),
+                      const SizedBox(width: AppSemanticSpacing.space4),
+                      Text(
+                        'LOCKED',
+                        style: AppSemanticTypography.caption.copyWith(
+                          color: theme.semanticColors.textSecondary,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ),
-              textAlign: TextAlign.center,
-            ),
           ],
         ),
       ),

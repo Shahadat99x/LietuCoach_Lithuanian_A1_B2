@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import '../../../../design_system/glass/glass.dart';
 import '../../../../ui/tokens.dart';
-import '../../../../ui/components/components.dart';
 
 class SrsStatsStrip extends StatelessWidget {
   final int dueCount;
@@ -55,26 +55,24 @@ class _StatCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    return AppCard(
+    return GlassCard(
+      preferPerformance: true,
+      preset: GlassPreset.frost,
       padding: const EdgeInsets.symmetric(
-        vertical: Spacing.m,
-        horizontal: Spacing.m,
+        vertical: AppSemanticSpacing.space16,
+        horizontal: AppSemanticSpacing.space16,
       ),
       child: Column(
         children: [
           Text(
             value,
-            style: theme.textTheme.headlineMedium?.copyWith(
-              color: color,
-              fontWeight: FontWeight.bold,
-            ),
+            style: AppSemanticTypography.section.copyWith(color: color),
           ),
-          const SizedBox(height: Spacing.xs),
+          const SizedBox(height: AppSemanticSpacing.space8),
           Text(
             label,
-            style: theme.textTheme.labelMedium?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant,
-              letterSpacing: 0.5,
+            style: AppSemanticTypography.caption.copyWith(
+              color: theme.semanticColors.textSecondary,
             ),
           ),
         ],

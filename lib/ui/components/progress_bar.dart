@@ -25,47 +25,44 @@ class ProgressBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final reduceMotion = AppMotion.reduceMotionOf(context);
     final clampedValue = value.clamp(0.0, 1.0);
     final effectiveProgressColor = progressColor ?? theme.colorScheme.primary;
+    final radius = BorderRadius.circular(borderRadius ?? Radii.full);
 
     final bar = Container(
       height: height,
       width: double.infinity,
       decoration: BoxDecoration(
         color: backgroundColor ?? theme.colorScheme.surfaceContainerHighest,
-        borderRadius: BorderRadius.circular(borderRadius ?? Radii.full),
+        borderRadius: radius,
       ),
       child: LayoutBuilder(
         builder: (context, constraints) {
-          return Stack(
-            children: [
-              TweenAnimationBuilder<double>(
-                tween: Tween<double>(begin: 0, end: clampedValue),
-                duration: const Duration(milliseconds: 800),
-                curve: Curves.easeOutQuart,
-                builder: (context, val, _) {
-                  return Container(
-                    width: constraints.maxWidth * val,
-                    height: height,
-                    decoration: BoxDecoration(
-                      color: effectiveProgressColor,
-                      borderRadius: BorderRadius.circular(
-                        borderRadius ?? Radii.full,
-                      ),
-                      boxShadow: [
-                        // Subtle 3D effect (highlight on top part of the bar)
-                        BoxShadow(
-                          color: Colors.white.withValues(alpha: 0.3),
-                          offset: const Offset(0, -2),
-                          blurRadius: 0,
-                          spreadRadius: -2,
-                        ),
-                      ],
+          return ClipRRect(
+            borderRadius: radius,
+            child: AnimatedFractionallySizedBox(
+              duration: reduceMotion ? AppMotion.fast : AppMotion.slow,
+              curve: AppMotion.curve(context, AppMotion.easeOut),
+              alignment: Alignment.centerLeft,
+              widthFactor: clampedValue,
+              child: Container(
+                width: constraints.maxWidth,
+                height: height,
+                decoration: BoxDecoration(
+                  color: effectiveProgressColor,
+                  borderRadius: radius,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.white.withValues(alpha: 0.3),
+                      offset: const Offset(0, -2),
+                      blurRadius: 0,
+                      spreadRadius: -2,
                     ),
-                  );
-                },
+                  ],
+                ),
               ),
-            ],
+            ),
           );
         },
       ),

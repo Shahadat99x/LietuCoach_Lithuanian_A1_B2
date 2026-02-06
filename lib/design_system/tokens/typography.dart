@@ -66,4 +66,9 @@ abstract class AppTypography {
     height: 1.4,
     letterSpacing: 0.2,
   );
+
+  // Semantic aliases
+  static const TextStyle title = titleLarge;
+  static const TextStyle section = titleMedium;
+  static const TextStyle body = bodyMedium;
 }

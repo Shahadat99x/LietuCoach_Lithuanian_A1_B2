@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import '../../lesson/widgets/exercise_shell.dart';
 import '../../lesson/widgets/bottom_result_sheet.dart';
 import '../../../ui/components/buttons.dart';
+import '../../../ui/tokens.dart';
+import '../../../design_system/glass/glass.dart';
 import '../domain/role_model.dart';
 import 'role_mcq_widget.dart';
 import 'role_reorder_widget.dart';
@@ -134,13 +136,22 @@ class _RoleExerciseRunnerState extends State<RoleExerciseRunner> {
       canCheck = _selectedReorder.isNotEmpty;
     }
 
-    return Container(
-      padding: const EdgeInsets.all(16),
-      color: Colors.white, // Or surface
-      child: PrimaryButton(
-        label: 'CHECK',
-        onPressed: canCheck ? _onCheck : null,
-        isFullWidth: true,
+    return GlassSurface(
+      preset: GlassPreset.solid,
+      padding: const EdgeInsets.fromLTRB(
+        AppSemanticSpacing.space12,
+        AppSemanticSpacing.space8,
+        AppSemanticSpacing.space12,
+        AppSemanticSpacing.space8,
+      ),
+      child: SafeArea(
+        top: false,
+        minimum: const EdgeInsets.only(bottom: AppSemanticSpacing.space4),
+        child: PrimaryButton(
+          label: 'CHECK',
+          onPressed: canCheck ? _onCheck : null,
+          isFullWidth: true,
+        ),
       ),
     );
   }

@@ -10,4 +10,11 @@ abstract class AppSpacing {
   static const double xl = 24.0;
   static const double xxl = 32.0;
   static const double xxxl = 40.0;
+
+  // Semantic aliases
+  static const double space4 = xxs;
+  static const double space8 = xs;
+  static const double space12 = s;
+  static const double space16 = m;
+  static const double space24 = xl;
 }

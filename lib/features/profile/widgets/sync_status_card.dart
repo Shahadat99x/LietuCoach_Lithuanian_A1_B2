@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import '../../../../design_system/glass/glass.dart';
 import '../../../../ui/tokens.dart';
-import '../../../../ui/components/components.dart';
 
 class SyncStatusCard extends StatelessWidget {
   final String statusMessage;
@@ -21,28 +21,72 @@ class SyncStatusCard extends StatelessWidget {
     return '${dt.hour}:${dt.minute.toString().padLeft(2, '0')}';
   }
 
+  String _headline(String statusMessage) {
+    final status = statusMessage.toLowerCase();
+    if (status.contains('syncing')) return 'Syncing now';
+    if (status.contains('offline')) return 'Offline mode';
+    if (status.contains('error')) return 'Sync needs attention';
+    if (status.contains('not signed in')) return 'Sign in to sync';
+    if (status.contains('synced')) return 'Cloud sync active';
+    return 'Sync ready';
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final semantic = theme.semanticColors;
+    final status = statusMessage.toLowerCase();
+    final isOffline = status.contains('offline');
+    final isError = status.contains('error');
+    final isSignedOut = status.contains('not signed in');
+    final isSynced = status.contains('synced');
 
-    return AppCard(
+    final iconColor = isSyncing
+        ? semantic.accentPrimary
+        : isError
+        ? semantic.danger
+        : isOffline
+        ? semantic.accentWarm
+        : isSignedOut
+        ? semantic.textSecondary
+        : semantic.success;
+
+    final iconBg = isSyncing
+        ? semantic.accentPrimary.withValues(alpha: 0.14)
+        : isError
+        ? semantic.dangerContainer
+        : isOffline
+        ? semantic.accentWarm.withValues(alpha: 0.16)
+        : isSignedOut
+        ? semantic.surfaceElevated
+        : semantic.successContainer;
+
+    return GlassCard(
+      preferPerformance: true,
+      preset: GlassPreset.frost,
       child: Row(
         children: [
           Container(
             padding: const EdgeInsets.all(Spacing.m),
-            decoration: BoxDecoration(
-              color: isSyncing
-                  ? theme.colorScheme.primary.withValues(alpha: 0.1)
-                  : Colors.green.withValues(alpha: 0.1),
-              shape: BoxShape.circle,
-            ),
+            decoration: BoxDecoration(color: iconBg, shape: BoxShape.circle),
             child: isSyncing
                 ? SizedBox(
                     width: 24,
                     height: 24,
                     child: CircularProgressIndicator(strokeWidth: 2),
                   )
-                : Icon(Icons.cloud_done_rounded, color: Colors.green),
+                : Icon(
+                    isError
+                        ? Icons.cloud_off_rounded
+                        : isOffline
+                        ? Icons.wifi_off_rounded
+                        : isSignedOut
+                        ? Icons.cloud_outlined
+                        : isSynced
+                        ? Icons.cloud_done_rounded
+                        : Icons.cloud_queue_rounded,
+                    color: iconColor,
+                  ),
           ),
           const SizedBox(width: Spacing.m),
           Expanded(
@@ -50,15 +94,15 @@ class SyncStatusCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  isSyncing ? 'Syncing...' : 'Cloud Sync Active',
-                  style: theme.textTheme.titleSmall?.copyWith(
-                    fontWeight: FontWeight.bold,
+                  _headline(statusMessage),
+                  style: AppSemanticTypography.section.copyWith(
+                    color: semantic.textPrimary,
                   ),
                 ),
                 Text(
-                  'Last synced: ${_formatLastSync(lastSyncAt)}',
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: theme.colorScheme.onSurfaceVariant,
+                  '$statusMessage · Last synced ${_formatLastSync(lastSyncAt)}',
+                  style: AppSemanticTypography.caption.copyWith(
+                    color: semantic.textSecondary,
                   ),
                 ),
               ],
@@ -66,7 +110,7 @@ class SyncStatusCard extends StatelessWidget {
           ),
           IconButton(
             icon: const Icon(Icons.sync),
-            onPressed: isSyncing ? null : onSync,
+            onPressed: (isSyncing || isSignedOut) ? null : onSync,
             tooltip: 'Sync now',
           ),
         ],
