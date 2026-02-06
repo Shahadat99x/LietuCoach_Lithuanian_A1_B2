@@ -64,7 +64,7 @@ void main() {
     await tester.tap(find.text('Practice'));
     await tester.pump(const Duration(milliseconds: 500));
     expect(find.text('Practice').first, findsOneWidget);
-    expect(find.text('Daily Training'), findsOneWidget);
+    expect(find.text('Daily Training Mix'), findsOneWidget);
 
     // 5. Tap Roles tab
     await tester.tap(find.text('Roles'));
@@ -79,7 +79,7 @@ void main() {
     // 7. Tap Profile tab
     await tester.tap(find.text('Profile'));
     await tester.pump(const Duration(milliseconds: 500));
-    expect(find.text('Guest User'), findsOneWidget);
+    expect(find.text('Create a Profile'), findsOneWidget);
 
     // 8. Tap back to Path tab
     await tester.tap(find.text('Path'));
