@@ -8,6 +8,7 @@ import '../features/practice/practice_screen.dart';
 import '../features/roles/roles_screen.dart';
 import '../features/cards/cards_screen.dart';
 import '../features/profile/profile_screen.dart';
+import 'widgets/glass_bottom_nav.dart';
 
 class AppShell extends StatefulWidget {
   const AppShell({super.key});
@@ -27,31 +28,36 @@ class _AppShellState extends State<AppShell> {
     ProfileScreen(),
   ];
 
-  static const List<NavigationDestination> _destinations = [
-    NavigationDestination(
+  static const List<GlassBottomNavItem> _destinations = [
+    GlassBottomNavItem(
       icon: Icon(Icons.map_outlined),
       selectedIcon: Icon(Icons.map),
       label: 'Path',
+      semanticsLabel: 'Path tab',
     ),
-    NavigationDestination(
+    GlassBottomNavItem(
       icon: Icon(Icons.fitness_center_outlined),
       selectedIcon: Icon(Icons.fitness_center),
       label: 'Practice',
+      semanticsLabel: 'Practice tab',
     ),
-    NavigationDestination(
+    GlassBottomNavItem(
       icon: Icon(Icons.work_outline),
       selectedIcon: Icon(Icons.work),
       label: 'Roles',
+      semanticsLabel: 'Roles tab',
     ),
-    NavigationDestination(
+    GlassBottomNavItem(
       icon: Icon(Icons.style_outlined),
       selectedIcon: Icon(Icons.style),
       label: 'Cards',
+      semanticsLabel: 'Cards tab',
     ),
-    NavigationDestination(
+    GlassBottomNavItem(
       icon: Icon(Icons.person_outline),
       selectedIcon: Icon(Icons.person),
       label: 'Profile',
+      semanticsLabel: 'Profile tab',
     ),
   ];
 
@@ -64,14 +70,12 @@ class _AppShellState extends State<AppShell> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: IndexedStack(
-        index: _currentIndex,
-        children: _screens,
-      ),
-      bottomNavigationBar: NavigationBar(
+      extendBody: true,
+      body: IndexedStack(index: _currentIndex, children: _screens),
+      bottomNavigationBar: GlassBottomNav(
+        items: _destinations,
         selectedIndex: _currentIndex,
-        onDestinationSelected: _onDestinationSelected,
-        destinations: _destinations,
+        onSelected: _onDestinationSelected,
       ),
     );
   }

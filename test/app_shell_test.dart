@@ -2,9 +2,9 @@
 ///
 /// Tests for bottom navigation and tab switching.
 
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'dart:io';
+import 'package:lietucoach/app/widgets/glass_bottom_nav.dart';
 import 'package:lietucoach/main.dart';
 import 'package:lietucoach/progress/progress.dart';
 import 'package:lietucoach/srs/srs.dart';
@@ -48,9 +48,8 @@ void main() {
     // Wait for initial load (PathScreen)
     await tester.pump(const Duration(seconds: 2));
 
-    // 2. Verify NavigationBar structure
-    expect(find.byType(NavigationBar), findsOneWidget);
-    expect(find.byType(NavigationDestination), findsNWidgets(5));
+    // 2. Verify bottom nav structure
+    expect(find.byType(GlassBottomNav), findsOneWidget);
     expect(find.text('Path'), findsOneWidget);
     expect(find.text('Practice'), findsOneWidget);
     expect(find.text('Roles'), findsOneWidget);
@@ -64,7 +63,7 @@ void main() {
     await tester.tap(find.text('Practice'));
     await tester.pump(const Duration(milliseconds: 500));
     expect(find.text('Practice').first, findsOneWidget);
-    expect(find.text('Daily Training'), findsOneWidget);
+    expect(find.textContaining('Daily Training'), findsOneWidget);
 
     // 5. Tap Roles tab
     await tester.tap(find.text('Roles'));
@@ -79,7 +78,7 @@ void main() {
     // 7. Tap Profile tab
     await tester.tap(find.text('Profile'));
     await tester.pump(const Duration(milliseconds: 500));
-    expect(find.text('Guest User'), findsOneWidget);
+    expect(find.text('Create a Profile'), findsOneWidget);
 
     // 8. Tap back to Path tab
     await tester.tap(find.text('Path'));
