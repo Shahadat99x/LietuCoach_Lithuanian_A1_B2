@@ -3,6 +3,7 @@
 /// Core vertical slice: renders steps, handles answers, tracks score.
 
 import 'package:flutter/material.dart' hide Step;
+import 'package:flutter/services.dart';
 import '../../audio/audio.dart';
 import '../../content/content.dart';
 import '../../progress/progress.dart';
@@ -79,7 +80,7 @@ class _LessonRunnerScreenState extends State<LessonRunnerScreen> {
     });
 
     // Small delay to prevent accidental double-taps if the UI hasn't rebuilt yet
-    Future.delayed(const Duration(milliseconds: 50), () {
+    Future.delayed(AppMotion.fast, () {
       if (mounted) {
         setState(() {
           _currentStepIndex++;
@@ -386,6 +387,13 @@ class _LessonRunnerScreenState extends State<LessonRunnerScreen> {
 
   // _onAnswer now just updates state
   void _onAnswer(dynamic answer, bool isCorrect) {
+    if (_hasAnswered) return;
+    if (isCorrect) {
+      HapticFeedback.lightImpact();
+    } else {
+      HapticFeedback.mediumImpact();
+    }
+
     setState(() {
       _selectedAnswer = answer;
       _hasAnswered = true;
