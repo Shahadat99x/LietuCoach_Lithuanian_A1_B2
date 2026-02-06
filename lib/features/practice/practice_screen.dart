@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import '../../ui/tokens.dart';
 import '../cards/review_session_screen.dart';
+import '../path/path_screen.dart';
+import '../path/widgets/lock_bottom_sheet.dart';
 import 'audio_queue_screen.dart';
 import 'practice_planner.dart';
 import 'practice_stats_service.dart';
@@ -64,10 +66,9 @@ class _PracticeScreenState extends State<PracticeScreen> {
 
   void _startDailyPractice() {
     if (_dailyPlan == null || _dailyPlan!.isEmpty) {
-      // If empty, navigate to Path? Or maybe just show a toast for now.
-      // Better: navigate to home tab if possible, or show message.
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Go to Path to unlock more content!')),
+      _showLockedModeSheet(
+        title: 'Nothing to practice yet',
+        message: 'Finish a lesson on Path to unlock your next session.',
       );
       return;
     }
@@ -79,10 +80,29 @@ class _PracticeScreenState extends State<PracticeScreen> {
     if (plan.itemsListening.isNotEmpty) {
       _launchSession(plan, isDailyMix: false);
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('No listening content available yet.')),
+      _showLockedModeSheet(
+        title: 'No listening items yet',
+        message: 'Finish a lesson, then come back for audio practice.',
       );
     }
+  }
+
+  void _showLockedModeSheet({
+    required String title,
+    required String message,
+    String actionLabel = 'Go to Path',
+  }) {
+    LockBottomSheet.show(
+      context,
+      title: title,
+      message: message,
+      actionLabel: actionLabel,
+      onAction: () {
+        Navigator.of(
+          context,
+        ).push(MaterialPageRoute(builder: (_) => const PathScreen()));
+      },
+    );
   }
 
   void _launchSession(PracticePlan plan, {required bool isDailyMix}) {
@@ -142,6 +162,7 @@ class _PracticeScreenState extends State<PracticeScreen> {
 
     // Show completion dialog
     if (mounted) {
+      final semantic = Theme.of(context).semanticColors;
       showDialog(
         context: context,
         builder: (_) => AlertDialog(
@@ -149,7 +170,7 @@ class _PracticeScreenState extends State<PracticeScreen> {
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(Icons.emoji_events, size: 48, color: Colors.orange),
+              Icon(Icons.emoji_events, size: 48, color: semantic.accentWarm),
               const SizedBox(height: Spacing.m),
               Text('+${plan.estimatedMinutes} mins recorded'),
               Text('Streak: $_streak days'),
@@ -163,6 +184,7 @@ class _PracticeScreenState extends State<PracticeScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final semantic = theme.semanticColors;
 
     if (_loading) {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
@@ -177,11 +199,11 @@ class _PracticeScreenState extends State<PracticeScreen> {
             // Header
             Text(
               'Practice',
-              style: theme.textTheme.headlineLarge?.copyWith(
-                fontWeight: FontWeight.bold,
+              style: AppSemanticTypography.title.copyWith(
+                color: semantic.textPrimary,
               ),
             ),
-            const SizedBox(height: Spacing.xs),
+            const SizedBox(height: AppSemanticSpacing.space8),
 
             // Stats Row (Integrated)
             Container(
@@ -199,64 +221,65 @@ class _PracticeScreenState extends State<PracticeScreen> {
                   const SizedBox(width: Spacing.xs),
                   Text(
                     'Daily Goal: $_minutesToday / $_goalMinutes min',
-                    style: theme.textTheme.labelLarge?.copyWith(
-                      color: theme.colorScheme.onSurfaceVariant,
+                    style: AppSemanticTypography.caption.copyWith(
+                      color: semantic.textSecondary,
                     ),
                   ),
                   const Spacer(),
                   Icon(
                     Icons.local_fire_department,
                     size: 16,
-                    color: Colors.orange,
+                    color: semantic.accentWarm,
                   ),
                   const SizedBox(width: Spacing.xs),
                   Text(
                     '$_streak days',
-                    style: theme.textTheme.labelLarge?.copyWith(
-                      color: Colors.orange,
-                      fontWeight: FontWeight.bold,
+                    style: AppSemanticTypography.caption.copyWith(
+                      color: semantic.accentWarm,
+                      fontWeight: FontWeight.w700,
                     ),
                   ),
                 ],
               ),
             ),
-            const SizedBox(height: Spacing.l),
+            const SizedBox(height: AppSemanticSpacing.space24),
 
             // Hero
             DailyTrainingHero(plan: _dailyPlan, onStart: _startDailyPractice),
-            const SizedBox(height: Spacing.xl),
+            const SizedBox(height: AppSemanticSpacing.space24),
 
             // Modes Grid
             Text(
               'Practice Modes',
-              style: theme.textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
+              style: AppSemanticTypography.section.copyWith(
+                color: semantic.textPrimary,
               ),
             ),
-            const SizedBox(height: Spacing.m),
+            const SizedBox(height: AppSemanticSpacing.space16),
 
             PracticeModeGrid(
               onListeningTap: _launchListeningMode,
               onSpeakingTap: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Speaking mode specific unlock needed!'),
-                  ),
+                _showLockedModeSheet(
+                  title: 'Speaking is locked',
+                  message: 'Finish a lesson to unlock speaking practice.',
                 );
               },
               onWordsTap: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Focus mode coming soon!')),
+                _showLockedModeSheet(
+                  title: 'Word focus is locked',
+                  message: 'Finish a lesson to unlock difficult words.',
                 );
               },
               onMistakesTap: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Mistake review coming soon!')),
+                _showLockedModeSheet(
+                  title: 'Mistake review is locked',
+                  message: 'Do a few lessons first, then this will unlock.',
                 );
               },
             ),
 
-            const SizedBox(height: Spacing.xl),
+            const SizedBox(height: AppSemanticSpacing.space24),
           ],
         ),
       ),

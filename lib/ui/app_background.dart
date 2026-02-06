@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../design_system/aurora_background.dart';
-import '../design_system/tokens/colors.dart';
+import '../design_system/tokens/semantic_tokens.dart';
 
 enum BackgroundPolicy {
   neutral, // Standard surface0 (calm)
@@ -21,9 +21,12 @@ class AppBackground extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final semantic = theme.semanticColors;
+
     if (policy == BackgroundPolicy.aurora) {
       return AuroraBackground(
-        isDark: Theme.of(context).brightness == Brightness.dark,
+        isDark: theme.brightness == Brightness.dark,
         debugLoud: debugLoud,
         child: child,
       );
@@ -35,11 +38,53 @@ class AppBackground extends StatelessWidget {
     // OR we just rely on Scaffold's own background color if simpler.
     // However, to be "Single Source of Truth", we ideally render the bg here.
 
-    final theme = Theme.of(context);
-    final bgColor = theme.brightness == Brightness.dark
-        ? AppColors.surface0Dark
-        : AppColors.surface0Light;
+    if (theme.brightness == Brightness.dark) {
+      return Container(color: semantic.bg, child: child);
+    }
 
-    return Container(color: bgColor, child: child);
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: semantic.bg,
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [semantic.bg, semantic.bgElevated.withValues(alpha: 0.98)],
+        ),
+      ),
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          IgnorePointer(
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: RadialGradient(
+                  center: const Alignment(-0.9, -0.95),
+                  radius: 1.15,
+                  colors: [
+                    semantic.accentPrimary.withValues(alpha: 0.035),
+                    Colors.transparent,
+                  ],
+                ),
+              ),
+            ),
+          ),
+          IgnorePointer(
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: RadialGradient(
+                  center: const Alignment(0.95, -0.75),
+                  radius: 1.2,
+                  colors: [
+                    semantic.accentWarm.withValues(alpha: 0.028),
+                    Colors.transparent,
+                  ],
+                ),
+              ),
+            ),
+          ),
+          child,
+        ],
+      ),
+    );
   }
 }

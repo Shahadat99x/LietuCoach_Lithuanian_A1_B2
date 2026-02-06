@@ -78,7 +78,7 @@ class _CardSide extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
+    final semantic = theme.semanticColors;
 
     // Premium styling: Surface1 (Card Color) with subtle border/shadow
     // In Dark Mode: Surface1 is slightly lighter than background.
@@ -98,7 +98,7 @@ class _CardSide extends StatelessWidget {
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.08),
+            color: semantic.shadowSoft,
             blurRadius: 16,
             offset: const Offset(0, 8),
           ),

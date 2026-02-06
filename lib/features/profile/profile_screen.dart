@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import '../../auth/auth_service.dart';
 import '../../sync/sync_service.dart';
 import '../../ui/tokens.dart';
+import '../../ui/components/components.dart';
+import '../../ui/theme/theme_controller.dart';
 import 'widgets/profile_header.dart';
 import 'widgets/sync_status_card.dart';
 import 'widgets/settings_section_card.dart';
@@ -75,9 +77,52 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
+  Future<void> _showAppearanceSheet(ThemeController controller) async {
+    await showModalBottomSheet<void>(
+      context: context,
+      showDragHandle: true,
+      builder: (sheetContext) {
+        return SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: Spacing.s),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                ListTile(
+                  title: const Text('Appearance'),
+                  subtitle: const Text('Choose app theme'),
+                ),
+                RadioGroup<AppThemeMode>(
+                  groupValue: controller.mode,
+                  onChanged: (value) async {
+                    if (value == null) return;
+                    await controller.setMode(value);
+                    if (sheetContext.mounted) {
+                      Navigator.of(sheetContext).pop();
+                    }
+                  },
+                  child: Column(
+                    children: [
+                      for (final mode in AppThemeMode.values)
+                        RadioListTile<AppThemeMode>(
+                          value: mode,
+                          title: Text(mode.label),
+                        ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final themeController = ThemeControllerScope.of(context);
     final authState = _authService.state;
 
     // Properties from services
@@ -89,6 +134,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final syncStatus = _syncService.statusMessage;
     final lastSync = _syncService.lastSyncAt;
     final isSyncing = _syncService.isSyncing;
+    final authError = authState.errorMessage;
 
     return Scaffold(
       backgroundColor: theme.colorScheme.surface,
@@ -98,11 +144,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
           children: [
             Text(
               'Profile',
-              style: theme.textTheme.headlineLarge?.copyWith(
-                fontWeight: FontWeight.bold,
+              style: AppSemanticTypography.title.copyWith(
+                color: theme.semanticColors.textPrimary,
               ),
             ),
-            const SizedBox(height: Spacing.l),
+            const SizedBox(height: AppSemanticSpacing.space24),
 
             // Header
             ProfileHeader(
@@ -122,7 +168,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ),
             const SizedBox(height: Spacing.xl),
 
-            // Sync Status (Only if authenticated)
+            // Sync Status
             if (isAuthenticated) ...[
               SyncStatusCard(
                 statusMessage: syncStatus,
@@ -149,8 +195,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
                 ListTile(
                   leading: const Icon(Icons.dark_mode_outlined),
-                  title: const Text('Dark Mode'),
-                  trailing: Switch(value: false, onChanged: (v) {}),
+                  title: const Text('Appearance'),
+                  subtitle: Text(themeController.mode.label),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () => _showAppearanceSheet(themeController),
                 ),
               ],
             ),
@@ -176,12 +224,26 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     leading: Icon(Icons.logout, color: theme.colorScheme.error),
                     title: Text(
                       'Sign Out',
-                      style: TextStyle(color: theme.colorScheme.error),
+                      style: AppSemanticTypography.body.copyWith(
+                        color: theme.colorScheme.error,
+                      ),
                     ),
                     onTap: _handleSignOut,
                   ),
               ],
             ),
+            if (!isAuthenticated) ...[
+              const SizedBox(height: Spacing.l),
+              EmptyStateCard(
+                icon: Icons.cloud_off_rounded,
+                title: 'Sync is paused',
+                description:
+                    authError ??
+                    'Sign in to back up progress and keep your streak safe.',
+                primaryActionLabel: 'Sign in to sync',
+                onPrimaryAction: _handleSignIn,
+              ),
+            ],
             const SizedBox(height: Spacing.xl),
           ],
         ),

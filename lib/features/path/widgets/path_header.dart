@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
+import '../../../design_system/glass/glass.dart';
 import '../../practice/practice_stats_service.dart';
 import '../../../ui/tokens.dart';
-import '../../../ui/components/components.dart';
 import '../../../progress/progress.dart';
 
 class PathHeader extends StatefulWidget {
@@ -29,32 +29,49 @@ class _PathHeaderState extends State<PathHeader>
   late AnimationController _enterController;
   late Animation<double> _fadeAnimation;
   late Animation<Offset> _slideAnimation;
+  bool _reduceMotion = false;
 
   @override
   void initState() {
     super.initState();
+    _reduceMotion = false;
     _enterController = AnimationController(
       vsync: this,
-      duration: const Duration(
-        milliseconds: 600,
-      ), // Slightly slower for elegance
+      duration: AppMotion.slow,
     );
 
     _fadeAnimation = CurvedAnimation(
       parent: _enterController,
-      curve: const Interval(0.0, 0.6, curve: Curves.easeOut),
+      curve: const Interval(0.0, 0.7, curve: AppMotion.easeOut),
     );
 
     _slideAnimation =
         Tween<Offset>(
-          begin: const Offset(0, 0.1), // Slide up from ~10% height
+          begin: const Offset(0, AppMotion.fadeOffsetMedium),
           end: Offset.zero,
         ).animate(
-          CurvedAnimation(parent: _enterController, curve: Curves.easeOutCubic),
+          CurvedAnimation(parent: _enterController, curve: AppMotion.easeOut),
         );
 
     // Trigger animation
     _enterController.forward();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final reduceMotion = AppMotion.reduceMotionOf(context);
+    if (reduceMotion == _reduceMotion) return;
+    _reduceMotion = reduceMotion;
+    final targetDuration = _reduceMotion ? AppMotion.instant : AppMotion.slow;
+    if (_enterController.duration != targetDuration) {
+      _enterController.duration = targetDuration;
+    }
+    if (_reduceMotion) {
+      _enterController.value = 1;
+    } else if (_enterController.value == 0) {
+      _enterController.forward();
+    }
   }
 
   @override
@@ -96,17 +113,16 @@ class _PathHeaderState extends State<PathHeader>
                           children: [
                             Text(
                               'Learning Path',
-                              style: theme.textTheme.labelLarge?.copyWith(
-                                color: theme.colorScheme.primary,
-                                fontWeight: FontWeight.bold,
+                              style: AppSemanticTypography.caption.copyWith(
+                                color: theme.semanticColors.accentPrimary,
+                                fontWeight: FontWeight.w700,
                               ),
                             ),
-                            const SizedBox(height: Spacing.xxs),
+                            const SizedBox(height: AppSemanticSpacing.space4),
                             Text(
                               'A1 Level — Beginner',
-                              style: theme.textTheme.headlineMedium?.copyWith(
-                                fontWeight: FontWeight.bold,
-                                color: theme.colorScheme.onSurface,
+                              style: AppSemanticTypography.title.copyWith(
+                                color: theme.semanticColors.textPrimary,
                               ),
                             ),
                           ],
@@ -116,7 +132,7 @@ class _PathHeaderState extends State<PathHeader>
                     ],
                   ),
                 ),
-                const SizedBox(height: Spacing.l),
+                const SizedBox(height: AppSemanticSpacing.space24),
 
                 // Dashboard Content
                 Padding(
@@ -201,7 +217,7 @@ class _StatsColumn extends StatelessWidget {
                   child: _StatCard(
                     icon: Icons.local_fire_department,
                     color: isStreakActive
-                        ? AppColors.danger
+                        ? theme.semanticColors.danger
                         : theme
                               .colorScheme
                               .onSurfaceVariant, // Fixed param name
@@ -234,41 +250,22 @@ class _ContinueCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    final isDark = theme.brightness == Brightness.dark;
-
-    return ScaleButton(
+    return GlassCard(
       onTap: onTap,
-      child: Container(
+      preset: GlassPreset.frost,
+      padding: EdgeInsets.zero,
+      borderRadius: BorderRadius.circular(AppSemanticShape.radiusHero),
+      child: ConstrainedBox(
         constraints: const BoxConstraints(minHeight: 80),
-        decoration: BoxDecoration(
-          color: isDark
-              ? colorScheme.surfaceContainer
-              : Colors.white, // Surface 2
-          borderRadius: BorderRadius.circular(Radii.xl),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.05),
-              offset: const Offset(0, 4),
-              blurRadius: 12,
-            ),
-          ],
-        ),
-        clipBehavior: Clip.antiAlias,
         child: Row(
           children: [
             // Left Accent Strip
-            Container(
-              width: 6,
-              decoration: BoxDecoration(
-                color: colorScheme.primary, // Solid accent
-              ),
-            ),
-
+            Container(width: 6, color: colorScheme.primary),
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.symmetric(
-                  horizontal: Spacing.m,
-                  vertical: Spacing.s,
+                  horizontal: AppSemanticSpacing.space16,
+                  vertical: AppSemanticSpacing.space12,
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -276,9 +273,8 @@ class _ContinueCard extends StatelessWidget {
                   children: [
                     Text(
                       label,
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: theme.colorScheme.onSurface,
+                      style: AppSemanticTypography.section.copyWith(
+                        color: theme.semanticColors.textPrimary,
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
@@ -286,8 +282,8 @@ class _ContinueCard extends StatelessWidget {
                     const SizedBox(height: 2),
                     Text(
                       subLabel,
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: theme.colorScheme.onSurfaceVariant,
+                      style: AppSemanticTypography.caption.copyWith(
+                        color: theme.semanticColors.textSecondary,
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
@@ -296,24 +292,20 @@ class _ContinueCard extends StatelessWidget {
                 ),
               ),
             ),
-
-            // Resume Button Pillar
             Padding(
               padding: const EdgeInsets.only(right: Spacing.m),
-              child: Container(
+              child: GlassPill(
+                selected: true,
+                preferPerformance: true,
                 padding: const EdgeInsets.symmetric(
-                  horizontal: Spacing.m,
-                  vertical: Spacing.xs,
-                ),
-                decoration: BoxDecoration(
-                  color: colorScheme.primaryContainer,
-                  borderRadius: BorderRadius.circular(100),
+                  horizontal: AppSemanticSpacing.space16,
+                  vertical: AppSemanticSpacing.space8,
                 ),
                 child: Text(
                   'RESUME',
-                  style: theme.textTheme.labelSmall?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: colorScheme.onPrimaryContainer,
+                  style: AppSemanticTypography.caption.copyWith(
+                    fontWeight: FontWeight.w700,
+                    color: theme.semanticColors.textPrimary,
                     letterSpacing: 0.5,
                   ),
                 ),
@@ -331,63 +323,44 @@ class _StatCard extends StatelessWidget {
   final String value;
   final String label;
   final Color color;
-  final double iconSize;
-  // final double? progress; // Removed unused
-  // final bool? isHighlighted; // Removed unused
 
   const _StatCard({
     required this.icon,
     required this.value,
     required this.label,
     required this.color,
-    this.iconSize = 24.0,
   });
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return Container(
+    return GlassCard(
+      preferPerformance: true,
+      preset: GlassPreset.frost,
       padding: const EdgeInsets.symmetric(
-        horizontal: Spacing.m,
-        vertical: Spacing.m,
-      ),
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surface,
-        borderRadius: BorderRadius.circular(Radii.lg),
-        border: Border.all(
-          color: theme.colorScheme.outlineVariant.withValues(alpha: 0.5),
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: theme.colorScheme.shadow.withValues(alpha: 0.05),
-            offset: const Offset(0, 2),
-            blurRadius: 4,
-          ),
-        ],
+        horizontal: AppSemanticSpacing.space16,
+        vertical: AppSemanticSpacing.space16,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              Icon(icon, size: iconSize, color: color),
+              Icon(icon, size: 24, color: color),
               const Spacer(),
             ],
           ),
-          const SizedBox(height: Spacing.s),
+          const SizedBox(height: AppSemanticSpacing.space12),
           Text(
             value,
-            style: theme.textTheme.titleLarge?.copyWith(
-              // Consistent Typography
-              fontWeight: FontWeight.bold,
-              color: theme.colorScheme.onSurface,
+            style: AppSemanticTypography.section.copyWith(
+              color: theme.semanticColors.textPrimary,
             ),
           ),
           Text(
             label,
-            style: theme.textTheme.bodySmall?.copyWith(
-              // Consistent Typography
-              color: theme.colorScheme.onSurfaceVariant,
+            style: AppSemanticTypography.caption.copyWith(
+              color: theme.semanticColors.textSecondary,
             ),
           ),
         ],

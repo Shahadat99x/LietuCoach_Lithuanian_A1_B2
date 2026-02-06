@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../../../../ui/tokens.dart';
 import '../../../../ui/components/components.dart';
 
 class CaughtUpView extends StatelessWidget {
@@ -25,26 +24,10 @@ class CaughtUpView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AppCard(
-      child: AppEmptyState(
-        title: 'All Caught Up!',
-        message:
-            'Great job! New reviews will be ready\n${_formatNextDue(nextDue)}.',
-        customIcon: Container(
-          padding: const EdgeInsets.all(Spacing.xl),
-          decoration: BoxDecoration(
-            color: Colors.green.withValues(alpha: 0.1),
-            shape: BoxShape.circle,
-          ),
-          child: Icon(
-            Icons.check_circle_rounded,
-            size: 64,
-            color: Colors.green,
-          ),
-        ),
-        ctaLabel: 'Learn New Words',
-        onCta: onLearnMore,
-      ),
+    return CaughtUpState(
+      nextReadyHint: _formatNextDue(nextDue),
+      primaryActionLabel: 'Go to Path',
+      onPrimaryAction: onLearnMore,
     );
   }
 }

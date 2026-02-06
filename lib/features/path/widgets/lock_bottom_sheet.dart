@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../design_system/glass/glass.dart';
 import '../../../../ui/tokens.dart';
 import '../../../../ui/components/components.dart';
 
@@ -38,71 +39,63 @@ class LockBottomSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final semantic = theme.semanticColors;
 
-    return Container(
+    return GlassSurface(
+      borderRadius: const BorderRadius.vertical(top: Radius.circular(Radii.xl)),
+      blurSigma: 14,
+      preferPerformance: true,
       padding: const EdgeInsets.all(Spacing.xl),
-      decoration: BoxDecoration(
-        // Use card color (Surface1) for better separation from background
-        color:
-            theme.cardTheme.color ?? theme.colorScheme.surfaceContainerHighest,
-        borderRadius: const BorderRadius.vertical(
-          top: Radius.circular(Radii.xl),
-        ),
-      ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          // Handle
           Container(
             width: 40,
             height: 4,
             decoration: BoxDecoration(
-              color: theme.colorScheme.outlineVariant,
+              color: semantic.borderSubtle,
               borderRadius: BorderRadius.circular(Radii.full),
             ),
           ),
           const SizedBox(height: Spacing.xl),
-
-          // Icon
           Container(
             width: 64,
             height: 64,
             decoration: BoxDecoration(
-              color: theme.colorScheme.surfaceContainerHighest,
+              color: semantic.accentWarm.withValues(alpha: 0.18),
               shape: BoxShape.circle,
+              border: Border.all(
+                color: semantic.accentWarm.withValues(alpha: 0.32),
+              ),
             ),
             child: Icon(
               Icons.lock_rounded,
               size: 32,
-              color: theme.colorScheme.onSurfaceVariant,
+              color: semantic.accentWarm,
             ),
           ),
           const SizedBox(height: Spacing.l),
-
-          // Text
           Text(
             title,
-            style: theme.textTheme.headlineSmall?.copyWith(
-              fontWeight: FontWeight.bold,
+            style: AppSemanticTypography.section.copyWith(
+              color: semantic.textPrimary,
             ),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: Spacing.m),
           Text(
             message,
-            style: theme.textTheme.bodyMedium?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant,
+            style: AppSemanticTypography.body.copyWith(
+              color: semantic.textSecondary,
             ),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: Spacing.xl),
-
-          // Action
           SizedBox(
             width: double.infinity,
             child: PrimaryButton(
               onPressed: () => Navigator.pop(context),
-              label: 'Understood',
+              label: 'Got it',
             ),
           ),
           if (onAction != null && actionLabel != null) ...[

@@ -8,6 +8,7 @@
 import 'package:flutter/material.dart';
 import '../../ui/tokens.dart';
 import '../../ui/components/components.dart';
+import '../path/path_screen.dart';
 import '../path/widgets/lock_bottom_sheet.dart';
 import 'widgets/role_card.dart';
 import 'role_pack_detail_screen.dart';
@@ -22,11 +23,14 @@ class RolesScreen extends StatelessWidget {
   ) {
     LockBottomSheet.show(
       context,
-      title: 'Unlock $roleTitle',
-      message:
-          'Reach Unit $unlockUnit on the Path to unlock\nthis role-playing scenario.',
-      actionLabel: 'Got it',
-      onAction: () {}, // Optional, or just let default close handle it
+      title: '$roleTitle is locked',
+      message: 'Complete Unit $unlockUnit on Path to unlock this role.',
+      actionLabel: 'Go to Path',
+      onAction: () {
+        Navigator.of(
+          context,
+        ).push(MaterialPageRoute(builder: (_) => const PathScreen()));
+      },
     );
   }
 
@@ -42,18 +46,18 @@ class RolesScreen extends StatelessWidget {
           children: [
             Text(
               'Role Packs',
-              style: theme.textTheme.headlineLarge?.copyWith(
-                fontWeight: FontWeight.bold,
+              style: AppSemanticTypography.title.copyWith(
+                color: theme.semanticColors.textPrimary,
               ),
             ),
-            const SizedBox(height: Spacing.xs),
+            const SizedBox(height: AppSemanticSpacing.space8),
             Text(
               'Real-world conversation scenarios',
-              style: theme.textTheme.titleMedium?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant,
+              style: AppSemanticTypography.body.copyWith(
+                color: theme.semanticColors.textSecondary,
               ),
             ),
-            const SizedBox(height: Spacing.l),
+            const SizedBox(height: AppSemanticSpacing.space24),
 
             // Role pack cards
             RoleCard(
@@ -77,6 +81,7 @@ class RolesScreen extends StatelessWidget {
               description: 'Ordering, addresses, payments',
               icon: Icons.delivery_dining_rounded,
               status: RoleStatus.locked,
+              unlockHint: 'Finish Unit 3 to unlock',
               onTap: () => _showLockedSheet(context, 'Food Delivery', 3),
             ),
             const SizedBox(height: Spacing.m),
@@ -86,6 +91,7 @@ class RolesScreen extends StatelessWidget {
               description: 'University, schedules, registration',
               icon: Icons.school_rounded,
               status: RoleStatus.locked,
+              unlockHint: 'Finish Unit 5 to unlock',
               onTap: () => _showLockedSheet(context, 'Student Life', 5),
             ),
             const SizedBox(height: Spacing.m),
@@ -95,39 +101,15 @@ class RolesScreen extends StatelessWidget {
               description: 'Introductions, meetings, emails',
               icon: Icons.work_rounded,
               status: RoleStatus.locked,
+              unlockHint: 'Finish Unit 8 to unlock',
               onTap: () => _showLockedSheet(context, 'Workplace', 8),
             ),
 
             const SizedBox(height: Spacing.xl),
 
-            // Coming Soon / Teaser
-            AppCard(
-              color: theme.colorScheme.surfaceContainerHighest.withValues(
-                alpha: 0.3,
-              ),
-              child: Row(
-                children: [
-                  Icon(Icons.auto_awesome, color: theme.colorScheme.primary),
-                  const SizedBox(width: Spacing.m),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'More Coming Soon',
-                          style: theme.textTheme.titleSmall?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        Text(
-                          'New scenarios added monthly',
-                          style: theme.textTheme.bodySmall,
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
+            ComingSoonCard(
+              title: 'More role packs are on the way',
+              description: 'New real-world scenarios are added regularly.',
             ),
           ],
         ),

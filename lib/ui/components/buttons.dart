@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import '../tokens.dart';
+import 'scale_button.dart';
 
 /// PrimaryButton - Filled button for primary actions
 class PrimaryButton extends StatelessWidget {
@@ -40,6 +41,11 @@ class PrimaryButton extends StatelessWidget {
           alpha: 0.38,
         ),
         elevation: onPressed == null ? 0 : 2,
+        animationDuration: AppMotion.duration(
+          context,
+          AppMotion.normal,
+          reduced: AppMotion.fast,
+        ),
       ),
       child: isLoading
           ? SizedBox(
@@ -64,10 +70,13 @@ class PrimaryButton extends StatelessWidget {
     );
 
     if (isFullWidth) {
-      return SizedBox(width: double.infinity, child: button);
+      return PressScale(
+        enabled: onPressed != null && !isLoading,
+        child: SizedBox(width: double.infinity, child: button),
+      );
     }
 
-    return button;
+    return PressScale(enabled: onPressed != null && !isLoading, child: button);
   }
 }
 
@@ -90,6 +99,13 @@ class SecondaryButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final button = OutlinedButton(
       onPressed: onPressed,
+      style: OutlinedButton.styleFrom(
+        animationDuration: AppMotion.duration(
+          context,
+          AppMotion.normal,
+          reduced: AppMotion.fast,
+        ),
+      ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -103,9 +119,12 @@ class SecondaryButton extends StatelessWidget {
     );
 
     if (isFullWidth) {
-      return SizedBox(width: double.infinity, child: button);
+      return PressScale(
+        enabled: onPressed != null,
+        child: SizedBox(width: double.infinity, child: button),
+      );
     }
 
-    return button;
+    return PressScale(enabled: onPressed != null, child: button);
   }
 }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../design_system/glass/glass.dart';
 import '../../../../ui/tokens.dart';
 import '../../../../ui/components/components.dart';
 import '../practice_planner.dart';
@@ -18,11 +19,12 @@ class DailyTrainingHero extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final semantic = theme.semanticColors;
     final isEmpty = plan?.isEmpty == true;
 
-    return AppCard(
-      // Standard Surface2 for calm feel (Step 4)
-      color: theme.colorScheme.surfaceContainerHighest,
+    return GlassCard(
+      preferPerformance: true,
+      preset: GlassPreset.frost,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -36,55 +38,95 @@ class DailyTrainingHero extends StatelessWidget {
               const SizedBox(width: Spacing.s),
               Text(
                 'Recommended for you',
-                style: theme.textTheme.labelMedium?.copyWith(
-                  color: theme.colorScheme.primary,
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: 0.5,
+                style: AppSemanticTypography.caption.copyWith(
+                  color: semantic.accentPrimary,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 0.3,
                 ),
               ),
             ],
           ),
-          const SizedBox(height: Spacing.m),
+          const SizedBox(height: AppSemanticSpacing.space16),
 
           Text(
             'Daily Training Mix',
-            style: theme.textTheme.headlineSmall?.copyWith(
-              fontWeight: FontWeight.bold,
+            style: AppSemanticTypography.section.copyWith(
+              color: semantic.textPrimary,
             ),
           ),
-          const SizedBox(height: Spacing.xs),
+          const SizedBox(height: AppSemanticSpacing.space8),
 
           Text(
             isEmpty
                 ? 'Complete more lessons to unlock your personalized training mix.'
                 : '${plan?.estimatedMinutes ?? 5} min • Review & Listening',
-            style: theme.textTheme.bodyMedium?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant,
+            style: AppSemanticTypography.body.copyWith(
+              color: semantic.textSecondary,
             ),
           ),
 
-          const SizedBox(height: Spacing.l),
+          const SizedBox(height: AppSemanticSpacing.space24),
 
           // Content Chips (Visual flavor)
           if (!isEmpty) ...[
             Wrap(
-              spacing: Spacing.s,
+              spacing: AppSemanticSpacing.space12,
               children: [
-                AppChip(
-                  icon: Icons.refresh_rounded,
-                  label: 'Review',
-                  color: Colors.orange,
-                  isSelected: true, // Highlights with the color
+                GlassPill(
+                  selected: true,
+                  preferPerformance: true,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppSemanticSpacing.space12,
+                    vertical: AppSemanticSpacing.space8,
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.refresh_rounded,
+                        size: 16,
+                        color: semantic.textPrimary,
+                      ),
+                      const SizedBox(width: AppSemanticSpacing.space8),
+                      Text(
+                        'Review',
+                        style: AppSemanticTypography.caption.copyWith(
+                          color: semantic.textPrimary,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-                AppChip(
-                  icon: Icons.headphones_rounded,
-                  label: 'Listening',
-                  color: Colors.purple,
-                  isSelected: true,
+                GlassPill(
+                  selected: true,
+                  preferPerformance: true,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppSemanticSpacing.space12,
+                    vertical: AppSemanticSpacing.space8,
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.headphones_rounded,
+                        size: 16,
+                        color: semantic.textPrimary,
+                      ),
+                      const SizedBox(width: AppSemanticSpacing.space8),
+                      Text(
+                        'Listening',
+                        style: AppSemanticTypography.caption.copyWith(
+                          color: semantic.textPrimary,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ],
             ),
-            const SizedBox(height: Spacing.l),
+            const SizedBox(height: AppSemanticSpacing.space24),
           ],
 
           PrimaryButton(

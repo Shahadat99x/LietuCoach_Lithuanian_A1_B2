@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import '../../../../design_system/glass/glass.dart';
 import '../../../../ui/tokens.dart';
-import '../../../../ui/components/components.dart';
 
 class SettingsSectionCard extends StatelessWidget {
   final String title;
@@ -26,20 +26,22 @@ class SettingsSectionCard extends StatelessWidget {
           ),
           child: Text(
             title.toUpperCase(),
-            style: theme.textTheme.labelSmall?.copyWith(
-              fontWeight: FontWeight.bold,
+            style: AppSemanticTypography.caption.copyWith(
+              fontWeight: FontWeight.w700,
               letterSpacing: 1.0,
-              color: theme.colorScheme.onSurfaceVariant,
+              color: theme.semanticColors.textSecondary,
             ),
           ),
         ),
-        AppCard(
+        GlassCard(
           padding: EdgeInsets.zero,
+          preset: GlassPreset.solid,
+          preferPerformance: true,
           child: Column(
             children: [
               for (var i = 0; i < children.length; i++) ...[
                 if (i > 0)
-                  Divider(height: 1, indent: Spacing.m, endIndent: Spacing.m),
+                  const GlassDivider(indent: Spacing.m, endIndent: Spacing.m),
                 children[i],
               ],
             ],

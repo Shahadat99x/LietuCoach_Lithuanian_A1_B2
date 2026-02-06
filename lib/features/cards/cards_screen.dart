@@ -3,9 +3,11 @@
 /// Main screen for flashcard tab showing stats and review button.
 
 import 'package:flutter/material.dart';
+import '../../design_system/glass/glass.dart';
 import '../../srs/srs.dart';
 import '../../ui/tokens.dart';
 import '../../ui/components/components.dart';
+import '../path/path_screen.dart';
 import 'review_session_screen.dart';
 import 'widgets/srs_stats_strip.dart';
 import 'widgets/caught_up_view.dart';
@@ -66,12 +68,9 @@ class _CardsScreenState extends State<CardsScreen> with WidgetsBindingObserver {
   }
 
   void _goToPath() {
-    // TODO: Navigation to Path tab.
-    // For now, we interact via a snackbar or just pop if this was pushed (it's a tab though).
-    // Ideally we use a TabController or a global navigation service.
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Switching to Path tab (Simulated)')),
-    );
+    Navigator.of(
+      context,
+    ).push(MaterialPageRoute(builder: (_) => const PathScreen()));
   }
 
   @override
@@ -93,18 +92,18 @@ class _CardsScreenState extends State<CardsScreen> with WidgetsBindingObserver {
                       delegate: SliverChildListDelegate([
                         Text(
                           'Flashcards',
-                          style: theme.textTheme.headlineLarge?.copyWith(
-                            fontWeight: FontWeight.bold,
+                          style: AppSemanticTypography.title.copyWith(
+                            color: theme.semanticColors.textPrimary,
                           ),
                         ),
-                        const SizedBox(height: Spacing.xs),
+                        const SizedBox(height: AppSemanticSpacing.space8),
                         Text(
                           'Your personal collection',
-                          style: theme.textTheme.titleMedium?.copyWith(
-                            color: theme.colorScheme.onSurfaceVariant,
+                          style: AppSemanticTypography.body.copyWith(
+                            color: theme.semanticColors.textSecondary,
                           ),
                         ),
-                        const SizedBox(height: Spacing.l),
+                        const SizedBox(height: AppSemanticSpacing.space24),
 
                         // Stats
                         SrsStatsStrip(
@@ -112,7 +111,7 @@ class _CardsScreenState extends State<CardsScreen> with WidgetsBindingObserver {
                           totalCount: _stats.totalCards,
                           isLoading: _loading,
                         ),
-                        const SizedBox(height: Spacing.xl),
+                        const SizedBox(height: AppSemanticSpacing.space24),
 
                         // Action or Empty State
                         if (isEmpty)
@@ -136,35 +135,39 @@ class _CardsScreenState extends State<CardsScreen> with WidgetsBindingObserver {
   }
 
   Widget _buildReviewCallToAction(ThemeData theme) {
-    return AppCard(
-      // Standard Surface2 for calm feel (Step 4)
-      color: theme.colorScheme.surfaceContainerHighest,
+    return GlassCard(
+      preferPerformance: true,
+      preset: GlassPreset.frost,
       child: Column(
         children: [
-          const SizedBox(height: Spacing.m),
-          Icon(Icons.style_rounded, size: 48, color: theme.colorScheme.primary),
-          const SizedBox(height: Spacing.m),
+          const SizedBox(height: AppSemanticSpacing.space16),
+          Icon(
+            Icons.style_rounded,
+            size: 48,
+            color: theme.semanticColors.accentPrimary,
+          ),
+          const SizedBox(height: AppSemanticSpacing.space16),
           Text(
             'Review Time!',
-            style: theme.textTheme.headlineSmall?.copyWith(
-              fontWeight: FontWeight.bold,
+            style: AppSemanticTypography.section.copyWith(
+              color: theme.semanticColors.textPrimary,
             ),
           ),
-          const SizedBox(height: Spacing.s),
+          const SizedBox(height: AppSemanticSpacing.space12),
           Text(
             '${_stats.dueToday} cards are ready for review.',
-            style: theme.textTheme.bodyMedium?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant,
+            style: AppSemanticTypography.body.copyWith(
+              color: theme.semanticColors.textSecondary,
             ),
           ),
-          const SizedBox(height: Spacing.l),
+          const SizedBox(height: AppSemanticSpacing.space24),
           PrimaryButton(
             label: 'Start Review Session',
             icon: Icons.play_arrow_rounded,
             onPressed: _startReview,
             isFullWidth: true,
           ),
-          const SizedBox(height: Spacing.m),
+          const SizedBox(height: AppSemanticSpacing.space16),
         ],
       ),
     );

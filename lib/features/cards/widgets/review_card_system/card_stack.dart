@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../../srs/srs.dart';
+import '../../../../ui/tokens.dart';
 import 'review_card.dart';
 
 enum SwipeDirection { left, right, up }
@@ -233,6 +234,9 @@ class _CardStackState extends State<CardStack>
   }
 
   Widget _buildDragOverlay() {
+    final theme = Theme.of(context);
+    final semantic = theme.semanticColors;
+
     // Simple colored application or icon based on _dragOffset
     Color color = Colors.transparent;
     IconData? icon;
@@ -240,17 +244,17 @@ class _CardStackState extends State<CardStack>
 
     if (_dragOffset.dx > 50) {
       // Right (Good)
-      color = Colors.green.withValues(alpha: 0.2);
+      color = semantic.successContainer;
       icon = Icons.check_circle_outline;
       alignment = Alignment.centerLeft;
     } else if (_dragOffset.dx < -50) {
       // Left (Hard)
-      color = Colors.red.withValues(alpha: 0.2);
+      color = semantic.dangerContainer;
       icon = Icons.error_outline;
       alignment = Alignment.centerRight;
     } else if (_dragOffset.dy < -50) {
       // Up (Easy)
-      color = Colors.blue.withValues(alpha: 0.2);
+      color = theme.colorScheme.secondaryContainer;
       icon = Icons.rocket_launch_outlined;
       alignment = Alignment.bottomCenter;
     }
@@ -267,11 +271,7 @@ class _CardStackState extends State<CardStack>
             borderRadius: BorderRadius.circular(24),
             color: color,
           ),
-          child: Icon(
-            icon,
-            size: 80,
-            color: Colors.white.withValues(alpha: 0.8),
-          ),
+          child: Icon(icon, size: 80, color: semantic.textPrimary),
         ),
       ),
     );

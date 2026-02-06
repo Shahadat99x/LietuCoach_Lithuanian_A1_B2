@@ -10,6 +10,7 @@ import '../../progress/progress.dart';
 import '../certificate/certificate.dart';
 import '../../auth/auth.dart';
 import '../../ui/components/components.dart';
+import '../../design_system/tokens/motion.dart';
 import '../lesson/lesson_list_screen.dart';
 import '../exam/exam_intro_screen.dart';
 import '../content/content_error_screen.dart';
@@ -229,6 +230,7 @@ class _PathScreenState extends State<PathScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final reduceMotion = AppMotion.reduceMotionOf(context);
     // Find last active unit for "Continue" button
     CourseUnitConfig? continueUnit;
     for (final config in courseUnits) {
@@ -304,9 +306,9 @@ class _PathScreenState extends State<PathScreen> {
           : RefreshIndicator(
               onRefresh: _loadData,
               child: AnimatedSwitcher(
-                duration: const Duration(milliseconds: 400),
-                switchInCurve: Curves.easeInOut,
-                switchOutCurve: Curves.easeInOut,
+                duration: reduceMotion ? AppMotion.instant : AppMotion.slow,
+                switchInCurve: AppMotion.curve(context, AppMotion.easeInOut),
+                switchOutCurve: AppMotion.curve(context, AppMotion.easeInOut),
                 transitionBuilder: (child, animation) {
                   return FadeTransition(opacity: animation, child: child);
                 },
@@ -331,8 +333,8 @@ class _PathScreenState extends State<PathScreen> {
       final unitIndex = courseUnits.indexOf(config);
       LockBottomSheet.show(
         context,
-        title: 'Unit Locked',
-        message: 'Pass the exam for Unit $unitIndex to unlock this module.',
+        title: 'Almost There!',
+        message: 'Complete Unit $unitIndex exam to unlock this new chapter.',
       );
       return;
     }

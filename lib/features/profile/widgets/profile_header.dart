@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../design_system/glass/glass.dart';
 import '../../../../ui/tokens.dart';
 import '../../../../ui/components/components.dart';
 
@@ -25,36 +26,41 @@ class ProfileHeader extends StatelessWidget {
     final theme = Theme.of(context);
 
     if (!isAuthenticated) {
-      return AppCard(
-        color: theme.colorScheme.primaryContainer.withValues(alpha: 0.3),
+      final semantic = theme.semanticColors;
+      return GlassCard(
+        preferPerformance: true,
+        preset: GlassPreset.frost,
         child: Column(
           children: [
-            const SizedBox(height: Spacing.m),
+            const SizedBox(height: AppSemanticSpacing.space16),
             Image.asset(
               'assets/branding/logo_mark_1024.png',
               width: 80,
               height: 80,
             ),
-            const SizedBox(height: Spacing.m),
+            const SizedBox(height: AppSemanticSpacing.space16),
             Text(
               'Create a Profile',
-              style: theme.textTheme.headlineSmall?.copyWith(
-                fontWeight: FontWeight.bold,
+              style: AppSemanticTypography.section.copyWith(
+                color: semantic.textPrimary,
               ),
             ),
-            const SizedBox(height: Spacing.s),
-            const Text(
+            const SizedBox(height: AppSemanticSpacing.space12),
+            Text(
               'Save your progress and sync across devices.',
+              style: AppSemanticTypography.body.copyWith(
+                color: semantic.textSecondary,
+              ),
               textAlign: TextAlign.center,
             ),
-            const SizedBox(height: Spacing.l),
+            const SizedBox(height: AppSemanticSpacing.space24),
             PrimaryButton(
               label: 'Sign In / Register',
               icon: Icons.login_rounded,
               onPressed: onEdit, // Reusing onEdit as sign-in trigger
               isFullWidth: true,
             ),
-            const SizedBox(height: Spacing.m),
+            const SizedBox(height: AppSemanticSpacing.space16),
           ],
         ),
       );
@@ -74,8 +80,8 @@ class ProfileHeader extends StatelessWidget {
               child: avatarUrl == null
                   ? Text(
                       (displayName ?? 'U').substring(0, 1).toUpperCase(),
-                      style: theme.textTheme.headlineLarge?.copyWith(
-                        color: theme.colorScheme.primary,
+                      style: AppSemanticTypography.title.copyWith(
+                        color: theme.semanticColors.accentPrimary,
                       ),
                     )
                   : null,
@@ -92,7 +98,11 @@ class ProfileHeader extends StatelessWidget {
                   color: theme.colorScheme.primary,
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(Icons.edit, size: 14, color: Colors.white),
+                child: Icon(
+                  Icons.edit,
+                  size: 14,
+                  color: theme.colorScheme.onPrimary,
+                ),
               ),
             ),
           ],
@@ -100,15 +110,15 @@ class ProfileHeader extends StatelessWidget {
         const SizedBox(height: Spacing.m),
         Text(
           displayName ?? 'User',
-          style: theme.textTheme.headlineSmall?.copyWith(
-            fontWeight: FontWeight.bold,
+          style: AppSemanticTypography.section.copyWith(
+            color: theme.semanticColors.textPrimary,
           ),
         ),
         if (email != null)
           Text(
             email!,
-            style: theme.textTheme.bodyMedium?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant,
+            style: AppSemanticTypography.body.copyWith(
+              color: theme.semanticColors.textSecondary,
             ),
           ),
       ],
