@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../../../ui/tokens.dart';
 import '../../lesson/widgets/answer_tile.dart';
 import '../domain/role_model.dart';
@@ -20,24 +21,22 @@ class RoleMcqWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    // Use promptLt (Lithuanian) as primary or promptEn depending on design.
-    // Prompt says: "Questions can be in English UI (promptEn), but options can be English".
-    // Let's use promptLt if available, else promptEn. Or display both?
-    // "Understand" section: promptEn, optionsEn (to test comprehension).
-    // "Respond" section: promptEn (Translate...), optionsLt.
-    // The model has both.
-
     final prompt = exercise.promptLt ?? exercise.promptEn ?? '';
     final options = exercise.optionsLt ?? exercise.optionsEn ?? [];
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Prompt
-        Text(prompt, style: theme.textTheme.headlineSmall),
-        const SizedBox(height: Spacing.l),
+        Text(prompt, style: AppSemanticTypography.section),
+        const SizedBox(height: AppSemanticSpacing.space4),
+        Text(
+          'Choose one answer',
+          style: AppSemanticTypography.caption.copyWith(
+            color: theme.semanticColors.textSecondary,
+          ),
+        ),
+        const SizedBox(height: AppSemanticSpacing.space12),
 
-        // Options
         ...List.generate(options.length, (index) {
           final isSelected = selectedIndex == index;
           final isCorrect = index == exercise.correctIndex;
@@ -61,8 +60,14 @@ class RoleMcqWidget extends StatelessWidget {
             child: AnswerTile(
               text: options[index],
               state: state,
+              leadingKind: AnswerLeadingKind.badge,
               shortcutLabel: String.fromCharCode(65 + index), // A, B, C...
-              onTap: hasAnswered ? null : () => onSelect(index),
+              onTap: hasAnswered
+                  ? null
+                  : () {
+                      HapticFeedback.selectionClick();
+                      onSelect(index);
+                    },
             ),
           );
         }),
