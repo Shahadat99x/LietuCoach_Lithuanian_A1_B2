@@ -29,8 +29,13 @@ class McqWidget extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         // Prompt
-        Text(step.prompt, style: theme.textTheme.headlineSmall),
-        const SizedBox(height: Spacing.l),
+        Text(
+          step.prompt,
+          style: AppSemanticTypography.section.copyWith(
+            color: theme.semanticColors.textPrimary,
+          ),
+        ),
+        const SizedBox(height: AppSemanticSpacing.space24),
 
         // Options
         ...List.generate(step.options.length, (index) {
@@ -56,6 +61,7 @@ class McqWidget extends StatelessWidget {
               text: step.options[index],
               state: state,
               shortcutLabel: String.fromCharCode(65 + index), // A, B, C...
+              leadingKind: AnswerLeadingKind.badge,
               onTap: hasAnswered ? null : () => onSelect(index),
             ),
           );

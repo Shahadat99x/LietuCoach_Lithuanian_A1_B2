@@ -9,6 +9,12 @@ abstract class AppRadius {
   static const double xl = 24.0;
   static const double full = 999.0;
 
+  // Semantic aliases
+  static const double radiusControl = md;
+  static const double radiusCard = lg;
+  static const double radiusHero = xl;
+  static const double radiusFull = full;
+
   static const Radius smRadius = Radius.circular(sm);
   static const Radius mdRadius = Radius.circular(md);
   static const Radius lgRadius = Radius.circular(lg);

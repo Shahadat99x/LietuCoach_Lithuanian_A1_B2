@@ -36,19 +36,21 @@ class _FillBlankWidgetState extends State<FillBlankWidget> {
 
   List<String> _generateChoices() {
     final choices = <String>[widget.step.answer];
-    
+
     // Add some plausible distractors (simplified - in real app, these would come from content)
     // For now, just use variations
     if (widget.step.answer.length > 2) {
       choices.add('${widget.step.answer}s');
-      choices.add(widget.step.answer.substring(0, widget.step.answer.length - 1));
+      choices.add(
+        widget.step.answer.substring(0, widget.step.answer.length - 1),
+      );
     }
-    
+
     // Ensure we have at least 3 choices
     while (choices.length < 3) {
       choices.add('...');
     }
-    
+
     choices.shuffle();
     return choices.take(3).toList();
   }
@@ -64,20 +66,19 @@ class _FillBlankWidgetState extends State<FillBlankWidget> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isCorrect = _selectedAnswer?.toLowerCase() == widget.step.answer.toLowerCase();
+    final semantic = theme.semanticColors;
+    final isCorrect =
+        _selectedAnswer?.toLowerCase() == widget.step.answer.toLowerCase();
 
     // Build sentence with blank
     final parts = widget.step.sentence.split(widget.step.blank);
-    
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          'Fill in the blank',
-          style: theme.textTheme.headlineSmall,
-        ),
+        Text('Fill in the blank', style: theme.textTheme.headlineSmall),
         const SizedBox(height: Spacing.l),
-        
+
         // Sentence with blank
         AppCard(
           child: RichText(
@@ -96,12 +97,14 @@ class _FillBlankWidgetState extends State<FillBlankWidget> {
                     ),
                     decoration: BoxDecoration(
                       color: widget.hasAnswered
-                          ? (isCorrect ? AppColors.successLight : AppColors.dangerLight)
+                          ? (isCorrect
+                                ? semantic.successContainer
+                                : semantic.dangerContainer)
                           : theme.colorScheme.primaryContainer,
                       borderRadius: BorderRadius.circular(Radii.sm),
                       border: Border.all(
                         color: widget.hasAnswered
-                            ? (isCorrect ? AppColors.success : AppColors.danger)
+                            ? (isCorrect ? semantic.success : semantic.danger)
                             : theme.colorScheme.primary,
                       ),
                     ),
@@ -120,14 +123,15 @@ class _FillBlankWidgetState extends State<FillBlankWidget> {
           ),
         ),
         const SizedBox(height: Spacing.l),
-        
+
         // Choices
         ...List.generate(_choices.length, (index) {
           final choice = _choices[index];
           final isSelected = _selectedAnswer == choice;
-          final showAsCorrect = widget.hasAnswered && 
+          final showAsCorrect =
+              widget.hasAnswered &&
               choice.toLowerCase() == widget.step.answer.toLowerCase();
-          
+
           return Padding(
             padding: const EdgeInsets.only(bottom: Spacing.s),
             child: _ChoiceButton(
@@ -162,16 +166,17 @@ class _ChoiceButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
+    final semantic = theme.semanticColors;
+
     Color? backgroundColor;
     Color borderColor = theme.dividerColor;
-    
+
     if (showResult && isCorrect) {
-      backgroundColor = AppColors.successLight;
-      borderColor = AppColors.success;
+      backgroundColor = semantic.successContainer;
+      borderColor = semantic.success;
     } else if (showResult && isSelected && !isCorrect) {
-      backgroundColor = AppColors.dangerLight;
-      borderColor = AppColors.danger;
+      backgroundColor = semantic.dangerContainer;
+      borderColor = semantic.danger;
     } else if (isSelected) {
       borderColor = theme.colorScheme.primary;
     }

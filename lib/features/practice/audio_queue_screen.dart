@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import '../../audio/audio.dart';
 import '../../ui/tokens.dart';
 import '../../ui/components/components.dart';
@@ -81,12 +80,25 @@ class _AudioQueueScreenState extends State<AudioQueueScreen> {
   @override
   Widget build(BuildContext context) {
     if (widget.items.isEmpty) {
-      return Scaffold(body: Center(child: Text('No listening items.')));
+      return Scaffold(
+        appBar: AppBar(title: const Text('Listening Practice')),
+        body: Padding(
+          padding: const EdgeInsets.all(Spacing.pagePadding),
+          child: EmptyStateCard(
+            icon: Icons.headphones_rounded,
+            title: 'No listening items yet',
+            description: 'Finish a lesson, then come back for audio practice.',
+            primaryActionLabel: 'Back to Practice',
+            onPrimaryAction: () => Navigator.of(context).pop(),
+          ),
+        ),
+      );
     }
 
     final item = widget.items[_currentIndex];
     final progress = (_currentIndex + 1) / widget.items.length;
     final theme = Theme.of(context);
+    final semantic = theme.semanticColors;
 
     return Scaffold(
       appBar: AppBar(
@@ -134,7 +146,7 @@ class _AudioQueueScreenState extends State<AudioQueueScreen> {
                 border: Border.all(color: theme.colorScheme.outlineVariant),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.05),
+                    color: semantic.shadowSoft,
                     blurRadius: 10,
                     offset: const Offset(0, 4),
                   ),

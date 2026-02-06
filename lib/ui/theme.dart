@@ -1,63 +1,83 @@
 /// LietuCoach Theme Configuration
 ///
-/// Material 3 ThemeData built from design tokens.
-/// Supports light and dark mode.
+/// Material 3 ThemeData built from semantic design tokens.
 
 import 'package:flutter/material.dart';
-import '../design_system/tokens/colors.dart';
+import '../design_system/tokens/semantic_tokens.dart';
 import '../design_system/tokens/typography.dart';
 import '../design_system/tokens/radius.dart';
 import '../design_system/tokens/spacing.dart';
 
-/// Build the app theme from design tokens
 ThemeData buildTheme({required Brightness brightness}) {
-  final isDark = brightness == Brightness.dark;
+  final semantic = brightness == Brightness.dark
+      ? AppSemanticColors.dark()
+      : AppSemanticColors.light();
 
-  final colorScheme = ColorScheme(
+  final base = ColorScheme.fromSeed(
+    seedColor: semantic.accentPrimary,
     brightness: brightness,
-    primary: AppColors.primary,
-    onPrimary: Colors.white,
-    primaryContainer: AppColors.primarySoft,
-    onPrimaryContainer: AppColors.primary, // Darker text on soft bg
-    secondary: AppColors.secondary,
-    onSecondary: Colors.black,
-    secondaryContainer: AppColors.secondary.withValues(alpha: 0.2),
-    onSecondaryContainer: AppColors.secondary,
-    surface: isDark ? AppColors.surface0Dark : AppColors.surface0Light,
-    onSurface: isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight,
-    surfaceContainerHighest: isDark
-        ? AppColors.surface2Dark
-        : AppColors.surface2Light,
-    onSurfaceVariant: isDark
-        ? AppColors.textSecondaryDark
-        : AppColors.textSecondaryLight,
-    error: AppColors.danger,
+  );
+
+  final colorScheme = base.copyWith(
+    primary: semantic.accentPrimary,
+    onPrimary: semantic.buttonPrimaryText,
+    primaryContainer: semantic.successContainer,
+    onPrimaryContainer: semantic.accentPrimary,
+    secondary: semantic.accentWarm,
+    onSecondary: semantic.textPrimary,
+    secondaryContainer: semantic.chipBg,
+    onSecondaryContainer: semantic.chipText,
+    tertiaryContainer: semantic.bgElevated,
+    onTertiaryContainer: semantic.textPrimary,
+    error: semantic.danger,
     onError: Colors.white,
-    errorContainer: AppColors.danger.withValues(alpha: 0.1),
-    onErrorContainer: AppColors.danger,
+    errorContainer: semantic.dangerContainer,
+    onErrorContainer: semantic.danger,
+    surface: semantic.surface,
+    onSurface: semantic.textPrimary,
+    onSurfaceVariant: semantic.textSecondary,
+    outline: semantic.borderStrong,
+    outlineVariant: semantic.borderSubtle,
+    shadow: semantic.shadowSoft,
+    surfaceContainerLowest: semantic.bgElevated,
+    surfaceContainerLow: semantic.surface,
+    surfaceContainer: semantic.surfaceCard,
+    surfaceContainerHigh: semantic.surfaceCard,
+    surfaceContainerHighest: semantic.surfaceElevated,
   );
 
   final textTheme = TextTheme(
     displayLarge: AppTypography.titleLarge.copyWith(
-      color: colorScheme.onSurface,
+      color: semantic.textPrimary,
     ),
     headlineLarge: AppTypography.titleLarge.copyWith(
-      color: colorScheme.onSurface,
-      fontSize: 28, // slight adjustment for headline
+      color: semantic.textPrimary,
+      fontSize: 28,
     ),
     headlineMedium: AppTypography.titleMedium.copyWith(
-      color: colorScheme.onSurface,
+      color: semantic.textPrimary,
     ),
-    titleLarge: AppTypography.titleLarge.copyWith(color: colorScheme.onSurface),
+    headlineSmall: AppTypography.titleMedium.copyWith(
+      color: semantic.textPrimary,
+      fontSize: 18,
+    ),
+    titleLarge: AppTypography.titleLarge.copyWith(color: semantic.textPrimary),
     titleMedium: AppTypography.titleMedium.copyWith(
-      color: colorScheme.onSurface,
+      color: semantic.textPrimary,
     ),
-    bodyLarge: AppTypography.bodyLarge.copyWith(color: colorScheme.onSurface),
-    bodyMedium: AppTypography.bodyMedium.copyWith(color: colorScheme.onSurface),
-    bodySmall: AppTypography.bodySmall.copyWith(
-      color: colorScheme.onSurfaceVariant,
+    titleSmall: AppTypography.bodySmall.copyWith(
+      color: semantic.textPrimary,
+      fontWeight: FontWeight.w700,
     ),
-    labelLarge: AppTypography.labelLarge.copyWith(color: colorScheme.onSurface),
+    bodyLarge: AppTypography.bodyLarge.copyWith(color: semantic.textPrimary),
+    bodyMedium: AppTypography.bodyMedium.copyWith(color: semantic.textPrimary),
+    bodySmall: AppTypography.bodySmall.copyWith(color: semantic.textSecondary),
+    labelLarge: AppTypography.labelLarge.copyWith(color: semantic.textPrimary),
+    labelMedium: AppTypography.bodySmall.copyWith(
+      color: semantic.textSecondary,
+      fontWeight: FontWeight.w700,
+    ),
+    labelSmall: AppTypography.caption.copyWith(color: semantic.textTertiary),
   );
 
   return ThemeData(
@@ -65,26 +85,20 @@ ThemeData buildTheme({required Brightness brightness}) {
     brightness: brightness,
     colorScheme: colorScheme,
     textTheme: textTheme,
-    scaffoldBackgroundColor: isDark
-        ? AppColors.surface0Dark
-        : AppColors.surface0Light,
+    scaffoldBackgroundColor: semantic.bg,
+    extensions: [semantic],
     appBarTheme: AppBarTheme(
-      backgroundColor: isDark
-          ? AppColors.surface0Dark
-          : AppColors.surface0Light,
-      foregroundColor: isDark
-          ? AppColors.textPrimaryDark
-          : AppColors.textPrimaryLight,
+      backgroundColor: semantic.bg,
+      foregroundColor: semantic.textPrimary,
       elevation: 0,
       centerTitle: true,
       titleTextStyle: AppTypography.titleMedium.copyWith(
-        color: isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight,
+        color: semantic.textPrimary,
       ),
     ),
     cardTheme: CardThemeData(
-      color: isDark ? AppColors.surface1Dark : AppColors.surface1Light,
-      elevation:
-          0, // We control shadow manually usually, but default to 0 for filled cards
+      color: semantic.surfaceCard,
+      elevation: 0,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(AppRadius.lg),
       ),
@@ -92,8 +106,10 @@ ThemeData buildTheme({required Brightness brightness}) {
     ),
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
-        backgroundColor: AppColors.primary,
-        foregroundColor: Colors.white,
+        backgroundColor: semantic.buttonPrimaryBg,
+        foregroundColor: semantic.buttonPrimaryText,
+        disabledBackgroundColor: semantic.surfaceElevated,
+        disabledForegroundColor: semantic.textTertiary,
         elevation: 0,
         padding: const EdgeInsets.symmetric(
           horizontal: AppSpacing.l,
@@ -107,7 +123,7 @@ ThemeData buildTheme({required Brightness brightness}) {
     ),
     outlinedButtonTheme: OutlinedButtonThemeData(
       style: OutlinedButton.styleFrom(
-        foregroundColor: AppColors.primary,
+        foregroundColor: semantic.accentPrimary,
         padding: const EdgeInsets.symmetric(
           horizontal: AppSpacing.l,
           vertical: AppSpacing.m,
@@ -115,35 +131,31 @@ ThemeData buildTheme({required Brightness brightness}) {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppRadius.md),
         ),
-        side: BorderSide(color: AppColors.primary),
+        side: BorderSide(color: semantic.borderStrong),
         textStyle: AppTypography.labelLarge,
       ),
     ),
     textButtonTheme: TextButtonThemeData(
       style: TextButton.styleFrom(
-        foregroundColor: AppColors.primary,
+        foregroundColor: semantic.accentPrimary,
         textStyle: AppTypography.labelLarge,
       ),
     ),
     navigationBarTheme: NavigationBarThemeData(
-      backgroundColor: isDark
-          ? AppColors.surface1Dark
-          : AppColors.surface1Light,
-      indicatorColor: AppColors.primarySoft,
+      backgroundColor: semantic.surfaceCard,
+      indicatorColor: semantic.successContainer,
       labelTextStyle: WidgetStateProperty.all(
         AppTypography.bodySmall.copyWith(fontSize: 12),
       ),
     ),
     progressIndicatorTheme: ProgressIndicatorThemeData(
-      color: AppColors.primary,
-      linearTrackColor: AppColors.primarySoft.withValues(alpha: 0.3),
+      color: semantic.accentPrimary,
+      linearTrackColor: semantic.surfaceElevated,
     ),
     chipTheme: ChipThemeData(
-      backgroundColor: isDark
-          ? AppColors.surface2Dark
-          : AppColors.surface2Light,
-      selectedColor: AppColors.primarySoft,
-      labelStyle: AppTypography.bodySmall,
+      backgroundColor: semantic.chipBg,
+      selectedColor: semantic.successContainer,
+      labelStyle: AppTypography.bodySmall.copyWith(color: semantic.chipText),
       padding: const EdgeInsets.symmetric(
         horizontal: AppSpacing.xs,
         vertical: AppSpacing.xxs,
@@ -153,15 +165,16 @@ ThemeData buildTheme({required Brightness brightness}) {
       ),
     ),
     dividerTheme: DividerThemeData(
-      color: isDark ? AppColors.borderSoftDark : AppColors.borderSoftLight,
+      color: semantic.borderSubtle,
       thickness: 1,
       space: 1,
+    ),
+    bottomSheetTheme: BottomSheetThemeData(
+      backgroundColor: semantic.surfaceCard,
+      showDragHandle: true,
     ),
   );
 }
 
-/// Light theme
 final ThemeData lightTheme = buildTheme(brightness: Brightness.light);
-
-/// Dark theme
 final ThemeData darkTheme = buildTheme(brightness: Brightness.dark);

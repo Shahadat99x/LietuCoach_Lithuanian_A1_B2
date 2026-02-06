@@ -5,7 +5,7 @@
 import 'package:flutter/material.dart';
 import '../../../content/content.dart';
 import '../../../ui/tokens.dart';
-import '../../../ui/components/app_card.dart';
+import '../widgets/answer_tile.dart';
 
 class ListeningChoiceWidget extends StatelessWidget {
   final ListeningChoiceStep step;
@@ -26,16 +26,19 @@ class ListeningChoiceWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final semantic = theme.semanticColors;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           'What do you hear?',
-          style: theme.textTheme.headlineSmall,
+          style: AppSemanticTypography.section.copyWith(
+            color: semantic.textPrimary,
+          ),
         ),
-        const SizedBox(height: Spacing.l),
-        
+        const SizedBox(height: AppSemanticSpacing.space24),
+
         // Audio play button
         Center(
           child: Material(
@@ -45,122 +48,56 @@ class ListeningChoiceWidget extends StatelessWidget {
               onTap: onPlayAudio,
               borderRadius: BorderRadius.circular(Radii.full),
               child: Padding(
-                padding: const EdgeInsets.all(Spacing.l),
+                padding: const EdgeInsets.all(AppSemanticSpacing.space24),
                 child: Icon(
                   Icons.volume_up,
                   size: 48,
-                  color: theme.colorScheme.primary,
+                  color: semantic.accentPrimary,
                 ),
               ),
             ),
           ),
         ),
-        const SizedBox(height: Spacing.s),
+        const SizedBox(height: AppSemanticSpacing.space12),
         Center(
           child: Text(
             'Tap to play',
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant,
+            style: AppSemanticTypography.caption.copyWith(
+              color: semantic.textSecondary,
             ),
           ),
         ),
-        const SizedBox(height: Spacing.l),
-        
+        const SizedBox(height: AppSemanticSpacing.space24),
+
         // Options
         ...List.generate(step.options.length, (index) {
           final isSelected = selectedIndex == index;
           final isCorrect = index == step.correctIndex;
-          
+          var state = AnswerState.defaultState;
+          if (hasAnswered) {
+            if (isCorrect) {
+              state = AnswerState.correct;
+            } else if (isSelected) {
+              state = AnswerState.incorrect;
+            } else {
+              state = AnswerState.disabled;
+            }
+          } else if (isSelected) {
+            state = AnswerState.selected;
+          }
+
           return Padding(
             padding: const EdgeInsets.only(bottom: Spacing.s),
-            child: _OptionCard(
+            child: AnswerTile(
               text: step.options[index],
-              isSelected: isSelected,
-              isCorrect: hasAnswered ? isCorrect : null,
-              showResult: hasAnswered,
+              state: state,
+              leadingKind: AnswerLeadingKind.radio,
+              showTrailingStateIcon: hasAnswered,
               onTap: hasAnswered ? null : () => onSelect(index),
             ),
           );
         }),
       ],
-    );
-  }
-}
-
-class _OptionCard extends StatelessWidget {
-  final String text;
-  final bool isSelected;
-  final bool? isCorrect;
-  final bool showResult;
-  final VoidCallback? onTap;
-
-  const _OptionCard({
-    required this.text,
-    required this.isSelected,
-    this.isCorrect,
-    required this.showResult,
-    this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    
-    Color? backgroundColor;
-    Color borderColor = theme.dividerColor;
-    
-    if (showResult && isCorrect == true) {
-      backgroundColor = AppColors.successLight;
-      borderColor = AppColors.success;
-    } else if (showResult && isSelected && isCorrect == false) {
-      backgroundColor = AppColors.dangerLight;
-      borderColor = AppColors.danger;
-    } else if (isSelected) {
-      borderColor = theme.colorScheme.primary;
-    }
-
-    return AppCard(
-      color: backgroundColor,
-      padding: EdgeInsets.zero,
-      onTap: onTap,
-      child: Container(
-        decoration: BoxDecoration(
-          border: Border.all(
-            color: borderColor,
-            width: isSelected ? 2 : 1,
-          ),
-          borderRadius: BorderRadius.circular(Radii.md),
-        ),
-        padding: const EdgeInsets.all(Spacing.m),
-        child: Row(
-          children: [
-            Container(
-              width: 24,
-              height: 24,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                border: Border.all(
-                  color: isSelected 
-                      ? (borderColor)
-                      : theme.colorScheme.outline,
-                  width: 2,
-                ),
-                color: isSelected ? borderColor : null,
-              ),
-              child: isSelected
-                  ? const Icon(Icons.check, size: 16, color: Colors.white)
-                  : null,
-            ),
-            const SizedBox(width: Spacing.m),
-            Expanded(
-              child: Text(
-                text,
-                style: theme.textTheme.bodyLarge,
-              ),
-            ),
-          ],
-        ),
-      ),
     );
   }
 }

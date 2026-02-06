@@ -78,7 +78,9 @@ void main() {
 
       // Should show 'Perfect!' since score is 0/0 (100%)
       expect(find.text('Perfect!'), findsOneWidget);
-      await tester.tap(find.text('Continue'));
+      final continueFinder = find.text('CONTINUE');
+      await tester.ensureVisible(continueFinder);
+      await tester.tap(continueFinder, warnIfMissed: false);
       await tester.pumpAndSettle();
 
       verify(

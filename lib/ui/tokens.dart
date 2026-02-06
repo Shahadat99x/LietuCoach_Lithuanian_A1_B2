@@ -10,6 +10,9 @@ import '../design_system/tokens/spacing.dart' as spacing_ds;
 import '../design_system/tokens/radius.dart' as radius_ds;
 import '../design_system/tokens/colors.dart' as colors_ds;
 import '../design_system/tokens/typography.dart' as typography_ds;
+import '../design_system/tokens/motion.dart' as motion_ds;
+export '../design_system/tokens/semantic_tokens.dart';
+export '../design_system/tokens/motion.dart';
 
 /// Spacing scale (logical pixels)
 abstract final class Spacing {
@@ -70,9 +73,9 @@ abstract final class AppColors {
 
   // Semantic colors
   static const Color success = colors_ds.AppColors.primary;
-  static const Color successLight = colors_ds.AppColors.primarySoft;
+  static const Color successLight = Color(0xFFDDF2DF);
   static const Color danger = colors_ds.AppColors.danger;
-  static const Color dangerLight = Color(0xFFFFEBEE); // Legacy
+  static const Color dangerLight = Color(0xFFF9E0E0);
   static const Color warning = colors_ds.AppColors.secondary;
   static const Color warningLight = Color(0xFFFFF3E0); // Legacy
   static const Color info = colors_ds.AppColors.info;
@@ -125,7 +128,7 @@ abstract final class Elevations {
 
 /// Animation durations
 abstract final class AppDurations {
-  static const Duration fast = Duration(milliseconds: 200);
-  static const Duration medium = Duration(milliseconds: 300);
-  static const Duration slow = Duration(milliseconds: 600);
+  static const Duration fast = motion_ds.AppMotion.fast;
+  static const Duration medium = motion_ds.AppMotion.normal;
+  static const Duration slow = motion_ds.AppMotion.slow;
 }

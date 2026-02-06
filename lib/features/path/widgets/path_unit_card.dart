@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../design_system/glass/glass.dart';
 import '../../../../ui/tokens.dart';
 import '../../../../ui/components/components.dart';
 import '../models/map_ui_models.dart';
@@ -24,11 +25,8 @@ class PathUnitCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final semantic = theme.semanticColors;
 
-    // Determine overall state
-    // A unit is "Completed" if all nodes are completed (or exam passed)
-    // A unit is "Current" if any node is current
-    // Otherwise "Locked"
     final isCompleted = section.nodes.every(
       (n) => n.state == PathNodeState.completed,
     );
@@ -42,26 +40,26 @@ class PathUnitCard extends StatelessWidget {
 
     final progress = section.progressCount / section.totalCount;
     final isDownloading = downloadProgress != null;
-
-    // Visual Tokens
-    // Surface1 for Locked/Completed, Surface2 for Current (Duolingo style highlight)
     final Color backgroundColor;
     final double elevation;
+    final double opacity;
 
     if (!hasContent) {
-      backgroundColor = theme.colorScheme.surfaceVariant.withValues(alpha: 0.3);
+      backgroundColor = semantic.surfaceElevated;
       elevation = 0.0;
+      opacity = 0.65;
     } else if (isCurrent) {
-      backgroundColor = theme.colorScheme.surfaceContainer;
-      elevation = 4.0;
+      backgroundColor = semantic.surfaceCard;
+      elevation = 2.5;
+      opacity = 1;
     } else if (isLocked) {
-      backgroundColor = theme.colorScheme.surfaceContainerLow.withValues(
-        alpha: 0.5,
-      );
+      backgroundColor = semantic.surfaceElevated.withValues(alpha: 0.8);
       elevation = 0.0;
+      opacity = 0.86;
     } else {
-      backgroundColor = theme.colorScheme.surfaceContainerLow;
-      elevation = 2.0;
+      backgroundColor = semantic.surfaceCard;
+      elevation = 1.2;
+      opacity = 1;
     }
 
     return ScaleButton(
@@ -71,10 +69,9 @@ class PathUnitCard extends StatelessWidget {
         elevation: elevation,
         color: backgroundColor,
         child: Opacity(
-          opacity: hasContent ? 1.0 : 0.6,
+          opacity: hasContent ? opacity : 0.62,
           child: Row(
             children: [
-              // Icon / Badge
               _buildLeadingIcon(
                 context,
                 isLocked,
@@ -84,26 +81,44 @@ class PathUnitCard extends StatelessWidget {
               ),
               const SizedBox(width: Spacing.m),
 
-              // Content
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Row(
                       children: [
+                        if (isCurrent) ...[
+                          GlassPill(
+                            selected: true,
+                            minHeight: 0,
+                            preferPerformance: true,
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: AppSemanticSpacing.space8,
+                              vertical: AppSemanticSpacing.space4,
+                            ),
+                            child: Text(
+                              'NEXT',
+                              style: AppSemanticTypography.caption.copyWith(
+                                color: semantic.textPrimary,
+                                fontWeight: FontWeight.w700,
+                                letterSpacing: 0.4,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: AppSemanticSpacing.space8),
+                        ],
                         Expanded(
                           child: Text(
                             hasContent
                                 ? '${section.subTitle}: ${section.title}'
                                 : '${section.subTitle}: Coming Soon',
-                            style: theme.textTheme.titleMedium?.copyWith(
+                            style: AppSemanticTypography.body.copyWith(
                               fontWeight: isCurrent
-                                  ? FontWeight.bold
+                                  ? FontWeight.w700
                                   : FontWeight.w600,
                               color: isLocked || !hasContent
-                                  ? theme.colorScheme.onSurfaceVariant
-                                        .withValues(alpha: 0.6)
-                                  : theme.colorScheme.onSurface,
+                                  ? semantic.textSecondary
+                                  : semantic.textPrimary,
                             ),
                           ),
                         ),
@@ -125,12 +140,12 @@ class PathUnitCard extends StatelessWidget {
                         isCompleted
                             ? 'Completed'
                             : '${section.progressCount}/${section.totalCount} Lessons',
-                        style: theme.textTheme.labelSmall?.copyWith(
+                        style: AppSemanticTypography.caption.copyWith(
                           color: isCompleted
-                              ? theme.colorScheme.primary
-                              : theme.colorScheme.onSurfaceVariant,
+                              ? semantic.accentPrimary
+                              : semantic.textSecondary,
                           fontWeight: isCompleted
-                              ? FontWeight.bold
+                              ? FontWeight.w700
                               : FontWeight.normal,
                         ),
                       ),
@@ -139,10 +154,8 @@ class PathUnitCard extends StatelessWidget {
                         !hasContent
                             ? 'New content being developed'
                             : 'Unlock previous units to continue',
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: theme.colorScheme.onSurfaceVariant.withValues(
-                            alpha: 0.5,
-                          ),
+                        style: AppSemanticTypography.caption.copyWith(
+                          color: semantic.textSecondary,
                         ),
                       ),
                   ],
@@ -151,7 +164,6 @@ class PathUnitCard extends StatelessWidget {
 
               const SizedBox(width: Spacing.s),
 
-              // Status Chip
               if (hasContent)
                 _buildStatusChip(context, isLocked, isCurrent, isCompleted),
             ],
@@ -169,24 +181,22 @@ class PathUnitCard extends StatelessWidget {
     bool hasContent,
   ) {
     final theme = Theme.of(context);
+    final semantic = theme.semanticColors;
 
     if (!hasContent) {
       return Container(
         width: 52,
         height: 52,
         decoration: BoxDecoration(
-          color: theme.colorScheme.surfaceDim,
-          borderRadius: BorderRadius.circular(Radii.md),
-          border: Border.all(
-            color: theme.colorScheme.outlineVariant.withValues(alpha: 0.3),
-            width: 1,
-          ),
+          color: semantic.surfaceElevated,
+          borderRadius: BorderRadius.circular(AppSemanticShape.radiusControl),
+          border: Border.all(color: semantic.borderSubtle),
         ),
         alignment: Alignment.center,
         child: Icon(
           Icons.auto_awesome_rounded,
           size: 24,
-          color: theme.colorScheme.outline,
+          color: semantic.textSecondary,
         ),
       );
     }
@@ -195,11 +205,12 @@ class PathUnitCard extends StatelessWidget {
       height: 52,
       decoration: BoxDecoration(
         color: isLocked
-            ? theme.colorScheme.surfaceDim
-            : (isCompleted
-                  ? theme.colorScheme.primaryContainer
-                  : theme.colorScheme.secondaryContainer),
-        borderRadius: BorderRadius.circular(Radii.md),
+            ? semantic.surfaceElevated
+            : (isCompleted ? semantic.successContainer : semantic.chipBg),
+        borderRadius: BorderRadius.circular(AppSemanticShape.radiusControl),
+        border: Border.all(
+          color: isLocked ? semantic.borderSubtle : semantic.borderSubtle,
+        ),
       ),
       alignment: Alignment.center,
       child: isDownloading
@@ -209,7 +220,7 @@ class PathUnitCard extends StatelessWidget {
               child: CircularProgressIndicator(
                 strokeWidth: 3,
                 value: downloadProgress,
-                color: theme.colorScheme.primary,
+                color: semantic.accentPrimary,
               ),
             )
           : Icon(
@@ -220,10 +231,10 @@ class PathUnitCard extends StatelessWidget {
                         : Icons.play_arrow_rounded),
               size: 28,
               color: isLocked
-                  ? theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.4)
+                  ? semantic.textTertiary
                   : (isCompleted
-                        ? theme.colorScheme.primary
-                        : theme.colorScheme.secondary),
+                        ? semantic.accentPrimary
+                        : semantic.accentWarm),
             ),
     );
   }
@@ -235,77 +246,62 @@ class PathUnitCard extends StatelessWidget {
     bool isCompleted,
   ) {
     final theme = Theme.of(context);
+    final semantic = theme.semanticColors;
 
     String label;
-    Color chipColor;
-    Color textColor;
     IconData? icon;
 
     if (isCompleted) {
       label = 'DONE';
-      chipColor = theme.colorScheme.primaryContainer;
-      textColor = theme.colorScheme.primary;
       icon = Icons.check_circle;
     } else if (isCurrent) {
-      // Option to take exam if lessons are done
       final lessonsDone = section.progressCount >= section.totalCount;
       if (lessonsDone) {
-        return ScaleButton(
+        return GlassPill(
+          minHeight: 0,
+          selected: true,
+          preferPerformance: true,
           onTap: onExamTap,
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-            decoration: BoxDecoration(
-              color: theme.colorScheme.primary,
-              borderRadius: BorderRadius.circular(Radii.full),
-              boxShadow: [
-                BoxShadow(
-                  color: theme.colorScheme.primary.withValues(alpha: 0.3),
-                  blurRadius: 8,
-                  offset: const Offset(0, 4),
-                ),
-              ],
-            ),
-            child: Text(
-              'EXAM',
-              style: theme.textTheme.labelSmall?.copyWith(
-                color: theme.colorScheme.onPrimary,
-                fontWeight: FontWeight.bold,
-                letterSpacing: 1.1,
-              ),
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSemanticSpacing.space12,
+            vertical: AppSemanticSpacing.space8,
+          ),
+          child: Text(
+            'EXAM',
+            style: AppSemanticTypography.caption.copyWith(
+              color: semantic.textPrimary,
+              fontWeight: FontWeight.w700,
+              letterSpacing: 0.8,
             ),
           ),
         );
       }
       label = 'START';
-      chipColor = theme.colorScheme.secondaryContainer;
-      textColor = theme.colorScheme.secondary;
     } else {
       label = 'LOCKED';
-      chipColor = theme.colorScheme.surfaceContainerHighest.withValues(
-        alpha: 0.3,
-      );
-      textColor = theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.4);
     }
 
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration: BoxDecoration(
-        color: chipColor,
-        borderRadius: BorderRadius.circular(Radii.sm),
+    return GlassPill(
+      minHeight: 0,
+      selected: isCurrent || isCompleted,
+      preferPerformance: true,
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSemanticSpacing.space8,
+        vertical: AppSemanticSpacing.space4,
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           if (icon != null) ...[
-            Icon(icon, size: 12, color: textColor),
+            Icon(icon, size: 12, color: semantic.textSecondary),
             const SizedBox(width: 4),
           ],
           Text(
             label,
-            style: theme.textTheme.labelSmall?.copyWith(
-              color: textColor,
-              fontWeight: FontWeight.bold,
-              fontSize: 10,
+            style: AppSemanticTypography.caption.copyWith(
+              color: isLocked ? semantic.textTertiary : semantic.textSecondary,
+              fontWeight: FontWeight.w700,
+              letterSpacing: 0.3,
             ),
           ),
         ],

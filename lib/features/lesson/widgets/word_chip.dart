@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '../../../ui/tokens.dart';
-import '../../../ui/components/components.dart';
 
 class WordChip extends StatelessWidget {
   final String label;
@@ -19,52 +18,60 @@ class WordChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final semantic = theme.semanticColors;
+    final radius = BorderRadius.circular(AppSemanticShape.radiusFull);
 
-    if (isPlaceholder) {
-      return Container(
-        padding: const EdgeInsets.symmetric(
-          horizontal: Spacing.m,
-          vertical: Spacing.s + 4, // Match the height of the real chip
-        ),
-        decoration: BoxDecoration(
-          color: theme.colorScheme.surfaceContainerHighest.withValues(
-            alpha: 0.5,
-          ),
-          borderRadius: BorderRadius.circular(Radii.md),
-        ),
-        child: Text(
-          label,
-          style: const TextStyle(color: Colors.transparent), // Keep size
-        ),
-      );
-    }
+    final color = isPlaceholder
+        ? semantic.surfaceElevated.withValues(alpha: 0.55)
+        : (isSelected
+              ? semantic.accentPrimary.withValues(alpha: 0.16)
+              : semantic.surfaceCard);
+    final borderColor = isPlaceholder
+        ? semantic.borderSubtle.withValues(alpha: 0.8)
+        : (isSelected ? semantic.accentPrimary : semantic.borderSubtle);
+    final textColor = isPlaceholder
+        ? semantic.textTertiary
+        : semantic.textPrimary;
 
-    return ScaleButton(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(
-          horizontal: Spacing.m,
-          vertical: Spacing.s + 2,
-        ),
-        decoration: BoxDecoration(
-          color: theme.colorScheme.surface,
-          borderRadius: BorderRadius.circular(Radii.md),
-          border: Border.all(
-            color: theme.colorScheme.outlineVariant,
-            width: 1.5,
+    return Opacity(
+      opacity: isPlaceholder ? 0.8 : 1,
+      child: Material(
+        color: Colors.transparent,
+        child: Ink(
+          decoration: BoxDecoration(
+            color: color,
+            borderRadius: radius,
+            border: Border.all(color: borderColor),
+            boxShadow: [
+              if (!isPlaceholder)
+                BoxShadow(
+                  color: semantic.shadowSoft.withValues(
+                    alpha: theme.brightness == Brightness.dark ? 0.24 : 0.08,
+                  ),
+                  blurRadius: 6,
+                  offset: const Offset(0, 2),
+                ),
+            ],
           ),
-          boxShadow: [
-            BoxShadow(
-              color: theme.colorScheme.shadow.withValues(alpha: 0.05),
-              offset: const Offset(0, 2),
-              blurRadius: 2,
+          child: InkWell(
+            onTap: isPlaceholder ? null : onTap,
+            borderRadius: radius,
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(minHeight: 44),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppSemanticSpacing.space16,
+                  vertical: AppSemanticSpacing.space12,
+                ),
+                child: Text(
+                  label,
+                  style: AppSemanticTypography.body.copyWith(
+                    color: textColor,
+                    fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                  ),
+                ),
+              ),
             ),
-          ],
-        ),
-        child: Text(
-          label,
-          style: theme.textTheme.titleMedium?.copyWith(
-            color: theme.colorScheme.onSurface,
           ),
         ),
       ),

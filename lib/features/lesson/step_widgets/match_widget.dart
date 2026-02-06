@@ -45,7 +45,7 @@ class _MatchWidgetState extends State<MatchWidget> {
   void _onRightTap(int shuffledIndex) {
     if (widget.hasAnswered || _selectedLeftIndex == null) return;
     if (_matches.values.contains(shuffledIndex)) return;
-    
+
     setState(() {
       _matches[_selectedLeftIndex!] = shuffledIndex;
       _selectedLeftIndex = null;
@@ -80,10 +80,7 @@ class _MatchWidgetState extends State<MatchWidget> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          'Match the pairs',
-          style: theme.textTheme.headlineSmall,
-        ),
+        Text('Match the pairs', style: theme.textTheme.headlineSmall),
         const SizedBox(height: Spacing.s),
         Text(
           'Tap left, then right to match',
@@ -92,7 +89,7 @@ class _MatchWidgetState extends State<MatchWidget> {
           ),
         ),
         const SizedBox(height: Spacing.l),
-        
+
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -102,7 +99,7 @@ class _MatchWidgetState extends State<MatchWidget> {
                 children: List.generate(pairs.length, (index) {
                   final isMatched = _matches.containsKey(index);
                   final isSelected = _selectedLeftIndex == index;
-                  
+
                   return Padding(
                     padding: const EdgeInsets.only(bottom: Spacing.s),
                     child: _MatchTile(
@@ -125,7 +122,7 @@ class _MatchWidgetState extends State<MatchWidget> {
                 children: List.generate(pairs.length, (shuffledIndex) {
                   final isMatched = _matches.values.contains(shuffledIndex);
                   final actualIndex = _shuffledRightIndices[shuffledIndex];
-                  
+
                   return Padding(
                     padding: const EdgeInsets.only(bottom: Spacing.s),
                     child: _MatchTile(
@@ -164,16 +161,17 @@ class _MatchTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
+    final semantic = theme.semanticColors;
+
     Color backgroundColor = theme.colorScheme.surfaceContainerHighest;
     Color borderColor = Colors.transparent;
-    
+
     if (isCorrect == true) {
-      backgroundColor = AppColors.successLight;
-      borderColor = AppColors.success;
+      backgroundColor = semantic.successContainer;
+      borderColor = semantic.success;
     } else if (isCorrect == false) {
-      backgroundColor = AppColors.dangerLight;
-      borderColor = AppColors.danger;
+      backgroundColor = semantic.dangerContainer;
+      borderColor = semantic.danger;
     } else if (isSelected) {
       borderColor = theme.colorScheme.primary;
     } else if (isMatched) {

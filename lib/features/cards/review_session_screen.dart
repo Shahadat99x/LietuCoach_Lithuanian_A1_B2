@@ -125,16 +125,14 @@ class _ReviewSessionScreenState extends State<ReviewSessionScreen> {
     }
 
     if (_cards.isEmpty || _currentIndex >= _cards.length) {
-      // Show completion or empty state
       return Scaffold(
         appBar: AppBar(title: const Text('Review')),
-        body: AppEmptyState(
-          title: 'All Caught Up!',
-          message:
-              'You have no cards due for review properly. Great job keeping up!',
-          icon: Icons.check_circle_outline_rounded,
-          ctaLabel: 'Return to Path',
-          onCta: () => Navigator.of(context).pop(),
+        body: Padding(
+          padding: const EdgeInsets.all(Spacing.pagePadding),
+          child: CaughtUpState(
+            primaryActionLabel: 'Back to cards',
+            onPrimaryAction: () => Navigator.of(context).pop(),
+          ),
         ),
       );
     }

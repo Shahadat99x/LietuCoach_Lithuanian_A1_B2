@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
+import '../../../../design_system/glass/glass.dart';
 import '../../../../ui/tokens.dart';
 import '../../models/map_ui_models.dart';
 import 'path_connector_painter.dart';
@@ -18,11 +19,11 @@ class PathSectionLayout extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final semantic = theme.semanticColors;
     final nodes = section.nodes;
 
-    // Spacing Config
-    const double nodeSize = 72.0;
-    const double verticalSpacing = 40.0; // Between nodes
+    const double nodeSize = 76.0;
+    const double verticalSpacing = 42.0;
 
     // Total height calculation for Painter
     final totalHeight = nodes.length * (nodeSize + verticalSpacing);
@@ -32,7 +33,9 @@ class PathSectionLayout extends StatelessWidget {
       children: [
         // Unit Header
         Padding(
-          padding: const EdgeInsets.symmetric(vertical: Spacing.l),
+          padding: const EdgeInsets.symmetric(
+            vertical: AppSemanticSpacing.space24,
+          ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [_buildHeaderChip(context)],
@@ -53,10 +56,12 @@ class PathSectionLayout extends StatelessWidget {
                       nodeSize: nodeSize,
                       spacing: verticalSpacing,
                       getOffset: _getNodeOffset,
-                      completeColor: theme.colorScheme.primary.withValues(
-                        alpha: 0.5,
+                      completeColor: semantic.accentPrimary.withValues(
+                        alpha: theme.brightness == Brightness.dark ? 0.5 : 0.42,
                       ),
-                      lockedColor: theme.colorScheme.outlineVariant,
+                      lockedColor: semantic.borderSubtle.withValues(
+                        alpha: 0.92,
+                      ),
                     ),
                   ),
                 ),
@@ -72,7 +77,7 @@ class PathSectionLayout extends StatelessWidget {
                   top: top,
                   left: 0,
                   right: 0,
-                  height: nodeSize + 20, // Allow space for pulse/shadow
+                  height: nodeSize + 28,
                   child: Center(
                     child: Transform.translate(
                       offset: Offset(offset, 0),
@@ -93,45 +98,45 @@ class PathSectionLayout extends StatelessWidget {
 
   Widget _buildHeaderChip(BuildContext context) {
     final theme = Theme.of(context);
-    return Container(
+    final semantic = theme.semanticColors;
+    return GlassPill(
+      selected: true,
+      minHeight: 0,
+      preferPerformance: true,
       padding: const EdgeInsets.symmetric(
-        horizontal: Spacing.m,
-        vertical: Spacing.xs,
-      ),
-      decoration: BoxDecoration(
-        color: theme.colorScheme.secondaryContainer,
-        borderRadius: BorderRadius.circular(Radii.lg),
+        horizontal: AppSemanticSpacing.space16,
+        vertical: AppSemanticSpacing.space8,
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           Text(
             section.subTitle,
-            style: theme.textTheme.labelSmall?.copyWith(
-              color: theme.colorScheme.onSecondaryContainer,
-              fontWeight: FontWeight.bold,
+            style: AppSemanticTypography.caption.copyWith(
+              color: semantic.textSecondary,
+              fontWeight: FontWeight.w700,
             ),
           ),
-          const SizedBox(width: Spacing.s),
+          const SizedBox(width: AppSemanticSpacing.space12),
           Text(
             section.title,
-            style: theme.textTheme.titleSmall?.copyWith(
-              fontWeight: FontWeight.bold,
+            style: AppSemanticTypography.body.copyWith(
+              color: semantic.textPrimary,
             ),
           ),
-          const SizedBox(width: Spacing.s),
+          const SizedBox(width: AppSemanticSpacing.space12),
           // Progress Badge
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-            decoration: BoxDecoration(
-              color: theme.colorScheme.primary,
-              borderRadius: BorderRadius.circular(Radii.sm),
+          GlassPill(
+            minHeight: 0,
+            selected: false,
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSemanticSpacing.space8,
+              vertical: AppSemanticSpacing.space4,
             ),
             child: Text(
               '${section.progressCount}/${section.totalCount}',
-              style: theme.textTheme.labelSmall?.copyWith(
-                color: theme.colorScheme.onPrimary,
-                fontSize: 10,
+              style: AppSemanticTypography.caption.copyWith(
+                color: semantic.textSecondary,
               ),
             ),
           ),

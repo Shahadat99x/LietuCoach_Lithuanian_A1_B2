@@ -42,10 +42,14 @@ class _LessonListScreenState extends State<LessonListScreen> {
     setState(() => _loading = true);
 
     try {
-      final unitResult = await _repository.loadUnit(widget.unitId).timeout(
-        const Duration(seconds: 5),
-        onTimeout: () => Result.failure(ContentLoadFailure.unknown(widget.unitId, 'Loading timed out')),
-      );
+      final unitResult = await _repository
+          .loadUnit(widget.unitId)
+          .timeout(
+            const Duration(seconds: 5),
+            onTimeout: () => Result.failure(
+              ContentLoadFailure.unknown(widget.unitId, 'Loading timed out'),
+            ),
+          );
 
       if (unitResult.isFailure) {
         final failure = unitResult.failure;
@@ -57,7 +61,7 @@ class _LessonListScreenState extends State<LessonListScreen> {
               builder: (_) => ContentErrorScreen(
                 title: 'Unit coming soon',
                 message:
-                    'This unit isn’t installed yet. Update the app or download the pack.',
+                    'This unit is on the way. Keep learning on Path and check back soon.',
                 onRetry: _loadData,
               ),
             ),
@@ -126,6 +130,7 @@ class _LessonListScreenState extends State<LessonListScreen> {
       widget.unitId,
       unit.lessons.map((l) => l.id).toList(),
     );
+    if (!mounted) return;
 
     Navigator.of(context)
         .push(
@@ -151,21 +156,30 @@ class _LessonListScreenState extends State<LessonListScreen> {
   }
 
   Widget _buildBody(ThemeData theme) {
+    final semantic = theme.semanticColors;
     if (_loading) {
       return const Center(child: CircularProgressIndicator());
     }
 
     if (_error != null) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.error_outline, size: 48, color: AppColors.danger),
-            const SizedBox(height: Spacing.m),
-            Text('Failed to load unit', style: theme.textTheme.titleMedium),
-            const SizedBox(height: Spacing.s),
-            Text(_error!, style: theme.textTheme.bodySmall),
-          ],
+      return Padding(
+        padding: const EdgeInsets.all(Spacing.pagePadding),
+        child: Center(
+          child: EmptyStateCard(
+            icon: Icons.error_outline_rounded,
+            accentColor: semantic.danger,
+            title: 'Could not load this unit',
+            description: 'Check your content pack and try again.',
+            primaryActionLabel: 'Try again',
+            onPrimaryAction: _loadData,
+            secondaryActionLabel: 'View details',
+            onSecondaryAction: () {
+              ScaffoldMessenger.of(
+                context,
+              ).showSnackBar(SnackBar(content: Text(_error!)));
+            },
+            useGlass: false,
+          ),
         ),
       );
     }
@@ -226,6 +240,7 @@ class _LessonCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final semantic = theme.semanticColors;
 
     return AppCard(
       onTap: onTap,
@@ -237,13 +252,13 @@ class _LessonCard extends StatelessWidget {
             height: 40,
             decoration: BoxDecoration(
               color: isCompleted
-                  ? AppColors.successLight
+                  ? semantic.successContainer
                   : theme.colorScheme.surfaceContainerHighest,
               shape: BoxShape.circle,
             ),
             alignment: Alignment.center,
             child: isCompleted
-                ? Icon(Icons.check, color: AppColors.success, size: 24)
+                ? Icon(Icons.check, color: semantic.success, size: 24)
                 : Text(
                     '$lessonNumber',
                     style: theme.textTheme.titleMedium?.copyWith(
@@ -273,7 +288,7 @@ class _LessonCard extends StatelessWidget {
                       Text(
                         '• $score%',
                         style: theme.textTheme.bodySmall?.copyWith(
-                          color: AppColors.success,
+                          color: semantic.success,
                           fontWeight: FontWeight.w500,
                         ),
                       ),
@@ -310,6 +325,7 @@ class _ExamItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final semantic = theme.semanticColors;
 
     Color iconInfoColor = theme.colorScheme.primary;
     Color iconBgColor = theme.colorScheme.primaryContainer;
@@ -318,8 +334,8 @@ class _ExamItem extends StatelessWidget {
     String subtitle = 'Test your knowledge';
 
     if (isPassed) {
-      iconInfoColor = AppColors.success;
-      iconBgColor = AppColors.successLight;
+      iconInfoColor = semantic.success;
+      iconBgColor = semantic.successContainer;
       icon = Icons.workspace_premium; // Or celebration
       title = 'Exam Passed';
       subtitle = 'Score: $score% • Tap to retake';
@@ -333,49 +349,78 @@ class _ExamItem extends StatelessWidget {
 
     return AppCard(
       onTap: onTap,
-      color: isLocked
-          ? theme.colorScheme.surfaceContainerHighest.withAlpha(128)
-          : null,
-      child: Row(
-        children: [
-          Container(
-            width: 40,
-            height: 40,
-            decoration: BoxDecoration(
-              color: iconBgColor,
-              shape: BoxShape.circle,
+      child: Opacity(
+        opacity: isLocked ? 0.94 : 1,
+        child: Row(
+          children: [
+            Container(
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(
+                color: iconBgColor,
+                shape: BoxShape.circle,
+              ),
+              alignment: Alignment.center,
+              child: Icon(icon, color: iconInfoColor, size: 24),
             ),
-            alignment: Alignment.center,
-            child: Icon(icon, color: iconInfoColor, size: 24),
-          ),
-          const SizedBox(width: Spacing.m),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: theme.textTheme.titleMedium?.copyWith(
-                    color: isPassed
-                        ? AppColors.success
-                        : (isLocked
-                              ? theme.colorScheme.onSurfaceVariant
-                              : null),
-                    fontWeight: isPassed ? FontWeight.bold : null,
+            const SizedBox(width: Spacing.m),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: AppSemanticTypography.section.copyWith(
+                      color: isPassed ? semantic.success : semantic.textPrimary,
+                      fontWeight: isPassed ? FontWeight.w700 : FontWeight.w600,
+                    ),
                   ),
-                ),
-                const SizedBox(height: Spacing.xs),
-                Text(
-                  subtitle,
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: theme.colorScheme.onSurfaceVariant,
+                  const SizedBox(height: Spacing.xs),
+                  Text(
+                    subtitle,
+                    style: AppSemanticTypography.caption.copyWith(
+                      color: semantic.textSecondary,
+                    ),
                   ),
-                ),
-              ],
+                  if (isLocked) ...[
+                    const SizedBox(height: AppSemanticSpacing.space8),
+                    Text(
+                      'Finish every lesson to unlock this exam.',
+                      style: AppSemanticTypography.caption.copyWith(
+                        color: semantic.textSecondary,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ],
+              ),
             ),
-          ),
-          Icon(Icons.chevron_right, color: theme.colorScheme.onSurfaceVariant),
-        ],
+            if (isLocked)
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppSemanticSpacing.space8,
+                  vertical: AppSemanticSpacing.space4,
+                ),
+                decoration: BoxDecoration(
+                  color: semantic.chipBg,
+                  borderRadius: BorderRadius.circular(
+                    AppSemanticShape.radiusFull,
+                  ),
+                  border: Border.all(color: semantic.borderSubtle),
+                ),
+                child: Icon(
+                  Icons.lock_rounded,
+                  size: 14,
+                  color: semantic.textSecondary,
+                ),
+              )
+            else
+              Icon(
+                Icons.chevron_right,
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+          ],
+        ),
       ),
     );
   }

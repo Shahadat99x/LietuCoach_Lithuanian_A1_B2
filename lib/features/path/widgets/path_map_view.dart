@@ -36,16 +36,10 @@ class PathMapView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Add bottom padding for FAB or just general spacing
     final bottomPadding = MediaQuery.of(context).padding.bottom + Spacing.xxl;
+    final theme = Theme.of(context);
+    final semantic = theme.semanticColors;
 
-    // Frosted/Translucent surface for Map View
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final surfaceColor = isDark ? Colors.black : Colors.white;
-    // Reduce opacity to ensure aurora is visible (was 0.6)
-    final opacity = isDark ? 0.3 : 0.2;
-
-    // Convert Data
     final sections = MapDataMapper.buildSections(
       courseUnits: courseUnits,
       lessonCompletedCount: lessonCompletedCount,
@@ -54,7 +48,11 @@ class PathMapView extends StatelessWidget {
     );
 
     return Container(
-      decoration: BoxDecoration(color: surfaceColor.withValues(alpha: opacity)),
+      decoration: BoxDecoration(
+        color: semantic.bg.withValues(
+          alpha: theme.brightness == Brightness.dark ? 0.74 : 0.66,
+        ),
+      ),
       child: ListView.builder(
         padding: EdgeInsets.fromLTRB(
           Spacing.pagePadding,
@@ -87,25 +85,20 @@ class PathMapView extends StatelessWidget {
             section: section,
             onNodeTap: (node) {
               if (node.state == PathNodeState.locked) {
+                final lockMessage = node.isExam
+                    ? 'Complete all lessons in ${section.subTitle} to unlock the exam.'
+                    : 'Complete ${section.subTitle} to unlock ${node.label.toLowerCase()}.';
                 LockBottomSheet.show(
                   context,
-                  title: 'Lesson Locked',
-                  message:
-                      'Complete the previous lesson or unit to unlock this content.',
+                  title: 'Keep Going!',
+                  message: lockMessage,
                 );
               } else {
-                // Find config for this unit
                 final config = courseUnits[index - 1]; // Assume mapped 1:1
 
                 if (node.type == PathNodeType.exam) {
                   onExamTap(config);
                 } else {
-                  // Assuming Node Index maps effectively to Lesson Index if we ignore exam
-                  // In DataMapper: nodes are 0..lessonCount.
-                  // Call generic onUnitTap which usually resumes/starts?
-                  // OR we need to pass strict lesson index.
-                  // Original just called onUnitTap(config) which handles "Continue".
-                  // Let's stick to that for safe resume.
                   onUnitTap(config);
                 }
               }

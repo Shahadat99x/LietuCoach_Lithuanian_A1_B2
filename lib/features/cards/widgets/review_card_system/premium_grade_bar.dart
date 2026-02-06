@@ -10,6 +10,7 @@ class PremiumGradeBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final semantic = Theme.of(context).semanticColors;
     // Calculate intervals manually for display or use SRS logic if available.
     // Mimicking logic from ReviewSessionScreen for now.
     // Hard: 1 day (or less)
@@ -35,7 +36,7 @@ class PremiumGradeBar extends StatelessWidget {
           _GradeButton(
             label: 'Hard',
             interval: hardText,
-            color: AppColors.danger,
+            color: semantic.danger,
             icon: Icons.replay_rounded,
             onTap: () => onRate(SrsRating.hard),
           ),
@@ -43,7 +44,7 @@ class PremiumGradeBar extends StatelessWidget {
           _GradeButton(
             label: 'Good',
             interval: goodText,
-            color: AppColors.primary, // Natural Green
+            color: semantic.accentPrimary,
             icon: Icons.check_circle_outline_rounded,
             onTap: () => onRate(SrsRating.good),
             isPrimary: true, // Make this one larger or more prominent?
@@ -52,7 +53,7 @@ class PremiumGradeBar extends StatelessWidget {
           _GradeButton(
             label: 'Easy',
             interval: easyText,
-            color: AppColors.info, // Blue
+            color: semantic.accentWarm,
             icon: Icons.rocket_launch_outlined,
             onTap: () => onRate(SrsRating.easy),
           ),
@@ -88,7 +89,7 @@ class _GradeButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    // Removed unused isDark
+    final semantic = theme.semanticColors;
 
     return Expanded(
       child: Material(
@@ -117,21 +118,24 @@ class _GradeButton extends StatelessWidget {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(icon, color: isPrimary ? Colors.white : color, size: 24),
+                Icon(
+                  icon,
+                  color: isPrimary ? semantic.buttonPrimaryText : color,
+                  size: 24,
+                ),
                 const SizedBox(height: 4),
                 Text(
                   label,
                   style: theme.textTheme.labelLarge?.copyWith(
-                    color: isPrimary ? Colors.white : color,
+                    color: isPrimary ? semantic.buttonPrimaryText : color,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
                 Text(
                   interval,
                   style: theme.textTheme.labelSmall?.copyWith(
-                    color: (isPrimary ? Colors.white : color).withValues(
-                      alpha: 0.7,
-                    ),
+                    color: (isPrimary ? semantic.buttonPrimaryText : color)
+                        .withValues(alpha: 0.7),
                   ),
                 ),
               ],

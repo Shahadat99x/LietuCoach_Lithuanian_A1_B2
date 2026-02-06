@@ -1,25 +1,24 @@
-import 'dart:async';
-
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:just_audio/just_audio.dart';
-import '../../ui/tokens.dart';
-// import '../../ui/components/components.dart'; // Unused
-// import '../../ui/components/audio_play_button.dart'; // Unused
 import 'package:lietucoach/features/common/services/asset_audio_resolver.dart';
+import '../../design_system/glass/glass.dart';
+import '../../ui/tokens.dart';
 import 'domain/role_model.dart';
 import 'role_takeaways_screen.dart';
-import 'widgets/role_exercise_runner.dart'; // Phase 4
 import 'service/role_progress_service.dart';
+import 'widgets/role_dialogue_player_controller.dart';
+import 'widgets/role_exercise_runner.dart';
 
 class RoleDialoguePlayerScreen extends StatefulWidget {
-  final RoleDialogue dialogue;
-  final RolePack pack;
-
   const RoleDialoguePlayerScreen({
     super.key,
     required this.dialogue,
     required this.pack,
   });
+
+  final RoleDialogue dialogue;
+  final RolePack pack;
 
   @override
   State<RoleDialoguePlayerScreen> createState() =>
@@ -30,175 +29,329 @@ class _RoleDialoguePlayerScreenState extends State<RoleDialoguePlayerScreen> {
   final AudioPlayer _player = AudioPlayer();
   final ScrollController _scrollController = ScrollController();
 
-  int _currentTurnIndex = -1; // -1 = stopped, 0..N = playing line
-  bool _isPlaying = false;
-  bool _showEnglish = true; // Phase 3: Default ON
-  bool _isAutoPlaying = false;
-  final Set<int> _missingAudioIndices = {};
+  late final RoleDialoguePlayerController _controller;
+  late final List<GlobalKey> _turnKeys;
+  int _playSession = 0;
+  bool _showEnglish = true;
+  bool _audioProbeFinished = false;
+  bool _hasShownPlaySkipNotice = false;
+  DateTime? _lastMissingLineSnackAt;
 
   @override
   void initState() {
     super.initState();
-    // STEP 1: DEBUG PROBE
-    // Check if assets are actually bundled
-    // Initialize resolver and check assets
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
-      await assetAudioResolver.ensureInitialized(
-        DefaultAssetBundle.of(context),
-      );
-      if (!mounted) return;
+    _controller = RoleDialoguePlayerController(
+      totalTurns: widget.dialogue.turns.length,
+    );
+    _controller.addListener(_onControllerChanged);
+    _turnKeys = List<GlobalKey>.generate(
+      widget.dialogue.turns.length,
+      (_) => GlobalKey(),
+    );
 
-      final missing = <int>{};
-      for (int i = 0; i < widget.dialogue.turns.length; i++) {
-        final path = widget.dialogue.turns[i].audioNormalPath;
-        if (!assetAudioResolver.exists(path)) {
-          // debugPrint('Debug: Asset not found in manifest: $path');
-          missing.add(i);
-        }
-      }
-
-      if (missing.isNotEmpty) {
-        setState(() {
-          _missingAudioIndices.addAll(missing);
-        });
-      }
-    });
-
-    // Optional: auto-play start? Prompt says "do NOT auto-play immediately"
-    _player.playerStateStream.listen((state) {
-      if (state.processingState == ProcessingState.completed) {
-        if (_isAutoPlaying) {
-          _playNextTurn();
-        } else {
-          setState(() {
-            _isPlaying = false;
-            // Keep current turn index highlighted until explicit stop or new play
-          });
-        }
-      }
-    });
     _loadSettings();
-  }
-
-  Future<void> _loadSettings() async {
-    final show = await roleProgressService.getTranslationPreference();
-    if (mounted) {
-      setState(() => _showEnglish = show);
-    }
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await _probeAudioAvailability();
+      _scrollToCurrent(animated: false);
+    });
   }
 
   @override
   void dispose() {
+    _controller.removeListener(_onControllerChanged);
+    _controller.dispose();
     _player.dispose();
     _scrollController.dispose();
     super.dispose();
   }
 
-  Future<void> _playTurn(int index, {bool autoPlay = false}) async {
-    if (index >= widget.dialogue.turns.length) {
-      // End of dialogue
-      setState(() {
-        _isAutoPlaying = false;
-        _isPlaying = false;
-        _currentTurnIndex = widget.dialogue.turns.length; // Past end
-      });
+  void _onControllerChanged() {
+    if (mounted) {
+      setState(() {});
+    }
+  }
+
+  Future<void> _loadSettings() async {
+    final showTranslation = await roleProgressService
+        .getTranslationPreference();
+    if (!mounted) return;
+    setState(() {
+      _showEnglish = showTranslation;
+    });
+  }
+
+  Future<void> _probeAudioAvailability() async {
+    final bundle = DefaultAssetBundle.of(context);
+    await assetAudioResolver.ensureInitialized(bundle);
+    final paths = widget.dialogue.turns
+        .map((turn) => turn.audioNormalPath)
+        .toList(growable: false);
+    final availability = await assetAudioResolver.existsMany(
+      paths,
+      bundle: bundle,
+    );
+
+    _controller.setAudioAvailability(availability);
+    if (kDebugMode) {
+      debugPrint(
+        'RoleDialoguePlayer: audio availability ${availability.where((value) => value).length}/${availability.length}',
+      );
+    }
+    if (!mounted) return;
+    setState(() {
+      _audioProbeFinished = true;
+    });
+  }
+
+  Future<void> _stopPlayback() async {
+    _playSession++;
+    try {
+      await _player.stop();
+      if (kDebugMode) {
+        debugPrint('RoleDialoguePlayer: stop playback (session $_playSession)');
+      }
+    } catch (_) {
+      // no-op
+    }
+    _controller.setPlaying(false);
+  }
+
+  Future<void> _playPause() async {
+    if (_controller.isPlaying) {
+      await _stopPlayback();
       return;
     }
 
-    setState(() {
-      _currentTurnIndex = index;
-      _isPlaying = true;
-      _isAutoPlaying = autoPlay;
-    });
+    if (_controller.mode == RoleDialogueMode.learn) {
+      if (!_controller.hasAudioForCurrent) {
+        _showMissingLineSnack();
+        return;
+      }
+      await _playCurrentLine();
+      return;
+    }
 
-    _scrollToTurn(index);
+    if (_controller.isAllAudioMissing) {
+      if (kDebugMode) {
+        debugPrint('RoleDialoguePlayer: all lines missing audio, cannot play.');
+      }
+      return;
+    }
+    _hasShownPlaySkipNotice = false;
+    await _playFromCurrent();
+  }
 
-    final turn = widget.dialogue.turns[index];
-    try {
-      await _player.setAsset(turn.audioNormalPath);
-      await _player.play();
-    } catch (e) {
-      // Audio might be missing, handle gracefully
-      debugPrint('Audio missing: ${turn.audioNormalPath}');
-      if (mounted) {
-        setState(() {
-          _missingAudioIndices.add(index);
-        });
+  Future<void> _playCurrentLine() async {
+    final session = ++_playSession;
+    _controller.setPlaying(true);
+    _scrollToCurrent();
+    await _playLine(_controller.currentIndex, session: session);
+    if (!mounted || session != _playSession) return;
+    _controller.setPlaying(false);
+  }
 
-        if (autoPlay) {
-          // Skip to next after short delay
-          await Future.delayed(const Duration(seconds: 2));
-          if (mounted && _isAutoPlaying) _playNextTurn();
-        } else {
-          setState(() => _isPlaying = false);
+  Future<void> _playFromCurrent() async {
+    final session = ++_playSession;
+    _controller.setPlaying(true);
+    var reachedEnd = true;
+
+    for (
+      int i = _controller.currentIndex;
+      i < widget.dialogue.turns.length;
+      i++
+    ) {
+      if (!mounted || session != _playSession) {
+        reachedEnd = false;
+        break;
+      }
+      if (!_controller.isPlaying || _controller.mode != RoleDialogueMode.play) {
+        reachedEnd = false;
+        break;
+      }
+
+      _controller.setCurrentIndex(i);
+      _scrollToCurrent();
+
+      if (!_controller.isAudioAvailableAt(i)) {
+        if (kDebugMode) {
+          debugPrint(
+            'RoleDialoguePlayer: skip line $i (missing asset: ${widget.dialogue.turns[i].audioNormalPath})',
+          );
         }
+        _showPlaySkipNoticeOnce();
+        await Future.delayed(AppMotion.fast);
+        continue;
+      }
+
+      await _playLine(i, session: session);
+    }
+
+    if (!mounted || session != _playSession) return;
+    _controller.setPlaying(false);
+    if (kDebugMode) {
+      debugPrint(
+        'RoleDialoguePlayer: play session $session finished (reachedEnd=$reachedEnd)',
+      );
+    }
+  }
+
+  Future<void> _playFromTappedIndex(int index) async {
+    await _stopPlayback();
+    _controller.setCurrentIndex(index);
+    _scrollToCurrent();
+
+    if (_controller.mode == RoleDialogueMode.learn) {
+      if (_controller.hasAudioForCurrent) {
+        await _playCurrentLine();
+      } else {
+        _showMissingLineSnack();
+      }
+      return;
+    }
+
+    _hasShownPlaySkipNotice = false;
+    await _playFromCurrent();
+  }
+
+  Future<void> _playLine(int index, {required int session}) async {
+    if (!mounted || session != _playSession) return;
+    final turn = widget.dialogue.turns[index];
+
+    try {
+      if (kDebugMode) {
+        debugPrint(
+          'RoleDialoguePlayer: play line $index path=${turn.audioNormalPath}',
+        );
+      }
+      await _player.stop();
+      await _player.setAsset(turn.audioNormalPath);
+      final speed = _controller.playbackSpeed == RolePlaybackSpeed.slow
+          ? 0.85
+          : 1.0;
+      await _player.setSpeed(speed);
+      await _player.play();
+      if (kDebugMode) {
+        debugPrint('RoleDialoguePlayer: completed line $index');
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        debugPrint(
+          'RoleDialoguePlayer: failed line $index path=${turn.audioNormalPath} error=$e',
+        );
+      }
+      _controller.markAudioMissing(index);
+      if (_controller.mode == RoleDialogueMode.play) {
+        _showPlaySkipNoticeOnce();
       }
     }
   }
 
-  void _playNextTurn() {
-    _playTurn(_currentTurnIndex + 1, autoPlay: true);
-  }
-
-  void _onPlayPause() {
-    if (_isPlaying) {
-      _player.pause();
-      setState(() {
-        _isPlaying = false;
-        _isAutoPlaying = false;
-      });
-    } else {
-      // If we are at the end, restart. Otherwise continue.
-      int nextIndex = _currentTurnIndex;
-      if (nextIndex < 0 || nextIndex >= widget.dialogue.turns.length) {
-        nextIndex = 0;
-      }
-      _playTurn(nextIndex, autoPlay: true);
+  void _showMissingLineSnack() {
+    if (!mounted) return;
+    final now = DateTime.now();
+    final lastShown = _lastMissingLineSnackAt;
+    if (lastShown != null && now.difference(lastShown).inMilliseconds < 1200) {
+      return;
     }
+    _lastMissingLineSnackAt = now;
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Audio missing for this line.'),
+        duration: Duration(seconds: 2),
+      ),
+    );
   }
 
-  void _scrollToTurn(int index) {
-    if (_scrollController.hasClients) {
-      // Calculate approximate position or use item extent?
-      // For variable height list, ensureVisible is better but tricky with ListView builder.
-      // We'll simplisticly wait a frame and scroll to bottom if it is nearly at bottom,
-      // or try to keep active item in view.
-      // Since it's chat, auto-scroll to bottom usually makes sense if we add items,
-      // but here all items exist.
-      // Let's scroll to active item.
-      // This requires knowing the height. Simple autoscroll:
-      // _scrollController.animateTo(...)
-      // Better: use scrollable_positioned_list if available, but I don't see it in pubspec.
-      // Hack: Scroll to specific offset estimated? No.
-      // Let's just scroll minimal amount to ensure it is visible if it's way off?
-      // Actually standard behavior: don't auto-scroll aggressively unless it's "streamed".
-      // Highlight is enough.
+  Future<void> _autoPlayCurrentLineIfLearnMode() async {
+    if (_controller.mode != RoleDialogueMode.learn) return;
+    if (!_controller.hasAudioForCurrent) {
+      _showMissingLineSnack();
+      return;
     }
+    await _playCurrentLine();
   }
 
-  void _onToggleTranslation() {
+  void _showPlaySkipNoticeOnce() {
+    if (!mounted || _hasShownPlaySkipNotice) return;
+    _hasShownPlaySkipNotice = true;
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Some lines are missing audio. Skipping them.'),
+        duration: Duration(seconds: 2),
+      ),
+    );
+  }
+
+  void _scrollToCurrent({bool animated = true}) {
+    final index = _controller.currentIndex;
+    if (index < 0 || index >= _turnKeys.length) return;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      final contextToShow = _turnKeys[index].currentContext;
+      if (contextToShow == null) return;
+
+      Scrollable.ensureVisible(
+        contextToShow,
+        duration: animated ? AppMotion.normal : AppMotion.instant,
+        curve: AppMotion.curve(context, AppMotion.easeOut),
+        alignment: 0.2,
+      );
+    });
+  }
+
+  Future<void> _setMode(RoleDialogueMode mode) async {
+    if (_controller.mode == mode) return;
+    await _stopPlayback();
+    _controller.setMode(mode);
+    _scrollToCurrent();
+  }
+
+  Future<void> _goPreviousLine() async {
+    await _stopPlayback();
+    _controller.previous();
+    _scrollToCurrent();
+    await _autoPlayCurrentLineIfLearnMode();
+  }
+
+  Future<void> _goNextLine() async {
+    await _stopPlayback();
+    _controller.next();
+    _scrollToCurrent();
+    await _autoPlayCurrentLineIfLearnMode();
+  }
+
+  Future<void> _repeatCurrentLine() async {
+    await _stopPlayback();
+    if (!_controller.hasAudioForCurrent) {
+      _showMissingLineSnack();
+      return;
+    }
+    await _playCurrentLine();
+  }
+
+  void _toggleTranslation() {
     setState(() {
       _showEnglish = !_showEnglish;
     });
     roleProgressService.setTranslationPreference(_showEnglish);
   }
 
-  void _onContinue() {
-    // Navigate to Exercise Runner (Phase 4)
+  void _toggleSpeed() {
+    _controller.togglePlaybackSpeed();
+  }
+
+  void _onContinueToExercises() {
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (context) => RoleExerciseRunner(
           dialogue: widget.dialogue,
           onComplete: () {
-            // Proceed to Takeaways
             Navigator.of(context).pushReplacement(
               MaterialPageRoute(
                 builder: (context) => RoleTakeawaysScreen(
                   dialogue: widget.dialogue,
                   pack: widget.pack,
-                  onFinish: () {
-                    Navigator.of(context).pop(); // Perform final pop to Detail
-                  },
+                  onFinish: () => Navigator.of(context).pop(),
                 ),
               ),
             );
@@ -212,6 +365,9 @@ class _RoleDialoguePlayerScreenState extends State<RoleDialoguePlayerScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final turns = widget.dialogue.turns;
+    final visibleCount = _controller.mode == RoleDialogueMode.learn
+        ? (_controller.currentIndex + 1).clamp(0, turns.length)
+        : turns.length;
 
     return Scaffold(
       backgroundColor: theme.colorScheme.surface,
@@ -222,100 +378,95 @@ class _RoleDialoguePlayerScreenState extends State<RoleDialoguePlayerScreen> {
             icon: Icon(
               _showEnglish ? Icons.translate : Icons.translate_outlined,
             ),
-            onPressed: _onToggleTranslation,
+            onPressed: _toggleTranslation,
             tooltip: 'Toggle translation',
           ),
         ],
       ),
       body: Column(
         children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(
+              Spacing.pagePadding,
+              Spacing.s,
+              Spacing.pagePadding,
+              0,
+            ),
+            child: _buildModeSwitch(),
+          ),
+          if (_audioProbeFinished && _controller.isAllAudioMissing)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(
+                Spacing.pagePadding,
+                Spacing.s,
+                Spacing.pagePadding,
+                0,
+              ),
+              child: _buildAudioBanner(),
+            ),
           Expanded(
             child: ListView.builder(
               controller: _scrollController,
               padding: const EdgeInsets.all(Spacing.pagePadding),
-              itemCount: turns.length + 1, // +1 for spacer at bottom
-              itemBuilder: (context, i) {
-                if (i == turns.length)
-                  return const SizedBox(height: 100); // Space for play controls
+              itemCount: visibleCount + 1,
+              itemBuilder: (context, index) {
+                if (index == visibleCount) {
+                  return const SizedBox(height: 92);
+                }
 
-                final turn = turns[i];
-                final isActive = i == _currentTurnIndex;
-                final isUser = turn.speaker == "B"; // Assumption: B is me
+                final turn = turns[index];
+                final isActive = index == _controller.currentIndex;
+                final isUser = turn.speaker == 'B';
+                final showAvatar =
+                    index == 0 || turns[index - 1].speaker != turn.speaker;
 
-                return _buildChatBubble(turn, isUser, isActive, i);
+                return _buildChatBubble(
+                  key: _turnKeys[index],
+                  turn: turn,
+                  isUser: isUser,
+                  isActive: isActive,
+                  isLearnMode: _controller.mode == RoleDialogueMode.learn,
+                  showAvatar: showAvatar,
+                  onTap: () => _playFromTappedIndex(index),
+                );
               },
             ),
           ),
+          _buildBottomControls(),
+        ],
+      ),
+    );
+  }
 
-          // Bottom Controls
-          Container(
-            padding: const EdgeInsets.all(Spacing.m),
-            decoration: BoxDecoration(
-              color: theme.colorScheme.surface,
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.05),
-                  blurRadius: 10,
-                  offset: const Offset(0, -4),
+  Widget _buildModeSwitch() {
+    return GlassCard(
+      preset: GlassPreset.solid,
+      padding: const EdgeInsets.all(AppSemanticSpacing.space4),
+      child: Row(
+        children: [
+          Expanded(
+            child: GlassPill(
+              selected: _controller.mode == RoleDialogueMode.learn,
+              onTap: () => _setMode(RoleDialogueMode.learn),
+              preset: GlassPreset.frost,
+              child: Text(
+                'Learn',
+                style: AppSemanticTypography.caption.copyWith(
+                  fontWeight: FontWeight.w700,
                 ),
-              ],
+              ),
             ),
-            child: SafeArea(
-              child: SafeArea(
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    // Replay
-                    IconButton(
-                      onPressed:
-                          _currentTurnIndex >= 0 &&
-                              _currentTurnIndex < turns.length
-                          ? () => _playTurn(_currentTurnIndex, autoPlay: false)
-                          : null,
-                      icon: const Icon(Icons.replay_10_rounded),
-                      tooltip: 'Replay line',
-                    ),
-                    const SizedBox(width: Spacing.l),
-
-                    // Play/Pause (Compact)
-                    Container(
-                      height: 56,
-                      width: 56,
-                      decoration: BoxDecoration(
-                        color: theme.colorScheme.primary,
-                        shape: BoxShape.circle,
-                        boxShadow: [
-                          BoxShadow(
-                            color: theme.colorScheme.primary.withValues(
-                              alpha: 0.3,
-                            ),
-                            blurRadius: 8,
-                            offset: const Offset(0, 4),
-                          ),
-                        ],
-                      ),
-                      child: IconButton(
-                        onPressed: _onPlayPause,
-                        icon: Icon(
-                          _isPlaying
-                              ? Icons.pause_rounded
-                              : Icons.play_arrow_rounded,
-                          size: 32,
-                          color: theme.colorScheme.onPrimary,
-                        ),
-                        tooltip: _isPlaying ? 'Pause' : 'Play',
-                      ),
-                    ),
-
-                    const SizedBox(width: Spacing.l),
-
-                    // Next / Continue
-                    IconButton(
-                      onPressed: _onContinue,
-                      icon: const Icon(Icons.skip_next_rounded),
-                      tooltip: 'Next / Finish',
-                    ),
-                  ],
+          ),
+          const SizedBox(width: AppSemanticSpacing.space8),
+          Expanded(
+            child: GlassPill(
+              selected: _controller.mode == RoleDialogueMode.play,
+              onTap: () => _setMode(RoleDialogueMode.play),
+              preset: GlassPreset.frost,
+              child: Text(
+                'Play',
+                style: AppSemanticTypography.caption.copyWith(
+                  fontWeight: FontWeight.w700,
                 ),
               ),
             ),
@@ -325,15 +476,173 @@ class _RoleDialoguePlayerScreenState extends State<RoleDialoguePlayerScreen> {
     );
   }
 
-  Widget _buildChatBubble(
-    DialogueTurn turn,
-    bool isUser,
-    bool isActive,
-    int index,
-  ) {
+  Widget _buildAudioBanner() {
     final theme = Theme.of(context);
+    final semantic = theme.semanticColors;
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(AppSemanticSpacing.space12),
+      decoration: BoxDecoration(
+        color: semantic.accentWarm.withValues(alpha: 0.14),
+        borderRadius: BorderRadius.circular(AppSemanticShape.radiusControl),
+        border: Border.all(color: semantic.accentWarm.withValues(alpha: 0.3)),
+      ),
+      child: Row(
+        children: [
+          Icon(Icons.volume_off_rounded, size: 16, color: semantic.accentWarm),
+          const SizedBox(width: AppSemanticSpacing.space8),
+          Expanded(
+            child: Text(
+              'Audio unavailable for this dialogue.',
+              style: AppSemanticTypography.caption.copyWith(
+                color: semantic.textPrimary,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildBottomControls() {
+    final theme = Theme.of(context);
+    final semantic = theme.semanticColors;
+    final canStartPlayback = _controller.mode == RoleDialogueMode.play
+        ? !_controller.isAllAudioMissing
+        : _controller.hasAudioForCurrent;
+    final canPlay = _controller.isPlaying || canStartPlayback;
+    final speedLabel = _controller.playbackSpeed == RolePlaybackSpeed.normal
+        ? '1.0x'
+        : '0.85x';
+
+    return Container(
+      padding: const EdgeInsets.fromLTRB(
+        Spacing.pagePadding,
+        AppSemanticSpacing.space4,
+        Spacing.pagePadding,
+        AppSemanticSpacing.space4,
+      ),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surface,
+        boxShadow: [
+          BoxShadow(
+            color: semantic.shadowSoft.withValues(alpha: 0.2),
+            blurRadius: 10,
+            offset: const Offset(0, -3),
+          ),
+        ],
+      ),
+      child: SafeArea(
+        top: false,
+        minimum: const EdgeInsets.only(bottom: AppSemanticSpacing.space4),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                SizedBox(
+                  width: 48,
+                  height: 48,
+                  child: IconButton(
+                    onPressed: _repeatCurrentLine,
+                    icon: const Icon(Icons.replay_rounded, size: 22),
+                    tooltip: 'Repeat line',
+                  ),
+                ),
+                SizedBox(
+                  width: 48,
+                  height: 48,
+                  child: IconButton(
+                    onPressed: _controller.canGoPrev ? _goPreviousLine : null,
+                    icon: const Icon(Icons.skip_previous_rounded, size: 24),
+                    tooltip: 'Previous line',
+                  ),
+                ),
+                SizedBox(
+                  width: 64,
+                  height: 64,
+                  child: FilledButton(
+                    onPressed: canPlay ? _playPause : null,
+                    style: FilledButton.styleFrom(
+                      shape: const CircleBorder(),
+                      padding: EdgeInsets.zero,
+                    ),
+                    child: Icon(
+                      _controller.isPlaying
+                          ? Icons.pause_rounded
+                          : Icons.play_arrow_rounded,
+                      size: 32,
+                    ),
+                  ),
+                ),
+                SizedBox(
+                  width: 48,
+                  height: 48,
+                  child: IconButton(
+                    onPressed: _controller.canGoNext ? _goNextLine : null,
+                    icon: const Icon(Icons.skip_next_rounded, size: 24),
+                    tooltip: 'Next line',
+                  ),
+                ),
+                SizedBox(
+                  width: 48,
+                  height: 48,
+                  child: IconButton(
+                    onPressed: _onContinueToExercises,
+                    icon: const Icon(Icons.arrow_forward_rounded, size: 22),
+                    tooltip: 'Continue to exercises',
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: AppSemanticSpacing.space4),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  '${_controller.lineCounter} • $speedLabel',
+                  style: AppSemanticTypography.caption.copyWith(
+                    color: semantic.textSecondary,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                const SizedBox(width: AppSemanticSpacing.space8),
+                GlassPill(
+                  onTap: _toggleSpeed,
+                  minHeight: 34,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppSemanticSpacing.space8,
+                    vertical: AppSemanticSpacing.space4,
+                  ),
+                  preset: GlassPreset.frost,
+                  child: const Icon(Icons.speed_rounded, size: 16),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildChatBubble({
+    required Key key,
+    required DialogueTurn turn,
+    required bool isUser,
+    required bool isActive,
+    required bool isLearnMode,
+    required bool showAvatar,
+    required VoidCallback onTap,
+  }) {
+    final theme = Theme.of(context);
+    final semantic = theme.semanticColors;
+    final isLearnActive = isLearnMode && isActive;
 
     return Padding(
+      key: key,
       padding: const EdgeInsets.symmetric(vertical: Spacing.xs),
       child: Row(
         mainAxisAlignment: isUser
@@ -341,29 +650,32 @@ class _RoleDialoguePlayerScreenState extends State<RoleDialoguePlayerScreen> {
             : MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
-          if (!isUser) ...[
-            CircleAvatar(
-              radius: 16,
-              backgroundColor: theme.colorScheme.secondaryContainer,
-              child: Icon(
-                Icons.support_agent_rounded,
-                size: 20,
-                color: theme.colorScheme.onSecondaryContainer,
+          if (!isUser)
+            if (showAvatar) ...[
+              CircleAvatar(
+                radius: 16,
+                backgroundColor: theme.colorScheme.secondaryContainer,
+                child: Icon(
+                  Icons.support_agent_rounded,
+                  size: 20,
+                  color: theme.colorScheme.onSecondaryContainer,
+                ),
               ),
-            ),
-            const SizedBox(width: Spacing.s),
-          ],
+              const SizedBox(width: Spacing.s),
+            ] else
+              const SizedBox(width: 40),
           Flexible(
             child: GestureDetector(
-              onTap: () => _playTurn(index, autoPlay: false),
+              onTap: onTap,
               child: AnimatedContainer(
-                duration: const Duration(milliseconds: 300),
+                duration: AppMotion.normal,
+                curve: AppMotion.easeOut,
                 padding: const EdgeInsets.all(Spacing.m),
                 decoration: BoxDecoration(
-                  color: isActive
-                      ? theme.colorScheme.primaryContainer.withValues(
-                          alpha: 0.3,
-                        )
+                  color: isLearnActive
+                      ? semantic.accentPrimary.withValues(alpha: 0.18)
+                      : isActive
+                      ? semantic.accentPrimary.withValues(alpha: 0.14)
                       : (isUser
                             ? theme.colorScheme.primary.withValues(alpha: 0.1)
                             : theme.colorScheme.surfaceContainerHigh),
@@ -378,63 +690,66 @@ class _RoleDialoguePlayerScreenState extends State<RoleDialoguePlayerScreen> {
                         : const Radius.circular(16),
                   ),
                   border: isActive
-                      ? Border.all(color: theme.colorScheme.primary, width: 2)
+                      ? Border.all(
+                          color: semantic.accentPrimary,
+                          width: isLearnActive ? 1.8 : 1.5,
+                        )
                       : Border.all(
-                          color: theme.colorScheme.outlineVariant.withValues(
-                            alpha: 0.5,
-                          ),
+                          color: semantic.borderSubtle.withValues(alpha: 0.7),
                         ),
                   boxShadow: [
                     if (isActive)
                       BoxShadow(
-                        color: theme.colorScheme.primary.withValues(alpha: 0.2),
-                        blurRadius: 8,
-                        offset: const Offset(0, 4),
+                        color: semantic.accentPrimary.withValues(
+                          alpha: isLearnActive ? 0.24 : 0.18,
+                        ),
+                        blurRadius: isLearnActive ? 12 : 10,
+                        offset: const Offset(0, 3),
                       ),
                   ],
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    if (isLearnActive) ...[
+                      Container(
+                        margin: const EdgeInsets.only(bottom: Spacing.xs),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: AppSemanticSpacing.space8,
+                          vertical: AppSemanticSpacing.space4,
+                        ),
+                        decoration: BoxDecoration(
+                          color: semantic.accentPrimary.withValues(alpha: 0.2),
+                          borderRadius: BorderRadius.circular(
+                            AppSemanticShape.radiusFull,
+                          ),
+                        ),
+                        child: Text(
+                          'Now',
+                          style: AppSemanticTypography.caption.copyWith(
+                            color: semantic.textPrimary,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ),
+                    ],
                     Text(
                       turn.ltText,
-                      style: theme.textTheme.bodyLarge?.copyWith(
+                      style: AppSemanticTypography.body.copyWith(
                         fontWeight: isActive
-                            ? FontWeight.bold
-                            : FontWeight.normal,
-                        color: theme.colorScheme.onSurface,
+                            ? FontWeight.w700
+                            : FontWeight.w500,
+                        color: semantic.textPrimary,
                       ),
                     ),
                     if (_showEnglish || turn.enText.isEmpty) ...[
                       const SizedBox(height: Spacing.xs),
                       Text(
                         turn.enText,
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          color: theme.colorScheme.onSurfaceVariant,
+                        style: AppSemanticTypography.caption.copyWith(
+                          color: semantic.textSecondary,
                           fontStyle: FontStyle.italic,
-                          fontSize: 13,
                         ),
-                      ),
-                    ],
-                    if (_missingAudioIndices.contains(index)) ...[
-                      const SizedBox(height: Spacing.xs),
-                      Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            Icons.volume_off_rounded,
-                            size: 14,
-                            color: theme.colorScheme.error,
-                          ),
-                          const SizedBox(width: Spacing.xxs),
-                          Text(
-                            'No Audio',
-                            style: theme.textTheme.bodySmall?.copyWith(
-                              color: theme.colorScheme.error,
-                              fontSize: 11,
-                            ),
-                          ),
-                        ],
                       ),
                     ],
                   ],
@@ -442,18 +757,20 @@ class _RoleDialoguePlayerScreenState extends State<RoleDialoguePlayerScreen> {
               ),
             ),
           ),
-          if (isUser) ...[
-            const SizedBox(width: Spacing.s),
-            CircleAvatar(
-              radius: 16,
-              backgroundColor: theme.colorScheme.tertiaryContainer,
-              child: Icon(
-                Icons.person_rounded,
-                size: 20,
-                color: theme.colorScheme.onTertiaryContainer,
+          if (isUser)
+            if (showAvatar) ...[
+              const SizedBox(width: Spacing.s),
+              CircleAvatar(
+                radius: 16,
+                backgroundColor: theme.colorScheme.tertiaryContainer,
+                child: Icon(
+                  Icons.person_rounded,
+                  size: 20,
+                  color: theme.colorScheme.onTertiaryContainer,
+                ),
               ),
-            ),
-          ],
+            ] else
+              const SizedBox(width: 40),
         ],
       ),
     );

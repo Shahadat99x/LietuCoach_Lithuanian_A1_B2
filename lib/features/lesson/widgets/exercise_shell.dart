@@ -29,6 +29,8 @@ class ExerciseShell extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final reduceMotion = AppMotion.reduceMotionOf(context);
+    final switchDuration = reduceMotion ? AppMotion.fast : AppMotion.normal;
 
     // Use a SafeArea that handles the bottom notch but leaves room for the footer
     return Scaffold(
@@ -102,20 +104,28 @@ class ExerciseShell extends StatelessWidget {
 
             // Bottom Sticky Area
             AnimatedSwitcher(
-              duration: const Duration(milliseconds: 300),
+              duration: switchDuration,
               transitionBuilder: (child, animation) {
-                return SlideTransition(
-                  position:
-                      Tween<Offset>(
-                        begin: const Offset(0, 1),
-                        end: Offset.zero,
-                      ).animate(
-                        CurvedAnimation(
-                          parent: animation,
-                          curve: Curves.easeOutCubic,
-                        ),
+                final slideAnimation =
+                    Tween<Offset>(
+                      begin: AppMotion.slideOffset(
+                        context,
+                        dy: AppMotion.fadeOffsetMedium,
                       ),
-                  child: child,
+                      end: Offset.zero,
+                    ).animate(
+                      CurvedAnimation(
+                        parent: animation,
+                        curve: AppMotion.curve(context, AppMotion.easeOut),
+                      ),
+                    );
+
+                return FadeTransition(
+                  opacity: animation,
+                  child: SlideTransition(
+                    position: slideAnimation,
+                    child: child,
+                  ),
                 );
               },
               child: footer ?? const SizedBox.shrink(),

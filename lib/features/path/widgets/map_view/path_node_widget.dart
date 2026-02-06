@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../../../ui/components/components.dart';
+import '../../../../ui/tokens.dart';
 import '../../models/map_ui_models.dart';
 
 class PathNodeWidget extends StatefulWidget {
@@ -24,44 +25,52 @@ class _PathNodeWidgetState extends State<PathNodeWidget>
   late AnimationController _pulseController;
   late Animation<double> _pulseScale;
   late Animation<double> _pulseOpacity;
+  bool _reduceMotion = false;
 
   @override
   void initState() {
     super.initState();
     _pulseController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 2000),
+      duration: AppMotion.ambient,
     );
 
-    _pulseScale = Tween<double>(begin: 1.0, end: 1.4).animate(
+    _pulseScale = Tween<double>(begin: 1.0, end: 1.16).animate(
       CurvedAnimation(
         parent: _pulseController,
-        curve: const Interval(0.0, 0.6, curve: Curves.easeOut),
+        curve: const Interval(0.0, 0.7, curve: AppMotion.easeOut),
       ),
     );
 
-    _pulseOpacity = Tween<double>(begin: 0.6, end: 0.0).animate(
+    _pulseOpacity = Tween<double>(begin: 0.32, end: 0.0).animate(
       CurvedAnimation(
         parent: _pulseController,
-        curve: const Interval(0.0, 0.6, curve: Curves.easeOut),
+        curve: const Interval(0.0, 0.7, curve: AppMotion.easeOut),
       ),
     );
+  }
 
-    if (widget.node.state == PathNodeState.current) {
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _reduceMotion = AppMotion.reduceMotionOf(context);
+    _syncPulse();
+  }
+
+  void _syncPulse() {
+    if (widget.node.state == PathNodeState.current && !_reduceMotion) {
       _pulseController.repeat();
+      return;
     }
+    _pulseController.stop();
+    _pulseController.reset();
   }
 
   @override
   void didUpdateWidget(PathNodeWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.node.state != oldWidget.node.state) {
-      if (widget.node.state == PathNodeState.current) {
-        _pulseController.repeat();
-      } else {
-        _pulseController.stop();
-        _pulseController.reset();
-      }
+      _syncPulse();
     }
   }
 
@@ -79,112 +88,144 @@ class _PathNodeWidgetState extends State<PathNodeWidget>
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final semantic = theme.semanticColors;
     final state = widget.node.state;
     final isLocked = state == PathNodeState.locked;
     final isCurrent = state == PathNodeState.current;
     final isCompleted = state == PathNodeState.completed;
-    // final isExam = widget.node.type == PathNodeType.exam; // Unused
+    final isExam = widget.node.isExam;
+    final baseSize = isExam ? 74.0 : 72.0;
+    final size = isCurrent ? baseSize + 8 : baseSize;
 
-    // Visual Config
-    final size = isCurrent ? 80.0 : 72.0;
+    final IconData icon = widget.node.isExam
+        ? Icons.workspace_premium_rounded
+        : _getIconForType(widget.node.type);
+
     final Color fillColor;
     final Color iconColor;
     final Color borderColor;
-
-    // Icon selection
-    final IconData icon = widget.node.isExam
-        ? Icons.emoji_events_rounded
-        : _getIconForType(widget.node.type);
-
-    // Colors
     if (isCompleted) {
-      fillColor = theme.colorScheme.primaryContainer;
-      iconColor = theme.colorScheme.primary;
-      borderColor = theme.colorScheme.primary;
+      fillColor = isExam
+          ? semantic.accentWarm.withValues(alpha: 0.95)
+          : semantic.accentPrimary.withValues(alpha: 0.95);
+      iconColor = semantic.buttonPrimaryText;
+      borderColor = semantic.bgElevated.withValues(alpha: 0.65);
     } else if (isCurrent) {
-      fillColor = theme.colorScheme.primary;
-      iconColor = theme.colorScheme.onPrimary;
-      borderColor = Colors.white; // Or transparent if solid
+      fillColor = isExam ? semantic.accentWarm : semantic.accentPrimary;
+      iconColor = semantic.buttonPrimaryText;
+      borderColor = semantic.bgElevated.withValues(alpha: 0.9);
     } else {
-      // Locked
-      fillColor = theme.colorScheme.surfaceContainerHighest; // Grey
-      iconColor = theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.5);
-      borderColor = Colors.transparent;
+      fillColor = semantic.surfaceElevated;
+      iconColor = semantic.textTertiary;
+      borderColor = semantic.borderSubtle;
     }
+
+    final radius = isExam ? BorderRadius.circular(22) : null;
 
     return ScaleButton(
       onTap: _handleTap,
-      child: Stack(
-        alignment: Alignment.center,
-        clipBehavior: Clip.none,
-        children: [
-          // Current Pulse Ring
-          if (isCurrent)
-            AnimatedBuilder(
-              animation: _pulseController,
-              builder: (context, child) {
-                return Container(
-                  width: size * _pulseScale.value,
-                  height: size * _pulseScale.value,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    border: Border.all(
-                      color: theme.colorScheme.primary.withValues(
-                        alpha: _pulseOpacity.value,
+      child: Semantics(
+        label: widget.node.label,
+        button: true,
+        enabled: true,
+        child: SizedBox(
+          width: 88,
+          height: 88,
+          child: Stack(
+            alignment: Alignment.center,
+            clipBehavior: Clip.none,
+            children: [
+              if (isCurrent && !_reduceMotion)
+                AnimatedBuilder(
+                  animation: _pulseController,
+                  builder: (context, child) {
+                    return Container(
+                      width: size * _pulseScale.value,
+                      height: size * _pulseScale.value,
+                      decoration: BoxDecoration(
+                        shape: isExam ? BoxShape.rectangle : BoxShape.circle,
+                        borderRadius: radius,
+                        border: Border.all(
+                          color: semantic.accentPrimary.withValues(
+                            alpha: _pulseOpacity.value,
+                          ),
+                          width: 3,
+                        ),
                       ),
-                      width: 4,
-                    ),
-                  ),
-                );
-              },
-            ),
-
-          // Main Node
-          Container(
-            width: size,
-            height: size,
-            decoration: BoxDecoration(
-              color: fillColor,
-              shape: BoxShape.circle,
-              border: Border.all(
-                color: borderColor,
-                width: isCompleted ? 4 : 0,
-              ),
-              boxShadow: !isLocked
-                  ? [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.15),
-                        offset: const Offset(0, 6),
-                        blurRadius: 0, // Solid 3D shadow
-                      ),
-                    ]
-                  : null,
-            ),
-            child: Icon(
-              icon,
-              size: isCurrent ? 36 : 30, // Bigger icon for current
-              color: iconColor,
-            ),
-          ),
-
-          // Check Badge for Completed
-          if (isCompleted)
-            Positioned(
-              right: -4,
-              bottom: 0,
-              child: Container(
-                padding: const EdgeInsets.all(4),
-                decoration: BoxDecoration(
-                  color: theme.colorScheme.primary, // Or secondary
-                  shape: BoxShape.circle,
-                  border: Border.all(color: Colors.white, width: 2),
+                    );
+                  },
                 ),
-                child: const Icon(Icons.check, size: 14, color: Colors.white),
+              Container(
+                width: size,
+                height: size,
+                decoration: BoxDecoration(
+                  color: fillColor,
+                  shape: isExam ? BoxShape.rectangle : BoxShape.circle,
+                  borderRadius: radius,
+                  border: Border.all(
+                    color: borderColor,
+                    width: isCurrent ? 2 : 1,
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: semantic.shadowSoft.withValues(
+                        alpha: isLocked
+                            ? (theme.brightness == Brightness.dark
+                                  ? 0.14
+                                  : 0.08)
+                            : (theme.brightness == Brightness.dark
+                                  ? 0.34
+                                  : 0.14),
+                      ),
+                      offset: const Offset(0, 5),
+                      blurRadius: 12,
+                    ),
+                  ],
+                ),
+                child: Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    Positioned(
+                      top: 8,
+                      left: 12,
+                      right: 12,
+                      child: Container(
+                        height: 8,
+                        decoration: BoxDecoration(
+                          color: semantic.bgElevated.withValues(
+                            alpha: isLocked ? 0.12 : 0.22,
+                          ),
+                          borderRadius: BorderRadius.circular(999),
+                        ),
+                      ),
+                    ),
+                    Icon(icon, size: isCurrent ? 34 : 30, color: iconColor),
+                  ],
+                ),
               ),
-            ),
-
-          // Crown for Current/Start
-        ],
+              if (isCompleted)
+                Positioned(
+                  right: -2,
+                  bottom: 2,
+                  child: _NodeBadge(
+                    icon: Icons.check_rounded,
+                    color: semantic.success,
+                    background: semantic.bgElevated,
+                  ),
+                ),
+              if (isLocked)
+                Positioned(
+                  right: -2,
+                  bottom: 2,
+                  child: _NodeBadge(
+                    icon: Icons.lock_rounded,
+                    color: semantic.textSecondary,
+                    background: semantic.bgElevated,
+                  ),
+                ),
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -198,7 +239,42 @@ class _PathNodeWidgetState extends State<PathNodeWidget>
       case PathNodeType.review:
         return Icons.replay_rounded;
       case PathNodeType.exam:
-        return Icons.emoji_events_rounded;
+        return Icons.workspace_premium_rounded;
     }
+  }
+}
+
+class _NodeBadge extends StatelessWidget {
+  const _NodeBadge({
+    required this.icon,
+    required this.color,
+    required this.background,
+  });
+
+  final IconData icon;
+  final Color color;
+  final Color background;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 24,
+      height: 24,
+      decoration: BoxDecoration(
+        color: background,
+        shape: BoxShape.circle,
+        border: Border.all(color: color.withValues(alpha: 0.45), width: 1),
+        boxShadow: [
+          BoxShadow(
+            color: Theme.of(
+              context,
+            ).semanticColors.shadowSoft.withValues(alpha: 0.22),
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Icon(icon, size: 14, color: color),
+    );
   }
 }
