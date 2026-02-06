@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:just_audio/just_audio.dart';
-import 'package:lietucoach/features/common/services/asset_audio_resolver.dart';
-import '../../design_system/glass/glass.dart';
-import '../../srs/srs.dart';
-import '../../ui/components/buttons.dart';
 import '../../ui/tokens.dart';
+import '../../ui/components/components.dart';
+import '../../ui/components/buttons.dart';
 import 'domain/role_model.dart';
 import 'service/role_progress_service.dart';
+import '../../srs/srs.dart';
+// import '../../srs/local_srs_store.dart';
 
 class RoleTakeawaysScreen extends StatefulWidget {
   final RoleDialogue dialogue;
@@ -25,26 +25,24 @@ class RoleTakeawaysScreen extends StatefulWidget {
 }
 
 class _RoleTakeawaysScreenState extends State<RoleTakeawaysScreen> {
+  // By default, select all phrases for review
   final Set<int> _selectedIndices = {};
-  final Map<int, bool> _audioAvailableByIndex = {};
-  final AudioPlayer _player = AudioPlayer();
   bool _isSaving = false;
-
-  @override
-  void initState() {
-    super.initState();
-    for (int i = 0; i < widget.dialogue.takeaways.length; i++) {
-      _selectedIndices.add(i);
-    }
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _probeTakeawayAudio();
-    });
-  }
+  final AudioPlayer _player = AudioPlayer();
 
   @override
   void dispose() {
     _player.dispose();
     super.dispose();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    // Default: all selected
+    for (int i = 0; i < widget.dialogue.takeaways.length; i++) {
+      _selectedIndices.add(i);
+    }
   }
 
   void _onToggle(int index) {
@@ -57,64 +55,15 @@ class _RoleTakeawaysScreenState extends State<RoleTakeawaysScreen> {
     });
   }
 
-  void _selectAll() {
-    setState(() {
-      _selectedIndices
-        ..clear()
-        ..addAll(
-          List<int>.generate(widget.dialogue.takeaways.length, (i) => i),
-        );
-    });
-  }
-
-  void _clearAll() {
-    setState(() {
-      _selectedIndices.clear();
-    });
-  }
-
-  Future<void> _probeTakeawayAudio() async {
-    final bundle = DefaultAssetBundle.of(context);
-    await assetAudioResolver.ensureInitialized(bundle);
-    final paths = widget.dialogue.takeaways
-        .map((item) => item.audioNormalPath)
-        .toList(growable: false);
-    final availability = await assetAudioResolver.existsMany(
-      paths,
-      bundle: bundle,
-    );
-    if (!mounted) return;
-    setState(() {
-      for (int i = 0; i < availability.length; i++) {
-        _audioAvailableByIndex[i] = availability[i];
-      }
-    });
-  }
-
-  Future<void> _playPhraseAudio(int index, RolePhraseCard item) async {
-    final hasAudio = _audioAvailableByIndex[index] ?? true;
-    if (!hasAudio) return;
-    try {
-      await _player.stop();
-      await _player.setAsset(item.audioNormalPath);
-      await _player.play();
-    } catch (_) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Audio missing for this phrase.'),
-          duration: Duration(seconds: 1),
-        ),
-      );
-    }
-  }
-
   Future<void> _onFinish() async {
     setState(() => _isSaving = true);
 
+    // 1. Create SrsCards
     final cardsToSave = <SrsCard>[];
-    for (final index in _selectedIndices) {
+    for (var index in _selectedIndices) {
       final phrase = widget.dialogue.takeaways[index];
+      // Generate IDs
+      // Clean phrase ID: lowercase, remove punctuation, spaces -> underscore, limit length
       final safePhrase = phrase.lt
           .toLowerCase()
           .replaceAll(RegExp(r'[^a-z0-9]'), '_')
@@ -122,8 +71,12 @@ class _RoleTakeawaysScreenState extends State<RoleTakeawaysScreen> {
       final phraseId = safePhrase.length > 30
           ? safePhrase.substring(0, 30)
           : safePhrase;
-      final unitId = widget.pack.id;
-      final cardId = SrsCard.createId('roles', unitId, phraseId);
+      final unitId = widget.pack.id; // e.g. traveler_v1
+      final cardId = SrsCard.createId(
+        'roles',
+        unitId,
+        phraseId,
+      ); // Using 'roles' as level/category
 
       cardsToSave.add(
         SrsCard(
@@ -143,25 +96,30 @@ class _RoleTakeawaysScreenState extends State<RoleTakeawaysScreen> {
       if (cardsToSave.isNotEmpty) {
         await srsStore.upsertCards(cardsToSave);
       }
+
+      // 2. Mark dialogue complete
       await roleProgressService.markDialogueComplete(widget.dialogue.id);
+
+      // 3. Finish
       if (mounted) {
         widget.onFinish();
       }
     } catch (e) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Error saving progress: $e')));
-      setState(() => _isSaving = false);
+      debugPrint('Error saving takeaways: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error saving progress: $e')));
+        // Allow finish anyway?
+        setState(() => _isSaving = false);
+      }
     }
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final semantic = theme.semanticColors;
     final takeaways = widget.dialogue.takeaways;
-    final cardRadius = BorderRadius.circular(AppSemanticShape.radiusCard);
 
     return Scaffold(
       backgroundColor: theme.colorScheme.surface,
@@ -177,155 +135,95 @@ class _RoleTakeawaysScreenState extends State<RoleTakeawaysScreen> {
               children: [
                 Text(
                   'Key Phrases',
-                  style: AppSemanticTypography.section.copyWith(
-                    color: semantic.textPrimary,
+                  style: theme.textTheme.headlineMedium?.copyWith(
+                    color: theme.colorScheme.primary,
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
-                const SizedBox(height: AppSemanticSpacing.space8),
+                const SizedBox(height: Spacing.s),
                 Text(
                   'Select phrases to add to your daily review.',
-                  style: AppSemanticTypography.body.copyWith(
-                    color: semantic.textSecondary,
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
                   ),
                 ),
-                const SizedBox(height: AppSemanticSpacing.space8),
-                Row(
-                  children: [
-                    Text(
-                      '${_selectedIndices.length} selected',
-                      style: AppSemanticTypography.caption.copyWith(
-                        color: semantic.textSecondary,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                    const Spacer(),
-                    TextButton(
-                      onPressed: _selectAll,
-                      child: const Text('Select all'),
-                    ),
-                    const SizedBox(width: AppSemanticSpacing.space8),
-                    TextButton(
-                      onPressed: _clearAll,
-                      child: const Text('Clear'),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: AppSemanticSpacing.space8),
+                const SizedBox(height: Spacing.l),
+
                 ...List.generate(takeaways.length, (index) {
                   final item = takeaways[index];
                   final isSelected = _selectedIndices.contains(index);
-                  final hasAudio = _audioAvailableByIndex[index] ?? true;
 
                   return Padding(
-                    padding: const EdgeInsets.only(
-                      bottom: AppSemanticSpacing.space12,
-                    ),
-                    child: GlassSurface(
-                      preset: GlassPreset.solid,
-                      borderRadius: cardRadius,
-                      overlayOpacity: isSelected ? 0.12 : null,
-                      border: Border.all(
-                        color: isSelected
-                            ? semantic.accentPrimary
-                            : semantic.borderSubtle,
-                        width: isSelected ? 1.8 : 1,
-                      ),
-                      child: Material(
-                        color: Colors.transparent,
-                        child: InkWell(
-                          onTap: () => _onToggle(index),
-                          customBorder: RoundedRectangleBorder(
-                            borderRadius: cardRadius,
+                    padding: const EdgeInsets.only(bottom: Spacing.m),
+                    child: InkWell(
+                      onTap: () => _onToggle(index),
+                      borderRadius: BorderRadius.circular(Radii.md),
+                      child: Container(
+                        padding: const EdgeInsets.all(Spacing.m),
+                        decoration: BoxDecoration(
+                          color: isSelected
+                              ? theme.colorScheme.secondaryContainer.withValues(
+                                  alpha: 0.3,
+                                )
+                              : theme.colorScheme.surfaceContainer,
+                          borderRadius: BorderRadius.circular(Radii.md),
+                          border: Border.all(
+                            color: isSelected
+                                ? theme.colorScheme.secondary
+                                : Colors.transparent,
+                            width: 2,
                           ),
-                          child: Padding(
-                            padding: const EdgeInsets.all(
-                              AppSemanticSpacing.space12,
+                        ),
+                        child: Row(
+                          children: [
+                            Checkbox(
+                              value: isSelected,
+                              onChanged: (v) => _onToggle(index),
+                              activeColor: theme.colorScheme.secondary,
                             ),
-                            child: Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        item.lt,
-                                        style: AppSemanticTypography.body
-                                            .copyWith(
-                                              color: semantic.textPrimary,
-                                              fontWeight: FontWeight.w700,
-                                            ),
-                                      ),
-                                      const SizedBox(
-                                        height: AppSemanticSpacing.space4,
-                                      ),
-                                      Text(
-                                        item.en,
-                                        style: AppSemanticTypography.caption
-                                            .copyWith(
-                                              color: semantic.textSecondary,
-                                            ),
-                                      ),
-                                    ],
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    item.lt,
+                                    style: theme.textTheme.titleMedium,
                                   ),
-                                ),
-                                const SizedBox(
-                                  width: AppSemanticSpacing.space8,
-                                ),
-                                Column(
-                                  children: [
-                                    Icon(
-                                      isSelected
-                                          ? Icons.check_circle_rounded
-                                          : Icons
-                                                .radio_button_unchecked_rounded,
-                                      size: 20,
-                                      color: isSelected
-                                          ? semantic.accentPrimary
-                                          : semantic.textTertiary,
+                                  Text(
+                                    item.en,
+                                    style: theme.textTheme.bodySmall?.copyWith(
+                                      color: theme.colorScheme.onSurfaceVariant,
                                     ),
-                                    const SizedBox(
-                                      height: AppSemanticSpacing.space8,
-                                    ),
-                                    Opacity(
-                                      opacity: hasAudio ? 1 : 0.5,
-                                      child: Material(
-                                        color: Colors.transparent,
-                                        child: InkWell(
-                                          onTap: hasAudio
-                                              ? () => _playPhraseAudio(
-                                                  index,
-                                                  item,
-                                                )
-                                              : null,
-                                          customBorder: const CircleBorder(),
-                                          child: Container(
-                                            width: 40,
-                                            height: 40,
-                                            decoration: BoxDecoration(
-                                              shape: BoxShape.circle,
-                                              color: semantic.surfaceElevated,
-                                              border: Border.all(
-                                                color: semantic.borderSubtle,
+                                  ),
+                                  // Play button for phrase
+                                  IconButton(
+                                    icon: const Icon(Icons.volume_up_rounded),
+                                    onPressed: () async {
+                                      try {
+                                        await _player.setAsset(
+                                          item.audioNormalPath,
+                                        );
+                                        await _player.play();
+                                      } catch (e) {
+                                        if (context.mounted) {
+                                          ScaffoldMessenger.of(
+                                            context,
+                                          ).showSnackBar(
+                                            const SnackBar(
+                                              content: Text(
+                                                'Audio coming soon',
                                               ),
+                                              duration: Duration(seconds: 1),
                                             ),
-                                            child: Icon(
-                                              Icons.volume_up_rounded,
-                                              size: 20,
-                                              color: hasAudio
-                                                  ? semantic.textPrimary
-                                                  : semantic.textTertiary,
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ],
+                                          );
+                                        }
+                                      }
+                                    },
+                                  ),
+                                ],
+                              ),
                             ),
-                          ),
+                          ],
                         ),
                       ),
                     ),
@@ -334,20 +232,20 @@ class _RoleTakeawaysScreenState extends State<RoleTakeawaysScreen> {
               ],
             ),
           ),
+
           Container(
             padding: const EdgeInsets.all(Spacing.pagePadding),
             decoration: BoxDecoration(
               color: theme.colorScheme.surface,
               boxShadow: [
                 BoxShadow(
-                  color: semantic.shadowSoft,
+                  color: Colors.black.withValues(alpha: 0.05),
                   blurRadius: 10,
                   offset: const Offset(0, -4),
                 ),
               ],
             ),
             child: SafeArea(
-              top: false,
               child: PrimaryButton(
                 label: _isSaving ? 'SAVING...' : 'FINISH',
                 isLoading: _isSaving,
