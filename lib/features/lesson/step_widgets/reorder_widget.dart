@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../../../content/content.dart';
 import '../../../ui/tokens.dart';
 import '../widgets/word_chip.dart';
@@ -38,6 +39,7 @@ class _ReorderWidgetState extends State<ReorderWidget> {
     setState(() {
       _selectedOrder.add(wordIndex);
     });
+    HapticFeedback.selectionClick();
     widget.onOrderChanged(_selectedOrder);
   }
 
@@ -52,6 +54,7 @@ class _ReorderWidgetState extends State<ReorderWidget> {
         _selectedOrder.removeAt(position);
       }
     });
+    HapticFeedback.selectionClick();
     widget.onOrderChanged(_selectedOrder);
   }
 
@@ -67,77 +70,115 @@ class _ReorderWidgetState extends State<ReorderWidget> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final semantic = theme.semanticColors;
+    final reduceMotion = AppMotion.reduceMotionOf(context);
     final isCorrect = _isCorrect();
+    final trayColor = widget.hasAnswered
+        ? (isCorrect ? semantic.successContainer : semantic.dangerContainer)
+        : semantic.surfaceCard;
+    final trayBorderColor = widget.hasAnswered
+        ? (isCorrect ? semantic.success : semantic.danger)
+        : semantic.borderSubtle;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Arrange the words', style: theme.textTheme.headlineSmall),
-        const SizedBox(height: Spacing.l),
+        Text(
+          'Arrange the words',
+          style: AppSemanticTypography.section.copyWith(
+            color: semantic.textPrimary,
+          ),
+        ),
+        const SizedBox(height: AppSemanticSpacing.space12),
+        Text(
+          'Tap words to build a correct sentence.',
+          style: AppSemanticTypography.caption.copyWith(
+            color: semantic.textSecondary,
+          ),
+        ),
+        const SizedBox(height: AppSemanticSpacing.space24),
 
         // Answer area (Tray)
-        Container(
-          width: double.infinity,
-          constraints: const BoxConstraints(minHeight: 80),
-          padding: const EdgeInsets.all(Spacing.m),
-          decoration: BoxDecoration(
-            color: widget.hasAnswered
-                ? (isCorrect ? AppColors.successLight : AppColors.dangerLight)
-                : theme.colorScheme.surfaceContainerHighest,
-            borderRadius: BorderRadius.circular(Radii.md),
-            border: Border.all(
-              color: widget.hasAnswered
-                  ? (isCorrect ? AppColors.success : AppColors.danger)
-                  : theme.dividerColor,
-              width: 2,
-            ),
-          ),
-          child: _selectedOrder.isEmpty
-              ? Center(
-                  child: Text(
-                    'Tap words below to build the sentence',
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      color: theme.colorScheme.onSurfaceVariant,
-                    ),
+        AnimatedSize(
+          duration: reduceMotion ? AppMotion.fast : AppMotion.normal,
+          curve: AppMotion.curve(context, AppMotion.easeOut),
+          child: Container(
+            width: double.infinity,
+            constraints: const BoxConstraints(minHeight: 92),
+            padding: const EdgeInsets.all(AppSemanticSpacing.space16),
+            decoration: BoxDecoration(
+              color: trayColor,
+              borderRadius: BorderRadius.circular(AppSemanticShape.radiusCard),
+              border: Border.all(
+                color: trayBorderColor,
+                width: widget.hasAnswered ? 1.5 : 1,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: semantic.shadowSoft.withValues(
+                    alpha: theme.brightness == Brightness.dark ? 0.28 : 0.08,
                   ),
-                )
-              : Wrap(
-                  spacing: Spacing.s,
-                  runSpacing: Spacing.s,
-                  children: List.generate(_selectedOrder.length, (position) {
-                    final wordIndex = _selectedOrder[position];
-                    return WordChip(
-                      label: widget.step.words[wordIndex],
-                      onTap: () => _onRemoveWord(position),
-                    );
-                  }),
+                  blurRadius: 10,
+                  offset: const Offset(0, 4),
                 ),
+              ],
+            ),
+            child: _selectedOrder.isEmpty
+                ? Center(
+                    child: Text(
+                      'Tap words below to build the sentence',
+                      style: AppSemanticTypography.body.copyWith(
+                        color: semantic.textSecondary,
+                      ),
+                    ),
+                  )
+                : Wrap(
+                    spacing: AppSemanticSpacing.space8,
+                    runSpacing: AppSemanticSpacing.space8,
+                    children: List.generate(_selectedOrder.length, (position) {
+                      final wordIndex = _selectedOrder[position];
+                      return WordChip(
+                        label: widget.step.words[wordIndex],
+                        onTap: () => _onRemoveWord(position),
+                        isSelected: true,
+                      );
+                    }),
+                  ),
+          ),
         ),
-        const SizedBox(height: Spacing.l),
+        const SizedBox(height: AppSemanticSpacing.space24),
 
         // Word bank
-        Wrap(
-          spacing: Spacing.s,
-          runSpacing: Spacing.s,
-          children: _shuffledIndices.map((wordIndex) {
-            final isUsed = _selectedOrder.contains(wordIndex);
-            // Show placeholder if used in tray
-            return WordChip(
-              label: widget.step.words[wordIndex],
-              isPlaceholder: isUsed,
-              onTap: isUsed ? null : () => _onWordTap(wordIndex),
-            );
-          }).toList(),
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(AppSemanticSpacing.space16),
+          decoration: BoxDecoration(
+            color: semantic.surfaceElevated.withValues(alpha: 0.45),
+            borderRadius: BorderRadius.circular(AppSemanticShape.radiusCard),
+            border: Border.all(color: semantic.borderSubtle),
+          ),
+          child: Wrap(
+            spacing: AppSemanticSpacing.space8,
+            runSpacing: AppSemanticSpacing.space8,
+            children: _shuffledIndices.map((wordIndex) {
+              final isUsed = _selectedOrder.contains(wordIndex);
+              return WordChip(
+                label: widget.step.words[wordIndex],
+                isPlaceholder: isUsed,
+                onTap: isUsed ? null : () => _onWordTap(wordIndex),
+              );
+            }).toList(),
+          ),
         ),
 
         // Show correct answer after answering
         if (widget.hasAnswered && !isCorrect) ...[
-          const SizedBox(height: Spacing.l),
+          const SizedBox(height: AppSemanticSpacing.space24),
           Text(
             'Correct: ${widget.step.correctSentence}',
-            style: theme.textTheme.bodyMedium?.copyWith(
-              color: AppColors.success,
-              fontWeight: FontWeight.w500,
+            style: AppSemanticTypography.body.copyWith(
+              color: semantic.success,
+              fontWeight: FontWeight.w600,
             ),
           ),
         ],
