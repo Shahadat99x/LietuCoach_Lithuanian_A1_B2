@@ -28,6 +28,8 @@ class AccountDeletionResult {
 }
 
 class AccountDeletionService {
+  static const bool _debugJwtGatewayToggleHint = true;
+
   AccountDeletionService({
     AuthService? auth,
     LocalAccountDataWiper? wiper,
@@ -58,22 +60,34 @@ class AccountDeletionService {
       }
 
       final client = _client ?? Supabase.instance.client;
-      final accessToken = client.auth.currentSession?.accessToken;
-      if (accessToken == null || accessToken.isEmpty) {
+      final session = await _resolveSession(client);
+      if (kDebugMode) {
+        final token = session?.accessToken ?? '';
+        debugPrint('Account deletion: runtime SUPABASE_URL=${Env.supabaseUrl}');
+        debugPrint('Account deletion: session exists=${session != null}');
+        debugPrint(
+          'Account deletion: jwtParts=${token.isEmpty ? 0 : token.split('.').length}, tokenLength=${token.length}',
+        );
+      }
+
+      if (session?.accessToken.isEmpty ?? true) {
         return AccountDeletionResult.failure(
           'Not authenticated. Please sign in again and retry.',
         );
       }
 
       debugPrint('Account deletion: invoking delete-account...');
-      final response = await client.functions.invoke(
-        'delete-account',
-        headers: {'Authorization': 'Bearer $accessToken'},
-      );
+      final response = await client.functions.invoke('delete-account');
       final data = response.data;
       debugPrint(
         'Account deletion response: status=${response.status}, body=$data',
       );
+
+      if (kDebugMode && _debugJwtGatewayToggleHint && response.status == 401) {
+        debugPrint(
+          'Account deletion debug hint: if this is a gateway-level Invalid JWT, temporarily disable Verify JWT in Supabase Dashboard > Edge Functions > delete-account, retest, then re-enable immediately.',
+        );
+      }
 
       if (response.status != 200) {
         final safeMessage = _extractError(
@@ -130,5 +144,18 @@ class AccountDeletionService {
       return message;
     }
     return fallback;
+  }
+
+  Future<Session?> _resolveSession(SupabaseClient client) async {
+    final current = client.auth.currentSession;
+    if (current != null) return current;
+
+    try {
+      final refreshed = await client.auth.refreshSession();
+      return refreshed.session;
+    } catch (e) {
+      debugPrint('Account deletion: session refresh failed: $e');
+      return null;
+    }
   }
 }
