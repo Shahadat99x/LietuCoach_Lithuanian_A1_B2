@@ -58,8 +58,22 @@ class AccountDeletionService {
       }
 
       final client = _client ?? Supabase.instance.client;
-      final response = await client.functions.invoke('delete-account');
+      final accessToken = client.auth.currentSession?.accessToken;
+      if (accessToken == null || accessToken.isEmpty) {
+        return AccountDeletionResult.failure(
+          'Not authenticated. Please sign in again and retry.',
+        );
+      }
+
+      debugPrint('Account deletion: invoking delete-account...');
+      final response = await client.functions.invoke(
+        'delete-account',
+        headers: {'Authorization': 'Bearer $accessToken'},
+      );
       final data = response.data;
+      debugPrint(
+        'Account deletion response: status=${response.status}, body=$data',
+      );
 
       if (response.status != 200) {
         final safeMessage = _extractError(
@@ -80,8 +94,9 @@ class AccountDeletionService {
       await _auth.signOut();
       final warnings = await _wiper.wipeAfterAccountDeletion();
       return AccountDeletionResult.success(localWarnings: warnings);
-    } catch (e) {
+    } catch (e, st) {
       debugPrint('Account deletion failed: $e');
+      debugPrintStack(stackTrace: st);
       return AccountDeletionResult.failure(
         'Delete failed. Please try again or contact hello@dhossain.com.',
       );
@@ -89,9 +104,30 @@ class AccountDeletionService {
   }
 
   String _extractError(dynamic data, {required String fallback}) {
-    if (data is Map && data['error'] is String) {
-      final message = (data['error'] as String).trim();
-      if (message.isNotEmpty) return message;
+    if (data is Map) {
+      final rawMessage = switch (data['message']) {
+        final String value => value.trim(),
+        _ => switch (data['error']) {
+          final String value => value.trim(),
+          _ => '',
+        },
+      };
+      final step = data['step'] is String
+          ? (data['step'] as String).trim()
+          : '';
+      final requestId = data['requestId'] is String
+          ? (data['requestId'] as String).trim()
+          : '';
+
+      if (requestId.isNotEmpty) {
+        debugPrint('Account deletion requestId: $requestId');
+      }
+
+      final message = rawMessage.isEmpty ? fallback : rawMessage;
+      if (step.isNotEmpty) {
+        return '$message (step: $step)';
+      }
+      return message;
     }
     return fallback;
   }
