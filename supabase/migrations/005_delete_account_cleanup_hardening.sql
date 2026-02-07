@@ -1,6 +1,8 @@
 -- Harden account deletion cleanup with step-aware transactional result payload.
 -- This function is called by the delete-account Edge Function using service role.
 
+drop function if exists public.delete_account_data(uuid);
+
 create or replace function public.delete_account_data(p_user_id uuid)
 returns jsonb
 language plpgsql
