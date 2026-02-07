@@ -91,12 +91,12 @@ class AuthService extends ChangeNotifier {
       debugPrint('Auth: Starting Google sign-in...');
       // Reset error state
       if (_state.errorMessage != null) {
-          _state = AuthState(
-            status: _state.status,
-            user: _state.user,
-            errorMessage: null
-          );
-          notifyListeners();
+        _state = AuthState(
+          status: _state.status,
+          user: _state.user,
+          errorMessage: null,
+        );
+        notifyListeners();
       }
 
       final result = await Supabase.instance.client.auth.signInWithOAuth(
@@ -104,11 +104,11 @@ class AuthService extends ChangeNotifier {
         redirectTo: 'io.lietucoach.app://login-callback',
         authScreenLaunchMode: LaunchMode.externalApplication,
       );
-      
+
       if (!result) {
-         // Should not happen as OAuth is a redirect flow, 
-         // but if it returns false immediately for some reason
-         throw Exception('OAuth initiation failed');
+        // Should not happen as OAuth is a redirect flow,
+        // but if it returns false immediately for some reason
+        throw Exception('OAuth initiation failed');
       }
 
       // OAuth flow is async - state will update via onAuthStateChange
@@ -117,7 +117,8 @@ class AuthService extends ChangeNotifier {
       debugPrint('Auth: Google sign-in failed: $e');
       _state = AuthState(
         status: AuthStatus.unauthenticated,
-        errorMessage: 'Sign in failed: ${e.toString().split('\n').first}', // Clean message
+        errorMessage:
+            'Sign in failed: ${e.toString().split('\n').first}', // Clean message
       );
       notifyListeners();
       return false;
@@ -130,12 +131,19 @@ class AuthService extends ChangeNotifier {
 
     try {
       await Supabase.instance.client.auth.signOut();
-      _state = AuthState.unauthenticated();
-      notifyListeners();
       debugPrint('Auth: Signed out');
     } catch (e) {
       debugPrint('Auth: Sign out failed: $e');
+    } finally {
+      _state = AuthState.unauthenticated();
+      notifyListeners();
     }
+  }
+
+  @visibleForTesting
+  void setAuthStateForTest(AuthState state) {
+    _state = state;
+    notifyListeners();
   }
 
   @override
