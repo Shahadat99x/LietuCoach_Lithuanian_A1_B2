@@ -34,6 +34,7 @@ class AuthState {
 class AuthService extends ChangeNotifier {
   AuthState _state = AuthState.unknown();
   StreamSubscription<AuthState>? _authSubscription;
+  bool _initialized = false;
 
   AuthState get state => _state;
   User? get currentUser => _state.user;
@@ -41,6 +42,13 @@ class AuthService extends ChangeNotifier {
 
   /// Initialize Supabase and listen to auth changes
   Future<void> init() async {
+    if (_initialized) {
+      debugPrint(
+        'Auth: init() called again, skipping duplicate initialization',
+      );
+      return;
+    }
+
     if (!Env.isSupabaseConfigured) {
       debugPrint(
         'Auth: Supabase not configured (missing SUPABASE_URL or SUPABASE_ANON_KEY)',
@@ -50,6 +58,10 @@ class AuthService extends ChangeNotifier {
       return;
     }
 
+    debugPrint(
+      'Auth: initializing Supabase with Env URL=${Env.supabaseUrl}, anonKeyLen=${Env.supabaseAnonKey.length}',
+    );
+
     await Supabase.initialize(
       url: Env.supabaseUrl,
       anonKey: Env.supabaseAnonKey,
@@ -57,6 +69,13 @@ class AuthService extends ChangeNotifier {
         authFlowType: AuthFlowType.pkce,
       ),
     );
+
+    final runtimeClientUrl = Supabase.instance.client.rest.url.replaceFirst(
+      RegExp(r'/rest/v1/?$'),
+      '',
+    );
+    debugPrint('Auth: runtime client URL after init=$runtimeClientUrl');
+    _initialized = true;
 
     // Listen to auth state changes
     Supabase.instance.client.auth.onAuthStateChange.listen((data) {
