@@ -34,6 +34,7 @@ class AuthState {
 class AuthService extends ChangeNotifier {
   AuthState _state = AuthState.unknown();
   StreamSubscription<AuthState>? _authSubscription;
+  bool _initialized = false;
 
   AuthState get state => _state;
   User? get currentUser => _state.user;
@@ -41,6 +42,13 @@ class AuthService extends ChangeNotifier {
 
   /// Initialize Supabase and listen to auth changes
   Future<void> init() async {
+    if (_initialized) {
+      debugPrint(
+        'Auth: init() called again, skipping duplicate initialization',
+      );
+      return;
+    }
+
     if (!Env.isSupabaseConfigured) {
       debugPrint(
         'Auth: Supabase not configured (missing SUPABASE_URL or SUPABASE_ANON_KEY)',
@@ -50,6 +58,10 @@ class AuthService extends ChangeNotifier {
       return;
     }
 
+    debugPrint(
+      'Auth: initializing Supabase with Env URL=${Env.supabaseUrl}, anonKeyLen=${Env.supabaseAnonKey.length}',
+    );
+
     await Supabase.initialize(
       url: Env.supabaseUrl,
       anonKey: Env.supabaseAnonKey,
@@ -57,6 +69,13 @@ class AuthService extends ChangeNotifier {
         authFlowType: AuthFlowType.pkce,
       ),
     );
+
+    final runtimeClientUrl = Supabase.instance.client.rest.url.replaceFirst(
+      RegExp(r'/rest/v1/?$'),
+      '',
+    );
+    debugPrint('Auth: runtime client URL after init=$runtimeClientUrl');
+    _initialized = true;
 
     // Listen to auth state changes
     Supabase.instance.client.auth.onAuthStateChange.listen((data) {
@@ -91,12 +110,12 @@ class AuthService extends ChangeNotifier {
       debugPrint('Auth: Starting Google sign-in...');
       // Reset error state
       if (_state.errorMessage != null) {
-          _state = AuthState(
-            status: _state.status,
-            user: _state.user,
-            errorMessage: null
-          );
-          notifyListeners();
+        _state = AuthState(
+          status: _state.status,
+          user: _state.user,
+          errorMessage: null,
+        );
+        notifyListeners();
       }
 
       final result = await Supabase.instance.client.auth.signInWithOAuth(
@@ -104,11 +123,11 @@ class AuthService extends ChangeNotifier {
         redirectTo: 'io.lietucoach.app://login-callback',
         authScreenLaunchMode: LaunchMode.externalApplication,
       );
-      
+
       if (!result) {
-         // Should not happen as OAuth is a redirect flow, 
-         // but if it returns false immediately for some reason
-         throw Exception('OAuth initiation failed');
+        // Should not happen as OAuth is a redirect flow,
+        // but if it returns false immediately for some reason
+        throw Exception('OAuth initiation failed');
       }
 
       // OAuth flow is async - state will update via onAuthStateChange
@@ -117,7 +136,8 @@ class AuthService extends ChangeNotifier {
       debugPrint('Auth: Google sign-in failed: $e');
       _state = AuthState(
         status: AuthStatus.unauthenticated,
-        errorMessage: 'Sign in failed: ${e.toString().split('\n').first}', // Clean message
+        errorMessage:
+            'Sign in failed: ${e.toString().split('\n').first}', // Clean message
       );
       notifyListeners();
       return false;
@@ -130,12 +150,19 @@ class AuthService extends ChangeNotifier {
 
     try {
       await Supabase.instance.client.auth.signOut();
-      _state = AuthState.unauthenticated();
-      notifyListeners();
       debugPrint('Auth: Signed out');
     } catch (e) {
       debugPrint('Auth: Sign out failed: $e');
+    } finally {
+      _state = AuthState.unauthenticated();
+      notifyListeners();
     }
+  }
+
+  @visibleForTesting
+  void setAuthStateForTest(AuthState state) {
+    _state = state;
+    notifyListeners();
   }
 
   @override

@@ -46,6 +46,12 @@ class RoleProgressService {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(_showTranslationKey, show);
   }
+
+  Future<void> clearAll() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove(_completedDialoguesKey);
+    await prefs.remove(_showTranslationKey);
+  }
 }
 
 final roleProgressService = RoleProgressService();

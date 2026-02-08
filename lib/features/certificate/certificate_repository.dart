@@ -39,4 +39,17 @@ class CertificateRepository {
       await _box.delete(id);
     }
   }
+
+  Future<void> clearAll() async {
+    final certs = _box.values.toList();
+    for (final cert in certs) {
+      final path = cert.filePath;
+      if (path.isEmpty) continue;
+      final file = File(path);
+      if (await file.exists()) {
+        await file.delete();
+      }
+    }
+    await _box.clear();
+  }
 }

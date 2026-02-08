@@ -4,25 +4,34 @@ import '../../sync/sync_service.dart';
 import '../../ui/tokens.dart';
 import '../../ui/components/components.dart';
 import '../../ui/theme/theme_controller.dart';
+import 'delete_account_screen.dart';
 import 'widgets/profile_header.dart';
 import 'widgets/sync_status_card.dart';
 import 'widgets/settings_section_card.dart';
 
 class ProfileScreen extends StatefulWidget {
-  const ProfileScreen({super.key});
+  const ProfileScreen({
+    super.key,
+    this.authServiceOverride,
+    this.syncServiceOverride,
+  });
+
+  final AuthService? authServiceOverride;
+  final SyncService? syncServiceOverride;
 
   @override
   State<ProfileScreen> createState() => _ProfileScreenState();
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-  // Services are singletons
-  final _authService = authService;
-  final _syncService = syncService;
+  late final AuthService _authService;
+  late final SyncService _syncService;
 
   @override
   void initState() {
     super.initState();
+    _authService = widget.authServiceOverride ?? authService;
+    _syncService = widget.syncServiceOverride ?? syncService;
     _authService.addListener(_onStateChanged);
     _syncService.addListener(_onStateChanged);
   }
@@ -75,6 +84,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ),
       ],
     );
+  }
+
+  Future<void> _openDeleteAccount() async {
+    await Navigator.of(
+      context,
+    ).push(MaterialPageRoute(builder: (_) => const DeleteAccountScreen()));
   }
 
   Future<void> _showAppearanceSheet(ThemeController controller) async {
@@ -219,7 +234,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   trailing: const Text('v1.0.0'),
                   onTap: _showAboutDialog,
                 ),
-                if (isAuthenticated)
+              ],
+            ),
+            if (isAuthenticated) ...[
+              const SizedBox(height: Spacing.l),
+              SettingsSectionCard(
+                title: 'Account',
+                children: [
                   ListTile(
                     leading: Icon(Icons.logout, color: theme.colorScheme.error),
                     title: Text(
@@ -230,8 +251,26 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     ),
                     onTap: _handleSignOut,
                   ),
-              ],
-            ),
+                  ListTile(
+                    leading: Icon(
+                      Icons.delete_forever_outlined,
+                      color: theme.colorScheme.error,
+                    ),
+                    title: Text(
+                      'Delete account',
+                      style: AppSemanticTypography.body.copyWith(
+                        color: theme.colorScheme.error,
+                      ),
+                    ),
+                    subtitle: const Text(
+                      'Permanently remove account and cloud data',
+                    ),
+                    trailing: const Icon(Icons.chevron_right),
+                    onTap: _openDeleteAccount,
+                  ),
+                ],
+              ),
+            ],
             if (!isAuthenticated) ...[
               const SizedBox(height: Spacing.l),
               EmptyStateCard(

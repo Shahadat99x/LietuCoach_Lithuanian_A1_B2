@@ -80,6 +80,16 @@ class SyncService extends ChangeNotifier {
     }
   }
 
+  Future<void> resetLocalSyncMeta() async {
+    _syncBox ??= await Hive.openBox(_syncBoxName);
+    await _syncBox?.clear();
+    _lastSyncAt = null;
+    _lastAutoSyncAttempt = null;
+    _isSyncing = false;
+    _statusMessage = 'Idle';
+    notifyListeners();
+  }
+
   @override
   void dispose() {
     authService.removeListener(_onAuthChanged);
