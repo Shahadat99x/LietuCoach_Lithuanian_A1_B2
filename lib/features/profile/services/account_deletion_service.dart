@@ -64,6 +64,7 @@ class AccountDeletionService {
       final token = session?.accessToken ?? '';
       final jwtParts = token.isEmpty ? 0 : token.split('.').length;
       final tokenLen = token.length;
+      final sessionExpired = session?.isExpired ?? false;
       final runtimeClientUrl = client.rest.url.replaceFirst(
         RegExp(r'/rest/v1/?$'),
         '',
@@ -74,6 +75,7 @@ class AccountDeletionService {
       debugPrint('env.supabaseUrl: ${Env.supabaseUrl}');
       debugPrint('anonKeyLen: ${Env.supabaseAnonKey.length}');
       debugPrint('sessionNull: ${session == null}');
+      debugPrint('sessionExpired: $sessionExpired');
       debugPrint('jwtParts: $jwtParts');
       debugPrint('tokenLen: $tokenLen');
       debugPrint('========================================');
@@ -169,7 +171,13 @@ class AccountDeletionService {
 
   Future<Session?> _resolveSession(SupabaseClient client) async {
     final current = client.auth.currentSession;
-    if (current != null) return current;
+    if (current != null && !current.isExpired) {
+      return current;
+    }
+
+    if (current != null && current.isExpired) {
+      debugPrint('Account deletion: current session expired, refreshing token');
+    }
 
     try {
       final refreshed = await client.auth.refreshSession();
