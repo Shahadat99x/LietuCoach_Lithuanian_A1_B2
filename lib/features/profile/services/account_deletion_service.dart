@@ -61,27 +61,48 @@ class AccountDeletionService {
 
       final client = _client ?? Supabase.instance.client;
       final session = await _resolveSession(client);
-      if (kDebugMode) {
-        final token = session?.accessToken ?? '';
-        debugPrint('Account deletion: runtime SUPABASE_URL=${Env.supabaseUrl}');
-        debugPrint('Account deletion: session exists=${session != null}');
-        debugPrint(
-          'Account deletion: jwtParts=${token.isEmpty ? 0 : token.split('.').length}, tokenLength=${token.length}',
-        );
-      }
-
-      if (session?.accessToken.isEmpty ?? true) {
-        return AccountDeletionResult.failure(
-          'Not authenticated. Please sign in again and retry.',
-        );
-      }
-
-      debugPrint('Account deletion: invoking delete-account...');
-      final response = await client.functions.invoke('delete-account');
-      final data = response.data;
-      debugPrint(
-        'Account deletion response: status=${response.status}, body=$data',
+      final token = session?.accessToken ?? '';
+      final jwtParts = token.isEmpty ? 0 : token.split('.').length;
+      final tokenLen = token.length;
+      final runtimeClientUrl = client.rest.url.replaceFirst(
+        RegExp(r'/rest/v1/?$'),
+        '',
       );
+
+      debugPrint('=== DELETE ACCOUNT PRE-FLIGHT CHECK ===');
+      debugPrint('client.supabaseUrl: $runtimeClientUrl');
+      debugPrint('env.supabaseUrl: ${Env.supabaseUrl}');
+      debugPrint('anonKeyLen: ${Env.supabaseAnonKey.length}');
+      debugPrint('sessionNull: ${session == null}');
+      debugPrint('jwtParts: $jwtParts');
+      debugPrint('tokenLen: $tokenLen');
+      debugPrint('========================================');
+
+      if (session == null || token.isEmpty) {
+        return AccountDeletionResult.failure(
+          'Session expired. Please sign in again and retry.',
+        );
+      }
+      if (jwtParts != 3) {
+        return AccountDeletionResult.failure(
+          'Invalid session token. Please sign out and sign in again.',
+        );
+      }
+
+      late final FunctionResponse response;
+      try {
+        // Keep SDK-managed headers to avoid gateway auth/header mismatches.
+        response = await client.functions.invoke('delete-account');
+      } catch (invokeError, invokeSt) {
+        debugPrint(
+          'DELETE-INVOKE FAILED type=${invokeError.runtimeType} details=$invokeError',
+        );
+        debugPrintStack(stackTrace: invokeSt);
+        rethrow;
+      }
+
+      final data = response.data;
+      debugPrint('DELETE-INVOKE RESPONSE status=${response.status} body=$data');
 
       if (kDebugMode && _debugJwtGatewayToggleHint && response.status == 401) {
         debugPrint(
@@ -109,7 +130,7 @@ class AccountDeletionService {
       final warnings = await _wiper.wipeAfterAccountDeletion();
       return AccountDeletionResult.success(localWarnings: warnings);
     } catch (e, st) {
-      debugPrint('Account deletion failed: $e');
+      debugPrint('Account deletion failed type=${e.runtimeType} details=$e');
       debugPrintStack(stackTrace: st);
       return AccountDeletionResult.failure(
         'Delete failed. Please try again or contact hello@dhossain.com.',
