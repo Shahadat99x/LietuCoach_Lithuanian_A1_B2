@@ -8,6 +8,8 @@ import 'delete_account_screen.dart';
 import 'widgets/profile_header.dart';
 import 'widgets/sync_status_card.dart';
 import 'widgets/settings_section_card.dart';
+import 'about_screen.dart';
+import '../common/services/external_links_service.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({
@@ -67,23 +69,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
     await _syncService.syncNow();
   }
 
-  void _showAboutDialog() {
-    showAboutDialog(
-      context: context,
-      applicationName: 'LietuCoach',
-      applicationVersion: '1.0.0',
-      applicationIcon: Image.asset(
-        'assets/branding/logo_mark_1024.png',
-        width: 48,
-        height: 48,
-      ),
-      children: [
-        const Text(
-          'LietuCoach helps you learn Lithuanian with short lessons, '
-          'real dialogues, and spaced repetition.',
-        ),
-      ],
-    );
+  void _showAbout() {
+    Navigator.of(
+      context,
+    ).push(MaterialPageRoute(builder: (_) => const AboutScreen()));
   }
 
   Future<void> _openDeleteAccount() async {
@@ -226,13 +215,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   leading: const Icon(Icons.help_outline),
                   title: const Text('Help Center'),
                   trailing: const Icon(Icons.chevron_right),
-                  onTap: () {},
+                  onTap: () => ExternalLinksService.openUrl(
+                    context,
+                    ExternalLinksService.supportUrl,
+                  ),
                 ),
                 ListTile(
                   leading: const Icon(Icons.info_outline),
                   title: const Text('About LietuCoach'),
                   trailing: const Text('v1.0.0'),
-                  onTap: _showAboutDialog,
+                  onTap: _showAbout,
                 ),
               ],
             ),

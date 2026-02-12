@@ -6,6 +6,7 @@ import '../../design_system/glass/glass.dart';
 import '../../ui/components/components.dart';
 import '../../ui/tokens.dart';
 import '../onboarding/onboarding_screen.dart';
+import '../common/services/external_links_service.dart';
 import 'services/account_deletion_service.dart';
 
 class DeleteAccountScreen extends StatefulWidget {
@@ -232,6 +233,18 @@ class _DeleteAccountScreenState extends State<DeleteAccountScreen> {
               child: TextButton(
                 onPressed: _copySupportEmail,
                 child: const Text('Contact support: hello@dhossain.com'),
+              ),
+            ),
+            Center(
+              child: TextButton(
+                onPressed: () => ExternalLinksService.openUrl(
+                  context,
+                  ExternalLinksService.dataDeletionUrl,
+                ),
+                style: TextButton.styleFrom(
+                  foregroundColor: semantic.textSecondary,
+                ),
+                child: const Text('Read data deletion policy'),
               ),
             ),
           ],
