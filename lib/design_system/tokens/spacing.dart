@@ -17,4 +17,9 @@ abstract class AppSpacing {
   static const double space12 = s;
   static const double space16 = m;
   static const double space24 = xl;
+
+  // Icon sizes
+  static const double iconSm = 16.0;
+  static const double iconMd = 20.0;
+  static const double iconLg = 24.0;
 }
