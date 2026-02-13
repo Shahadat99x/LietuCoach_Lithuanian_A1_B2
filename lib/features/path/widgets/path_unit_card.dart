@@ -47,7 +47,7 @@ class PathUnitCard extends StatelessWidget {
     if (!hasContent) {
       backgroundColor = semantic.surfaceElevated;
       elevation = 0.0;
-      opacity = 0.65;
+      opacity = AppDisabledStyle.disabledOpacity;
     } else if (isCurrent) {
       backgroundColor = semantic.surfaceCard;
       elevation = 2.5;
@@ -55,7 +55,7 @@ class PathUnitCard extends StatelessWidget {
     } else if (isLocked) {
       backgroundColor = semantic.surfaceElevated.withValues(alpha: 0.8);
       elevation = 0.0;
-      opacity = 0.86;
+      opacity = AppDisabledStyle.lockedOpacity;
     } else {
       backgroundColor = semantic.surfaceCard;
       elevation = 1.2;
@@ -69,7 +69,7 @@ class PathUnitCard extends StatelessWidget {
         elevation: elevation,
         color: backgroundColor,
         child: Opacity(
-          opacity: hasContent ? opacity : 0.62,
+          opacity: hasContent ? opacity : AppDisabledStyle.disabledOpacity,
           child: Row(
             children: [
               _buildLeadingIcon(

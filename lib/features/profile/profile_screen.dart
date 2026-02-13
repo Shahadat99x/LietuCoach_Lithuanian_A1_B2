@@ -187,21 +187,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
             SettingsSectionCard(
               title: 'General',
               children: [
-                ListTile(
-                  leading: const Icon(Icons.notifications_outlined),
+                AppListTile(
+                  leading: Icons.notifications_outlined,
                   title: const Text('Notifications'),
                   trailing: Switch(value: true, onChanged: (v) {}),
                 ),
-                ListTile(
-                  leading: const Icon(Icons.volume_up_outlined),
+                AppListTile(
+                  leading: Icons.volume_up_outlined,
                   title: const Text('Sound Effects'),
                   trailing: Switch(value: true, onChanged: (v) {}),
                 ),
-                ListTile(
-                  leading: const Icon(Icons.dark_mode_outlined),
+                AppListTile(
+                  leading: Icons.dark_mode_outlined,
                   title: const Text('Appearance'),
                   subtitle: Text(themeController.mode.label),
-                  trailing: const Icon(Icons.chevron_right),
+                  showChevron: true,
                   onTap: () => _showAppearanceSheet(themeController),
                 ),
               ],
@@ -211,19 +211,25 @@ class _ProfileScreenState extends State<ProfileScreen> {
             SettingsSectionCard(
               title: 'Support',
               children: [
-                ListTile(
-                  leading: const Icon(Icons.help_outline),
+                AppListTile(
+                  leading: Icons.help_outline,
                   title: const Text('Help Center'),
-                  trailing: const Icon(Icons.chevron_right),
+                  showChevron: true,
                   onTap: () => ExternalLinksService.openUrl(
                     context,
                     ExternalLinksService.supportUrl,
                   ),
                 ),
-                ListTile(
-                  leading: const Icon(Icons.info_outline),
+                AppListTile(
+                  leading: Icons.info_outline,
                   title: const Text('About LietuCoach'),
-                  trailing: const Text('v1.0.0'),
+                  trailing: Text(
+                    'v1.0.0',
+                    style: AppSemanticTypography.caption.copyWith(
+                      color: theme.semanticColors.textTertiary,
+                    ),
+                  ),
+                  showChevron: true,
                   onTap: _showAbout,
                 ),
               ],
@@ -233,8 +239,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
               SettingsSectionCard(
                 title: 'Account',
                 children: [
-                  ListTile(
-                    leading: Icon(Icons.logout, color: theme.colorScheme.error),
+                  AppListTile(
+                    leading: Icons.logout,
+                    leadingColor: theme.colorScheme.error,
                     title: Text(
                       'Sign Out',
                       style: AppSemanticTypography.body.copyWith(
@@ -243,11 +250,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     ),
                     onTap: _handleSignOut,
                   ),
-                  ListTile(
-                    leading: Icon(
-                      Icons.delete_forever_outlined,
-                      color: theme.colorScheme.error,
-                    ),
+                  AppListTile(
+                    leading: Icons.delete_forever_outlined,
+                    leadingColor: theme.colorScheme.error,
                     title: Text(
                       'Delete account',
                       style: AppSemanticTypography.body.copyWith(
@@ -257,7 +262,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     subtitle: const Text(
                       'Permanently remove account and cloud data',
                     ),
-                    trailing: const Icon(Icons.chevron_right),
+                    showChevron: true,
                     onTap: _openDeleteAccount,
                   ),
                 ],
