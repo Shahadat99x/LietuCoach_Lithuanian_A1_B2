@@ -106,7 +106,7 @@ class _ModeTile extends StatelessWidget {
                     shape: BoxShape.circle,
                   ),
                   child: Opacity(
-                    opacity: isLocked ? 0.75 : 1,
+                    opacity: isLocked ? AppDisabledStyle.lockedOpacity : 1,
                     child: Icon(icon, size: 28, color: effectiveColor),
                   ),
                 ),
@@ -133,37 +133,7 @@ class _ModeTile extends StatelessWidget {
               ],
             ),
             if (isLocked)
-              Positioned(
-                top: 0,
-                right: 0,
-                child: GlassPill(
-                  minHeight: 0,
-                  selected: false,
-                  preferPerformance: true,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: AppSemanticSpacing.space8,
-                    vertical: AppSemanticSpacing.space4,
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        Icons.lock_rounded,
-                        size: 12,
-                        color: theme.semanticColors.textSecondary,
-                      ),
-                      const SizedBox(width: AppSemanticSpacing.space4),
-                      Text(
-                        'LOCKED',
-                        style: AppSemanticTypography.caption.copyWith(
-                          color: theme.semanticColors.textSecondary,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
+              const Positioned(top: 0, right: 0, child: LockedBadge()),
           ],
         ),
       ),

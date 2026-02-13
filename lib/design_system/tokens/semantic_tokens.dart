@@ -266,7 +266,9 @@ abstract final class AppSemanticSpacing {
   static const double space8 = 8.0;
   static const double space12 = 12.0;
   static const double space16 = 16.0;
+  static const double space20 = 20.0;
   static const double space24 = 24.0;
+  static const double space32 = 32.0;
 }
 
 abstract final class AppSemanticTypography {
@@ -274,4 +276,16 @@ abstract final class AppSemanticTypography {
   static const TextStyle section = AppTypography.titleMedium;
   static const TextStyle body = AppTypography.bodyMedium;
   static const TextStyle caption = AppTypography.caption;
+}
+
+/// Locked / disabled visual constants — single source of truth.
+abstract final class AppDisabledStyle {
+  /// Opacity for locked items (cards, tiles)
+  static const double lockedOpacity = 0.7;
+
+  /// Opacity for fully disabled / unavailable items
+  static const double disabledOpacity = 0.5;
+
+  /// Lock icon size in badges
+  static const double lockIconSize = 12.0;
 }

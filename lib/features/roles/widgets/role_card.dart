@@ -33,7 +33,7 @@ class RoleCard extends StatelessWidget {
     return ScaleButton(
       onTap: onTap,
       child: Opacity(
-        opacity: isLocked ? 0.93 : 1,
+        opacity: isLocked ? AppDisabledStyle.lockedOpacity : 1,
         child: GlassCard(
           preferPerformance: true,
           preset: GlassPreset.solid,
@@ -95,20 +95,7 @@ class RoleCard extends StatelessWidget {
 
               const SizedBox(width: Spacing.s),
               if (isLocked)
-                GlassPill(
-                  minHeight: 0,
-                  selected: false,
-                  preferPerformance: true,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: AppSemanticSpacing.space8,
-                    vertical: AppSemanticSpacing.space4,
-                  ),
-                  child: Icon(
-                    Icons.lock_rounded,
-                    size: 14,
-                    color: semantic.textSecondary,
-                  ),
-                )
+                const LockedBadge(showLabel: false)
               else if (isCompleted)
                 Icon(Icons.check_circle_rounded, color: semantic.success)
               else

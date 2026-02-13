@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import '../../design_system/tokens/spacing.dart';
 import '../../ui/tokens.dart';
+import '../../ui/components/components.dart';
 import '../cards/review_session_screen.dart';
 import '../path/path_screen.dart';
 import '../path/widgets/lock_bottom_sheet.dart';
@@ -215,7 +217,7 @@ class _PracticeScreenState extends State<PracticeScreen> {
                 children: [
                   Icon(
                     Icons.timer_outlined,
-                    size: 16,
+                    size: AppSpacing.iconSm,
                     color: theme.colorScheme.onSurfaceVariant,
                   ),
                   const SizedBox(width: Spacing.xs),
@@ -228,7 +230,7 @@ class _PracticeScreenState extends State<PracticeScreen> {
                   const Spacer(),
                   Icon(
                     Icons.local_fire_department,
-                    size: 16,
+                    size: AppSpacing.iconSm,
                     color: semantic.accentWarm,
                   ),
                   const SizedBox(width: Spacing.xs),
@@ -249,11 +251,10 @@ class _PracticeScreenState extends State<PracticeScreen> {
             const SizedBox(height: AppSemanticSpacing.space24),
 
             // Modes Grid
-            Text(
-              'Practice Modes',
-              style: AppSemanticTypography.section.copyWith(
-                color: semantic.textPrimary,
-              ),
+            AppSectionHeader(
+              title: 'Practice Modes',
+              uppercase: false,
+              padding: EdgeInsets.zero,
             ),
             const SizedBox(height: AppSemanticSpacing.space16),
 
