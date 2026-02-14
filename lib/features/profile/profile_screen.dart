@@ -224,7 +224,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   leading: Icons.info_outline,
                   title: const Text('About LietuCoach'),
                   trailing: Text(
-                    'v1.0.0',
+                    'v1.0.0+2',
                     style: AppSemanticTypography.caption.copyWith(
                       color: theme.semanticColors.textTertiary,
                     ),

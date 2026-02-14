@@ -31,7 +31,7 @@ class ExternalLinksService {
     } catch (e) {
       debugPrint('ExternalLinksService: Exception launching $urlString: $e');
       if (context.mounted) {
-        _showError(context, 'Could not open link: $e');
+        _showError(context, 'Couldn\'t open link. Please try again.');
       }
     }
   }
