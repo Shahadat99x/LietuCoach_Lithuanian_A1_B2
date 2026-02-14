@@ -73,9 +73,6 @@ class _ReorderWidgetState extends State<ReorderWidget> {
     final semantic = theme.semanticColors;
     final reduceMotion = AppMotion.reduceMotionOf(context);
     final isCorrect = _isCorrect();
-    final trayColor = widget.hasAnswered
-        ? (isCorrect ? semantic.successContainer : semantic.dangerContainer)
-        : semantic.surfaceCard;
     final trayBorderColor = widget.hasAnswered
         ? (isCorrect ? semantic.success : semantic.danger)
         : semantic.borderSubtle;
@@ -99,36 +96,46 @@ class _ReorderWidgetState extends State<ReorderWidget> {
         const SizedBox(height: AppSemanticSpacing.space24),
 
         // Answer area (Tray)
+        // Answer area (Tray) - Chip Container Look
         AnimatedSize(
           duration: reduceMotion ? AppMotion.fast : AppMotion.normal,
           curve: AppMotion.curve(context, AppMotion.easeOut),
           child: Container(
             width: double.infinity,
-            constraints: const BoxConstraints(minHeight: 92),
-            padding: const EdgeInsets.all(AppSemanticSpacing.space16),
+            constraints: const BoxConstraints(minHeight: 64), // Reduced from 92
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSemanticSpacing.space12, // Tighter padding
+              vertical: AppSemanticSpacing.space12,
+            ),
             decoration: BoxDecoration(
-              color: trayColor,
+              // Neutral / Ghost style for empty state, slightly elevated for content
+              color: _selectedOrder.isEmpty
+                  ? semantic.surfaceCard.withValues(alpha: 0.5)
+                  : semantic.surfaceElevated,
               borderRadius: BorderRadius.circular(AppSemanticShape.radiusCard),
               border: Border.all(
-                color: trayBorderColor,
-                width: widget.hasAnswered ? 1.5 : 1,
+                color: widget.hasAnswered
+                    ? trayBorderColor
+                    : semantic.borderSubtle,
+                width: widget.hasAnswered ? 2.0 : 1.0,
               ),
-              boxShadow: [
-                BoxShadow(
-                  color: semantic.shadowSoft.withValues(
-                    alpha: theme.brightness == Brightness.dark ? 0.28 : 0.08,
-                  ),
-                  blurRadius: 10,
-                  offset: const Offset(0, 4),
-                ),
-              ],
+              boxShadow: _selectedOrder.isEmpty
+                  ? []
+                  : [
+                      BoxShadow(
+                        color: semantic.shadowSoft.withValues(alpha: 0.05),
+                        blurRadius: 4,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
             ),
             child: _selectedOrder.isEmpty
                 ? Center(
                     child: Text(
-                      'Tap words below to build the sentence',
+                      'Tap words to build sentence',
                       style: AppSemanticTypography.body.copyWith(
-                        color: semantic.textSecondary,
+                        color: semantic.textSecondary.withValues(alpha: 0.7),
+                        fontWeight: FontWeight.w500,
                       ),
                     ),
                   )
@@ -146,22 +153,22 @@ class _ReorderWidgetState extends State<ReorderWidget> {
                   ),
           ),
         ),
-        const SizedBox(height: AppSemanticSpacing.space24),
-
-        // Word bank
-        Container(
+        const SizedBox(
+          height: AppSemanticSpacing.space32,
+        ), // More breathing room
+        // Word bank - Cleaner, no heavy container
+        SizedBox(
           width: double.infinity,
-          padding: const EdgeInsets.all(AppSemanticSpacing.space16),
-          decoration: BoxDecoration(
-            color: semantic.surfaceElevated.withValues(alpha: 0.45),
-            borderRadius: BorderRadius.circular(AppSemanticShape.radiusCard),
-            border: Border.all(color: semantic.borderSubtle),
-          ),
           child: Wrap(
-            spacing: AppSemanticSpacing.space8,
-            runSpacing: AppSemanticSpacing.space8,
+            spacing:
+                AppSemanticSpacing.space12, // Wider spacing for tap targets
+            runSpacing: AppSemanticSpacing.space12,
+            alignment: WrapAlignment.center, // Center the bank
             children: _shuffledIndices.map((wordIndex) {
               final isUsed = _selectedOrder.contains(wordIndex);
+              // Hide used words completely or keep as placeholders?
+              // "placeholder" style in WordChip is ghosted.
+              // Let's keep ghosted to maintain layout stability.
               return WordChip(
                 label: widget.step.words[wordIndex],
                 isPlaceholder: isUsed,
