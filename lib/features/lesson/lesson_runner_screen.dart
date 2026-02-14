@@ -305,12 +305,17 @@ class _LessonRunnerScreenState extends State<LessonRunnerScreen> {
     }
 
     if (_hasAnswered && _currentStep.isGraded) {
+      String? message;
+      if (_wasCorrect) {
+        message = 'Good job!';
+      } else {
+        message = _getCorrectAnswerText(_currentStep);
+      }
+
       return BottomResultSheet(
         state: _wasCorrect ? ResultState.correct : ResultState.incorrect,
         title: _wasCorrect ? 'Correct!' : 'Incorrect',
-        message: _wasCorrect
-            ? 'Good job!'
-            : 'The correct answer is...', // We can improve this if we have data
+        message: message,
         onContinue: _nextStep,
       );
     }
@@ -421,6 +426,25 @@ class _LessonRunnerScreenState extends State<LessonRunnerScreen> {
       return _selectedAnswer != null;
     }
     return true; // If answered, can continue
+  }
+
+  String? _getCorrectAnswerText(Step step) {
+    if (step is McqStep) {
+      return 'Correct answer: ${step.options[step.correctIndex]}';
+    } else if (step is ListeningChoiceStep) {
+      return 'Correct answer: ${step.options[step.correctIndex]}';
+    } else if (step is DialogueChoiceStep) {
+      return 'Correct answer: ${step.options[step.correctIndex]}';
+    } else if (step is FillBlankStep) {
+      return 'Correct answer: ${step.answer}';
+    } else if (step is ReorderStep) {
+      return 'Correct answer: ${step.correctSentence}';
+    } else if (step is MatchStep) {
+      // Match step is usually auto-graded pair by pair,
+      // but if we show a general fail:
+      return null;
+    }
+    return null;
   }
 
   Future<void> _showExitConfirmation(BuildContext context) async {
