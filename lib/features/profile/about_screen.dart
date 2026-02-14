@@ -3,6 +3,11 @@ import '../common/services/external_links_service.dart';
 import 'widgets/settings_section_card.dart';
 
 import '../../ui/tokens.dart';
+import '../../ui/components/components.dart';
+
+/// Current app version — update here and in pubspec.yaml for each release.
+const String _appVersion = '1.0.0';
+const String _appBuildNumber = '2';
 
 class AboutScreen extends StatelessWidget {
   const AboutScreen({super.key});
@@ -36,7 +41,7 @@ class AboutScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: Spacing.xs),
                   Text(
-                    'Version 1.0.0',
+                    'Version $_appVersion ($_appBuildNumber)',
                     style: AppSemanticTypography.body.copyWith(
                       color: semantic.textSecondary,
                     ),
@@ -80,39 +85,51 @@ class AboutScreen extends StatelessWidget {
 
             // Legal Links
             SettingsSectionCard(
-              title: 'Legal & Support',
+              title: 'Legal',
               children: [
-                ListTile(
-                  leading: const Icon(Icons.privacy_tip_outlined),
+                AppListTile(
+                  leading: Icons.privacy_tip_outlined,
                   title: const Text('Privacy Policy'),
                   trailing: const Icon(Icons.open_in_new, size: 16),
+                  showChevron: true,
                   onTap: () => ExternalLinksService.openUrl(
                     context,
                     ExternalLinksService.privacyPolicyUrl,
                   ),
                 ),
-                ListTile(
-                  leading: const Icon(Icons.description_outlined),
+                AppListTile(
+                  leading: Icons.description_outlined,
                   title: const Text('Terms of Use'),
                   trailing: const Icon(Icons.open_in_new, size: 16),
+                  showChevron: true,
                   onTap: () => ExternalLinksService.openUrl(
                     context,
                     ExternalLinksService.termsUrl,
                   ),
                 ),
-                ListTile(
-                  leading: const Icon(Icons.delete_outline),
+                AppListTile(
+                  leading: Icons.delete_outline,
                   title: const Text('Data Deletion'),
                   trailing: const Icon(Icons.open_in_new, size: 16),
+                  showChevron: true,
                   onTap: () => ExternalLinksService.openUrl(
                     context,
                     ExternalLinksService.dataDeletionUrl,
                   ),
                 ),
-                ListTile(
-                  leading: const Icon(Icons.mail_outline),
+              ],
+            ),
+            const SizedBox(height: Spacing.m),
+
+            // Contact
+            SettingsSectionCard(
+              title: 'Contact',
+              children: [
+                AppListTile(
+                  leading: Icons.mail_outline,
                   title: const Text('Contact Support'),
                   subtitle: const Text(ExternalLinksService.supportEmail),
+                  showChevron: true,
                   onTap: () => ExternalLinksService.openEmail(context),
                 ),
               ],
@@ -121,7 +138,7 @@ class AboutScreen extends StatelessWidget {
 
             Center(
               child: Text(
-                '© 2024 LietuCoach',
+                '© 2025 LietuCoach',
                 style: AppSemanticTypography.caption.copyWith(
                   color: semantic.textSecondary,
                 ),
