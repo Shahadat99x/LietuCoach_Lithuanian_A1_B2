@@ -64,6 +64,7 @@ class GlassSurface extends StatelessWidget {
           overlayOpacity: overlayOpacity,
           preset: preset,
         ),
+        gradient: GlassStyle.gradient(theme, preset: preset),
         border:
             border ??
             Border.fromBorderSide(GlassStyle.borderSide(theme, preset: preset)),
