@@ -1,4 +1,4 @@
-package app.lietucoach.lietucoach
+package com.fluenthivego.lietucoach
 
 import android.app.Activity
 import com.google.android.play.core.assetpacks.AssetPackManager
