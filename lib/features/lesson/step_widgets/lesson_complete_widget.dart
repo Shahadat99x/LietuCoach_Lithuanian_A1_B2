@@ -178,14 +178,26 @@ class _StatCard extends StatelessWidget {
     final reduceMotion = AppMotion.reduceMotionOf(context);
 
     return SizedBox(
-      width: 120,
+      width: 132, // Slightly wider
       child: GlassCard(
         preferPerformance: true,
-        padding: const EdgeInsets.all(AppSemanticSpacing.space24),
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSemanticSpacing.space16,
+          vertical: AppSemanticSpacing.space24,
+        ),
+        // More opaque/solid feel for "active" look
+        preset: GlassPreset.solid,
         child: Column(
           children: [
-            Icon(icon, color: color, size: 28),
-            const SizedBox(height: AppSemanticSpacing.space12),
+            Container(
+              padding: const EdgeInsets.all(AppSemanticSpacing.space12),
+              decoration: BoxDecoration(
+                color: color.withValues(alpha: 0.1),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(icon, color: color, size: 32),
+            ),
+            const SizedBox(height: AppSemanticSpacing.space16),
             if (animateValue)
               TweenAnimationBuilder<int>(
                 tween: IntTween(begin: 0, end: value),
@@ -194,21 +206,31 @@ class _StatCard extends StatelessWidget {
                 builder: (context, val, child) {
                   return Text(
                     '$val$suffix',
-                    style: AppSemanticTypography.section.copyWith(color: color),
+                    style: AppSemanticTypography.title.copyWith(
+                      // Emphasized value
+                      color: semantic.textPrimary,
+                      fontWeight: FontWeight.w800,
+                      fontSize: 28,
+                    ),
                   );
                 },
               )
             else
               Text(
                 '$value$suffix',
-                style: AppSemanticTypography.section.copyWith(color: color),
+                style: AppSemanticTypography.title.copyWith(
+                  color: semantic.textPrimary,
+                  fontWeight: FontWeight.w800,
+                  fontSize: 28,
+                ),
               ),
+            const SizedBox(height: AppSemanticSpacing.space4),
             Text(
               label.toUpperCase(),
               style: AppSemanticTypography.caption.copyWith(
                 fontWeight: FontWeight.w700,
                 color: semantic.textSecondary,
-                letterSpacing: 0.8,
+                letterSpacing: 1.0,
               ),
             ),
           ],
