@@ -50,8 +50,8 @@ class BottomResultSheet extends StatelessWidget {
         padding: const EdgeInsets.only(
           left: Spacing.pagePadding,
           right: Spacing.pagePadding,
-          top: Spacing.m,
-          bottom: Spacing.l,
+          top: Spacing.l, // Increased top padding for better breathing room
+          bottom: Spacing.xl, // Increased bottom padding for safer tap area
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,

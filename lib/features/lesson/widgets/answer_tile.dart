@@ -61,7 +61,8 @@ class _AnswerTileState extends State<AnswerTile> {
         borderWidth = 2.0;
         break;
       case AnswerState.selected:
-        backgroundColor = semantic.accentPrimary.withValues(alpha: 0.14);
+        // Neutral pre-check selection
+        backgroundColor = semantic.accentPrimary.withValues(alpha: 0.08);
         borderColor = semantic.accentPrimary;
         textColor = semantic.textPrimary;
         borderWidth = 2.0;
@@ -248,11 +249,28 @@ class _AnswerRadio extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Only show "checked" filled circle if CORRECT or INCORRECT
+    // Or if we want radio to look selected?
+    // User requested "neutral selection".
+    // If radio, usually selected means filled circle.
+    // Let's keep filled circle for selected but maybe neutral color?
+    // Actually prompt says "no checkmark icons before result" for "A) Multiple choice selection state".
+    // _AnswerRadio is used if leadingKind == radio.
+    // Standard MCQ uses leadingKind == badge.
+    // So _AnswerRadio logic changes might be minimal or unused.
+    // But let's align it: selected state gets filled with activeColor (accent), but maybe no check icon inside?
+    // The code below adds check icon if filled.
+
     final isFilled =
         state == AnswerState.selected ||
         state == AnswerState.correct ||
         state == AnswerState.incorrect;
     final color = isFilled ? activeColor : inactiveColor;
+
+    // Only show check icon if correct/incorrect? Or selected too?
+    // "no checkmark icons before result" -> so selected shouldn't have checkmark.
+    final showCheck =
+        state == AnswerState.correct || state == AnswerState.incorrect;
 
     return Container(
       width: 24,
@@ -262,7 +280,20 @@ class _AnswerRadio extends StatelessWidget {
         border: Border.all(color: color, width: 2),
         color: isFilled ? color : Colors.transparent,
       ),
-      child: isFilled ? Icon(Icons.check, size: 14, color: checkColor) : null,
+      child: showCheck
+          ? Icon(Icons.check, size: 14, color: checkColor)
+          : (state == AnswerState.selected
+                ? Center(
+                    child: Container(
+                      width: 10,
+                      height: 10,
+                      decoration: BoxDecoration(
+                        color: checkColor,
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                  )
+                : null),
     );
   }
 }
