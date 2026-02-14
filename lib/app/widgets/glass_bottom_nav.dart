@@ -25,8 +25,8 @@ class GlassBottomNav extends StatelessWidget {
     required this.onSelected,
     this.horizontalMargin = AppSemanticSpacing.space12,
     this.bottomSpacing = AppSemanticSpacing.space8,
-    this.height = 72,
-    this.borderRadius = AppSemanticShape.radiusHero + AppSemanticSpacing.space4,
+    this.height = 62, // Reduced from 72 for slimmer profile
+    this.borderRadius = AppSemanticShape.radiusHero,
     this.preferPerformance = true,
   });
 
@@ -51,7 +51,7 @@ class GlassBottomNav extends StatelessWidget {
       return const SizedBox.shrink();
     }
 
-    final indicatorOpacity = isDark ? 0.22 : 0.16;
+    final indicatorOpacity = isDark ? 0.14 : 0.08; // Reduced opacity
     final animationDuration = AppMotion.duration(
       context,
       AppMotion.normal,
@@ -68,16 +68,17 @@ class GlassBottomNav extends StatelessWidget {
       ),
       child: GlassSurface(
         borderRadius: BorderRadius.circular(borderRadius),
-        blurSigma: 16,
+        blurSigma: 18, // Slightly more blur
         preset: GlassPreset.frost,
         preferPerformance: preferPerformance,
         useRepaintBoundary: true,
+        overlayOpacity: isDark ? 0.6 : 0.4, // Custom transparency (less opaque)
         child: SizedBox(
           height: height,
           child: LayoutBuilder(
             builder: (context, constraints) {
-              const indicatorHorizontalInset = 6.0;
-              const indicatorHeight = 46.0;
+              const indicatorHorizontalInset = 8.0;
+              const indicatorHeight = 40.0; // Reduced from 46
 
               final itemWidth = constraints.maxWidth / items.length;
               final indicatorWidth = itemWidth - (indicatorHorizontalInset * 2);
@@ -113,21 +114,7 @@ class GlassBottomNav extends StatelessWidget {
                               color: semantic.accentPrimary.withValues(
                                 alpha: indicatorOpacity,
                               ),
-                              border: Border.all(
-                                color: semantic.accentPrimary.withValues(
-                                  alpha: isDark ? 0.28 : 0.20,
-                                ),
-                                width: 1,
-                              ),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: semantic.accentPrimary.withValues(
-                                    alpha: isDark ? 0.20 : 0.12,
-                                  ),
-                                  blurRadius: 14,
-                                  offset: const Offset(0, 6),
-                                ),
-                              ],
+                              // Removed border for cleaner look
                             ),
                           ),
                         ),

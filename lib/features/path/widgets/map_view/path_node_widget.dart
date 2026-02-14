@@ -101,33 +101,60 @@ class _PathNodeWidgetState extends State<PathNodeWidget>
         ? Icons.workspace_premium_rounded
         : _getIconForType(widget.node.type);
 
+    // Determine base fill color and gradient
     final Color fillColor;
+    final Gradient? gradient;
     final Color iconColor;
     final Color borderColor;
+
     if (isCompleted) {
-      fillColor = isExam
-          ? semantic.accentWarm.withValues(alpha: 0.95)
-          : semantic.accentPrimary.withValues(alpha: 0.95);
+      final baseColor = isExam ? semantic.accentWarm : semantic.accentPrimary;
+      fillColor = baseColor;
+      gradient = LinearGradient(
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+        colors: [baseColor.withValues(alpha: 0.9), baseColor],
+      );
       iconColor = semantic.buttonPrimaryText;
-      borderColor = semantic.bgElevated.withValues(alpha: 0.65);
+      borderColor = semantic.bgElevated.withValues(alpha: 0.5);
     } else if (isCurrent) {
-      fillColor = isExam ? semantic.accentWarm : semantic.accentPrimary;
+      final baseColor = isExam ? semantic.accentWarm : semantic.accentPrimary;
+      fillColor = baseColor;
+      gradient = LinearGradient(
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+        colors: [baseColor.withValues(alpha: 0.8), baseColor],
+      );
       iconColor = semantic.buttonPrimaryText;
-      borderColor = semantic.bgElevated.withValues(alpha: 0.9);
+      borderColor = semantic.bgElevated.withValues(alpha: 0.8);
     } else {
       fillColor = semantic.surfaceElevated;
-      iconColor = semantic.textTertiary;
+      gradient = LinearGradient(
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+        colors: [
+          semantic.surfaceElevated.withValues(alpha: 0.8),
+          semantic.surfaceElevated,
+        ],
+      );
+      iconColor = isLocked
+          ? semantic.textTertiary.withValues(
+              alpha: AppDisabledStyle.lockedOpacity,
+            )
+          : semantic.textTertiary;
       borderColor = semantic.borderSubtle;
     }
 
-    final radius = isExam ? BorderRadius.circular(22) : null;
+    final radius = isExam
+        ? BorderRadius.circular(22)
+        : BorderRadius.circular(999);
 
     return ScaleButton(
       onTap: _handleTap,
       child: Semantics(
         label: widget.node.label,
         button: true,
-        enabled: true,
+        enabled: true, // Keep enabled for tap-to-show-lock-message
         child: SizedBox(
           width: 88,
           height: 88,
@@ -149,7 +176,7 @@ class _PathNodeWidgetState extends State<PathNodeWidget>
                           color: semantic.accentPrimary.withValues(
                             alpha: _pulseOpacity.value,
                           ),
-                          width: 3,
+                          width: 2, // Thinner, more elegant pulse
                         ),
                       ),
                     );
@@ -160,45 +187,60 @@ class _PathNodeWidgetState extends State<PathNodeWidget>
                 height: size,
                 decoration: BoxDecoration(
                   color: fillColor,
+                  gradient: gradient,
                   shape: isExam ? BoxShape.rectangle : BoxShape.circle,
                   borderRadius: radius,
                   border: Border.all(
                     color: borderColor,
-                    width: isCurrent ? 2 : 1,
+                    width: isCurrent
+                        ? 2
+                        : 1.5, // Slightly bolder border generally
                   ),
                   boxShadow: [
                     BoxShadow(
                       color: semantic.shadowSoft.withValues(
                         alpha: isLocked
-                            ? (theme.brightness == Brightness.dark
-                                  ? 0.14
-                                  : 0.08)
+                            ? (theme.brightness == Brightness.dark ? 0.1 : 0.05)
                             : (theme.brightness == Brightness.dark
-                                  ? 0.34
-                                  : 0.14),
+                                  ? 0.4
+                                  : 0.18),
                       ),
-                      offset: const Offset(0, 5),
-                      blurRadius: 12,
+                      offset: const Offset(0, 4),
+                      blurRadius: 10,
                     ),
                   ],
                 ),
                 child: Stack(
                   alignment: Alignment.center,
                   children: [
-                    Positioned(
-                      top: 8,
-                      left: 12,
-                      right: 12,
-                      child: Container(
-                        height: 8,
-                        decoration: BoxDecoration(
-                          color: semantic.bgElevated.withValues(
-                            alpha: isLocked ? 0.12 : 0.22,
+                    // Inner highlight 'shine'
+                    if (!isLocked)
+                      Positioned(
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        height: size / 2,
+                        child: Container(
+                          decoration: BoxDecoration(
+                            shape: isExam
+                                ? BoxShape.rectangle
+                                : BoxShape.circle,
+                            borderRadius: isExam
+                                ? const BorderRadius.vertical(
+                                    top: Radius.circular(22),
+                                  )
+                                : null,
+                            gradient: LinearGradient(
+                              begin: Alignment.topCenter,
+                              end: Alignment.bottomCenter,
+                              colors: [
+                                Colors.white.withValues(alpha: 0.15),
+                                Colors.white.withValues(alpha: 0.0),
+                              ],
+                            ),
                           ),
-                          borderRadius: BorderRadius.circular(999),
                         ),
                       ),
-                    ),
                     Icon(icon, size: isCurrent ? 34 : 30, color: iconColor),
                   ],
                 ),

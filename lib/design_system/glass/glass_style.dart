@@ -126,4 +126,32 @@ class GlassStyle {
       ),
     ];
   }
+
+  static LinearGradient? gradient(
+    ThemeData theme, {
+    GlassPreset preset = GlassPreset.frost,
+  }) {
+    final effectivePreset = _effectivePreset(theme, preset);
+    if (effectivePreset == GlassPreset.solid) return null;
+
+    final isDark = theme.brightness == Brightness.dark;
+    final overlayColor = theme.semanticColors.glassOverlay;
+
+    // Top-left shine effect
+    final double startOpacity = switch (effectivePreset) {
+      GlassPreset.frost => isDark ? 0.12 : 0.45,
+      GlassPreset.smoke => isDark ? 0.18 : 0.35,
+      _ => 0.0,
+    };
+
+    return LinearGradient(
+      begin: Alignment.topLeft,
+      end: Alignment.bottomRight,
+      colors: [
+        overlayColor.withValues(alpha: startOpacity),
+        overlayColor.withValues(alpha: 0.0),
+      ],
+      stops: const [0.0, 1.0],
+    );
+  }
 }
