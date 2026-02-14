@@ -1,4 +1,4 @@
-package app.lietucoach.lietucoach
+package com.fluenthivego.lietucoach
 
 import io.flutter.embedding.android.FlutterActivity
 
