@@ -34,15 +34,13 @@ class _DeleteAccountScreenState extends State<DeleteAccountScreen> {
       });
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text(
-            'Re-auth started. Return to app and continue deletion.',
-          ),
+          content: Text('Re-authenticated. You may now proceed with deletion.'),
         ),
       );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Could not start re-auth. You can still continue.'),
+          content: Text('Couldn\'t re-authenticate. You can still continue.'),
         ),
       );
     }
@@ -68,25 +66,27 @@ class _DeleteAccountScreenState extends State<DeleteAccountScreen> {
         _errorMessage = result.errorMessage;
       });
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(result.errorMessage ?? 'Delete failed.')),
+        SnackBar(
+          content: Text(
+            result.errorMessage ?? 'Something went wrong. Please try again.',
+          ),
+        ),
       );
       return;
     }
 
-    if (result.localWarnings.isNotEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            'Account deleted. Some local cleanup steps were skipped on this device.',
-          ),
-        ),
-      );
-    }
+    // Show success message after navigation (uses rootNavigator's scaffold)
+    final messenger = ScaffoldMessenger.of(context);
+    final successMessage = result.localWarnings.isNotEmpty
+        ? 'Account deleted. Some local data may need manual cleanup.'
+        : 'Account deleted. You\'ve been signed out.';
 
     Navigator.of(context).pushAndRemoveUntil(
       MaterialPageRoute(builder: (_) => const OnboardingScreen()),
       (_) => false,
     );
+
+    messenger.showSnackBar(SnackBar(content: Text(successMessage)));
   }
 
   Future<void> _copySupportEmail() async {
