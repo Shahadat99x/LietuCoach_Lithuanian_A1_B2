@@ -145,9 +145,7 @@ class _PathNodeWidgetState extends State<PathNodeWidget>
       borderColor = semantic.borderSubtle;
     }
 
-    final radius = isExam
-        ? BorderRadius.circular(22)
-        : BorderRadius.circular(999);
+    final radius = isExam ? BorderRadius.circular(22) : null;
 
     return ScaleButton(
       onTap: _handleTap,
