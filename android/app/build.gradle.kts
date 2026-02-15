@@ -15,7 +15,7 @@ if (keystorePropertiesFile.exists()) {
 }
 
 android {
-    namespace = "app.lietucoach.lietucoach"
+    namespace = "com.fluenthivego.lietucoach"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
@@ -40,8 +40,8 @@ android {
     }
 
     defaultConfig {
-        applicationId = "app.lietucoach.lietucoach"
-        minSdk = flutter.minSdkVersion
+        applicationId = "com.fluenthivego.lietucoach"
+        minSdk = 21
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName

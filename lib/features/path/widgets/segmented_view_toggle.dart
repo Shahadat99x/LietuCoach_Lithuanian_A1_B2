@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../design_system/glass/glass.dart';
 
 class SegmentedViewToggle extends StatelessWidget {
   final bool isMap;
@@ -19,54 +20,56 @@ class SegmentedViewToggle extends StatelessWidget {
     const padding = 4.0;
     const width = 96.0;
 
-    return Container(
-      width: width,
-      height: height,
-      padding: const EdgeInsets.all(padding),
-      decoration: BoxDecoration(
-        color: colorScheme.surfaceContainerHighest,
-        borderRadius: BorderRadius.circular(height / 2),
-      ),
-      child: Stack(
-        children: [
-          // Animated Background Pill
-          AnimatedAlign(
-            duration: const Duration(milliseconds: 200),
-            curve: Curves.easeOut,
-            alignment: isMap ? Alignment.centerRight : Alignment.centerLeft,
-            child: Container(
-              width: (width - padding * 2) / 2,
-              height: height - padding * 2,
-              decoration: BoxDecoration(
-                color: colorScheme.surface,
-                borderRadius: BorderRadius.circular((height - padding * 2) / 2),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.1),
-                    blurRadius: 2,
-                    offset: const Offset(0, 1),
+    return GlassSurface(
+      borderRadius: BorderRadius.circular(height / 2),
+      preset: GlassPreset.frost,
+      child: Container(
+        width: width,
+        height: height,
+        padding: const EdgeInsets.all(padding),
+        child: Stack(
+          children: [
+            // Animated Background Pill
+            AnimatedAlign(
+              duration: const Duration(milliseconds: 200),
+              curve: Curves.easeOut,
+              alignment: isMap ? Alignment.centerRight : Alignment.centerLeft,
+              child: Container(
+                width: (width - padding * 2) / 2,
+                height: height - padding * 2,
+                decoration: BoxDecoration(
+                  color: colorScheme.surface,
+                  borderRadius: BorderRadius.circular(
+                    (height - padding * 2) / 2,
                   ),
-                ],
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.1),
+                      blurRadius: 2,
+                      offset: const Offset(0, 1),
+                    ),
+                  ],
+                ),
               ),
             ),
-          ),
-          // Icons Row
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              _ToggleOption(
-                icon: Icons.format_list_bulleted_rounded,
-                isSelected: !isMap,
-                onTap: () => onToggle(false),
-              ),
-              _ToggleOption(
-                icon: Icons.map_rounded,
-                isSelected: isMap,
-                onTap: () => onToggle(true),
-              ),
-            ],
-          ),
-        ],
+            // Icons Row
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                _ToggleOption(
+                  icon: Icons.format_list_bulleted_rounded,
+                  isSelected: !isMap,
+                  onTap: () => onToggle(false),
+                ),
+                _ToggleOption(
+                  icon: Icons.map_rounded,
+                  isSelected: isMap,
+                  onTap: () => onToggle(true),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
