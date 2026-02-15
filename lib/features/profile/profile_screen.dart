@@ -36,6 +36,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
     _syncService = widget.syncServiceOverride ?? syncService;
     _authService.addListener(_onStateChanged);
     _syncService.addListener(_onStateChanged);
+    debugPrint(
+      'ProfileScreen: [INIT] authState=${_authService.state.status}, '
+      'email=${_authService.state.email}, mounted=$mounted',
+    );
   }
 
   @override
@@ -46,6 +50,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   void _onStateChanged() {
+    debugPrint(
+      'ProfileScreen: [LISTENER] _onStateChanged fired, '
+      'authState=${_authService.state.status}, '
+      'email=${_authService.state.email}, mounted=$mounted',
+    );
     if (mounted) setState(() {});
   }
 
@@ -128,6 +137,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final theme = Theme.of(context);
     final themeController = ThemeControllerScope.of(context);
     final authState = _authService.state;
+    debugPrint(
+      'ProfileScreen: [BUILD] status=${authState.status}, '
+      'email=${authState.email}, isAuthenticated=${authState.isAuthenticated}',
+    );
 
     // Properties from services
     final isAuthenticated = authState.isAuthenticated;

@@ -33,7 +33,7 @@ class AuthState {
 /// Auth service singleton
 class AuthService extends ChangeNotifier {
   AuthState _state = AuthState.unknown();
-  StreamSubscription<AuthState>? _authSubscription;
+  StreamSubscription<dynamic>? _authSubscription;
   bool _initialized = false;
 
   AuthState get state => _state;
@@ -77,8 +77,10 @@ class AuthService extends ChangeNotifier {
     debugPrint('Auth: runtime client URL after init=$runtimeClientUrl');
     _initialized = true;
 
-    // Listen to auth state changes
-    Supabase.instance.client.auth.onAuthStateChange.listen((data) {
+    // Listen to auth state changes — store subscription for cleanup
+    _authSubscription = Supabase.instance.client.auth.onAuthStateChange.listen((
+      data,
+    ) {
       debugPrint(
         'Auth: [EVENT] event=${data.event}, hasSession=${data.session != null}',
       );
@@ -89,14 +91,27 @@ class AuthService extends ChangeNotifier {
           'Auth: [EVENT] user=${session.user.email}, provider=${session.user.appMetadata['provider']}',
         );
       } else {
-        _state = AuthState.unauthenticated();
+        if (data.event == AuthChangeEvent.signedOut) {
+          _state = AuthState.unauthenticated();
+        }
+        // Ignore tokenRefreshed/initialSession with null session
+        // to avoid incorrectly clearing an active session.
       }
       notifyListeners();
-      debugPrint('Auth: State changed to ${_state.status}');
+      debugPrint(
+        'Auth: [EVENT] notifyListeners() called, state=${_state.status}, '
+        'hasListeners=$hasListeners',
+      );
     });
 
-    // Check initial session
+    // Check initial session (may already be restored from local storage)
     final session = Supabase.instance.client.auth.currentSession;
+    final currentUser = Supabase.instance.client.auth.currentUser;
+    debugPrint(
+      'Auth: [INIT] currentSession=${session != null}, '
+      'currentUser=${currentUser?.email}, '
+      'sessionExpiry=${session?.expiresAt}',
+    );
     if (session != null) {
       _state = AuthState.authenticated(session.user);
     } else {
