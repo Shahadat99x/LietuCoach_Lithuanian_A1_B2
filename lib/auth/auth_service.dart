@@ -79,9 +79,15 @@ class AuthService extends ChangeNotifier {
 
     // Listen to auth state changes
     Supabase.instance.client.auth.onAuthStateChange.listen((data) {
+      debugPrint(
+        'Auth: [EVENT] event=${data.event}, hasSession=${data.session != null}',
+      );
       final session = data.session;
       if (session != null) {
         _state = AuthState.authenticated(session.user);
+        debugPrint(
+          'Auth: [EVENT] user=${session.user.email}, provider=${session.user.appMetadata['provider']}',
+        );
       } else {
         _state = AuthState.unauthenticated();
       }
@@ -107,7 +113,7 @@ class AuthService extends ChangeNotifier {
     }
 
     try {
-      debugPrint('Auth: Starting Google sign-in...');
+      debugPrint('Auth: [SIGN-IN] Starting Google sign-in...');
       // Reset error state
       if (_state.errorMessage != null) {
         _state = AuthState(
@@ -118,11 +124,19 @@ class AuthService extends ChangeNotifier {
         notifyListeners();
       }
 
+      const redirectUrl = 'io.lietucoach.app://login-callback';
+      debugPrint('Auth: [SIGN-IN] redirectTo=$redirectUrl');
+      debugPrint(
+        'Auth: [SIGN-IN] launching with inAppBrowserView (Custom Tab)',
+      );
+
       final result = await Supabase.instance.client.auth.signInWithOAuth(
         OAuthProvider.google,
-        redirectTo: 'io.lietucoach.app://login-callback',
-        authScreenLaunchMode: LaunchMode.externalApplication,
+        redirectTo: redirectUrl,
+        authScreenLaunchMode: LaunchMode.inAppBrowserView,
       );
+
+      debugPrint('Auth: [SIGN-IN] signInWithOAuth returned: $result');
 
       if (!result) {
         // Should not happen as OAuth is a redirect flow,
@@ -132,8 +146,9 @@ class AuthService extends ChangeNotifier {
 
       // OAuth flow is async - state will update via onAuthStateChange
       return true;
-    } catch (e) {
-      debugPrint('Auth: Google sign-in failed: $e');
+    } catch (e, stack) {
+      debugPrint('Auth: [SIGN-IN] ERROR: $e');
+      debugPrint('Auth: [SIGN-IN] Stack: $stack');
       _state = AuthState(
         status: AuthStatus.unauthenticated,
         errorMessage:
