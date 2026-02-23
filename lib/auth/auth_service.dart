@@ -160,6 +160,23 @@ class AuthService extends ChangeNotifier {
       }
 
       // OAuth flow is async - state will update via onAuthStateChange
+      // Add a small polling loop here for deterministic checking in release
+      debugPrint('Auth: [SESSION] waiting up to 3s for session to manifest...');
+      for (var i = 0; i < 12; i++) {
+        await Future.delayed(const Duration(milliseconds: 250));
+        final s = Supabase.instance.client.auth.currentSession;
+        if (s != null) {
+          debugPrint(
+            'Auth: [SESSION] Session set after ${i * 250}ms! user=${s.user.email}',
+          );
+          // Force refresh state just in case
+          _state = AuthState.authenticated(s.user);
+          notifyListeners();
+          return true;
+        }
+      }
+      debugPrint('Auth: [SESSION] SESSION NOT SET after 3s polling!');
+
       return true;
     } catch (e, stack) {
       debugPrint('Auth: [SIGN-IN] ERROR: $e');

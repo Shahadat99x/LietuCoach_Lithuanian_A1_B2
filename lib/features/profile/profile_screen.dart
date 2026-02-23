@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
+import 'package:supabase_flutter/supabase_flutter.dart' hide AuthState;
 import '../../auth/auth_service.dart';
+import '../../config/env.dart';
 import '../../sync/sync_service.dart';
 import '../../ui/tokens.dart';
 import '../../ui/components/components.dart';
@@ -28,6 +31,67 @@ class ProfileScreen extends StatefulWidget {
 class _ProfileScreenState extends State<ProfileScreen> {
   late final AuthService _authService;
   late final SyncService _syncService;
+
+  int _debugTapCount = 0;
+  bool _showAuthDebug = false;
+
+  void _onProfileTapped() {
+    _debugTapCount++;
+    if (_debugTapCount >= 5) {
+      setState(() {
+        _showAuthDebug = !_showAuthDebug;
+        _debugTapCount = 0;
+      });
+    }
+  }
+
+  Widget _buildAuthDebugPanel(AuthState authState) {
+    if (!_showAuthDebug) return const SizedBox.shrink();
+
+    final session = Supabase.instance.client.auth.currentSession;
+    return Container(
+      margin: const EdgeInsets.only(top: 8, bottom: 16),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Colors.amber.shade100,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: Colors.amber.shade700),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'AUTH DEBUG PANEL',
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              color: Colors.amber.shade900,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Supabase Configured: ${Env.isSupabaseConfigured}',
+            style: const TextStyle(color: Colors.black),
+          ),
+          Text(
+            'hasSession: ${session != null}',
+            style: const TextStyle(color: Colors.black),
+          ),
+          Text(
+            'authState.status: ${authState.status.name}',
+            style: const TextStyle(color: Colors.black),
+          ),
+          Text(
+            'currentUser: ${session?.user.email ?? "null"}',
+            style: const TextStyle(color: Colors.black),
+          ),
+          Text(
+            'App Mode: ${kReleaseMode ? "RELEASE" : "DEBUG"}',
+            style: const TextStyle(color: Colors.black),
+          ),
+        ],
+      ),
+    );
+  }
 
   @override
   void initState() {
@@ -159,12 +223,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
         child: ListView(
           padding: const EdgeInsets.all(Spacing.pagePadding),
           children: [
-            Text(
-              'Profile',
-              style: AppSemanticTypography.title.copyWith(
-                color: theme.semanticColors.textPrimary,
+            GestureDetector(
+              onTap: _onProfileTapped,
+              child: Text(
+                'Profile',
+                style: AppSemanticTypography.title.copyWith(
+                  color: theme.semanticColors.textPrimary,
+                ),
               ),
             ),
+            if (_showAuthDebug) _buildAuthDebugPanel(authState),
             const SizedBox(height: AppSemanticSpacing.space24),
 
             // Header
