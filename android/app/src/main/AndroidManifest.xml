@@ -5,7 +5,7 @@
         android:name="${applicationName}"
         android:icon="@mipmap/launcher_icon">
         <activity
-            android:name="com.fluenthivego.lietucoach.MainActivity"
+            android:name="app.lietucoach.lietucoach.MainActivity"
             android:exported="true"
             android:launchMode="singleTask"
             android:taskAffinity=""
