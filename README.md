@@ -20,5 +20,9 @@ flutter test
 ## Documentation
 Start here: [docs/AI_INDEX.md](docs/AI_INDEX.md)
 
+## Author
+- **Portfolio**: https://www.dhossain.com
+- **LinkedIn**: https://linkedin.com/in/shahadat-ai
+
 ## License
 TODO: Define license
